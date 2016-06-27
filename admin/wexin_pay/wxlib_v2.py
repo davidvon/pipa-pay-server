@@ -7,7 +7,7 @@ import urllib
 import urllib2
 import time
 from app import config, logger
-from wxpay.pub import para_filter, random_str, do_post
+from wexin_pay.pub import para_filter, random_str, do_post
 
 DELIVER_NOTIFY_URL = 'https://api.weixin.qq.com/pay/delivernotify'
 ORDER_QUERY_URL = 'https://api.weixin.qq.com/pay/orderquery'

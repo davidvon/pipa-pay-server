@@ -2,8 +2,8 @@
 from app import logger
 import config
 from models import User
-# from signals import signal_order_notify
-from weixin.views import weixin
+from signals import signal_order_notify
+from wexin.views import weixin
 from cache.public import url_from_cache
 
 
@@ -196,4 +196,4 @@ def order_notify(sender, **extra):
     logger.info('[WEIXIN] sync order notify done: [id:%s,status:%s] ...' % (args['order_serial'], status))
 
 
-# signal_order_notify.connect(order_notify)
+signal_order_notify.connect(order_notify)

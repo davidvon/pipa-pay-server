@@ -3,7 +3,7 @@ import time
 from flask import Response, request, session
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
     WechatSystemReply, LIKE_MATCH, WechatImageNews
-from weixin.util import *
+from wexin.util import *
 from cache.public import cache_url
 # from signals import signal_customer_message_cached_notify
 

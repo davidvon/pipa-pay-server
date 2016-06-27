@@ -5,7 +5,7 @@ from flask import jsonify, session, request
 from app import app, db, redis_client, restful_api, logger
 from flask.ext.restful import Resource
 from models import Order
-from weixin.views import weixin
+from wexin.views import weixin
 
 __author__ = 'fengguanhua'
 

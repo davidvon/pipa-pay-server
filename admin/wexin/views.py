@@ -8,7 +8,7 @@ import time
 import json
 from flask import request, jsonify
 from flask_weixin import FlaskWeixin
-from weixin.util import *
+from wexin.util import *
 
 from flask import Blueprint
 

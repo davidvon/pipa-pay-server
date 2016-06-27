@@ -690,3 +690,17 @@ class WechatUselessWordReply(db.Model):
     menu_id = db.Column(db.Integer(), db.ForeignKey('wechat_menu.id'))
     menu = db.relationship(WechatMenu)
 
+
+def get_order_params(order):
+    create_date = str(order.create_date.strftime("%Y-%m-%d"))
+    create_time = str(order.create_time.strftime("%Y-%m-%d %H:%M:%S"))
+    args = {'customer_id': order.customer.id, 'openid': order.customer.openid, 'name': order.address.name,
+            'phone': order.phone, 'address': '%s' % order.address,
+            'order_date': create_date, 'order_time': create_time, 'price': str(order.pay_price or ''),
+            'order_id': order.id, 'order_serial': order.order_serial,
+            'sum': order.booking_clothes,
+            'delivery_time': '%s %s' % (order.booking_delivery_date, order.booking_time_format(1)),
+            'received_time': '%s %s' % (order.booking_received_date, order.booking_time_format(2)),
+            'status': order.status_desc(), 'paid': order.paid,
+            'shop_id': order.shop_id}
+    return args

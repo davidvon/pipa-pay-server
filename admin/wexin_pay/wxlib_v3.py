@@ -4,7 +4,7 @@
 import time
 from app import logger
 from config import WXPAY_CONIFG, WEIXIN_APPID
-from wxpay.pub import xml_to_dict, do_post, dict_to_xml, random_str, sign_md5
+from wexin_pay.pub import xml_to_dict, do_post, dict_to_xml, random_str, sign_md5
 
 
 def build_form(params, trade_type):

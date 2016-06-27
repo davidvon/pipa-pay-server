@@ -9,7 +9,7 @@ from time import sleep
 def update_customer_info(openid):
     try:
         logger.info('[WEIXIN] customer[%s] update info.' % openid)
-        from weixin.views import weixin
+        from wexin.views import weixin
         userinfo = weixin.weixin_helper.get_user_info(openid)
         customer = Customer.query.filter(Customer.openid == openid).one()
         customer.active = userinfo['subscribe']
