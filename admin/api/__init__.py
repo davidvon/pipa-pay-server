@@ -1,3 +1,6 @@
 __author__ = 'fengguanhua'
 
-from api import order
+API_PREFIX = '/api/'
+
+from api import cards
+
