@@ -21,9 +21,10 @@ from posplat.ISO8583.ISO8583 import ISO8583
 from posplat.ISO8583.ISOErrors import *
 import traceback
 
-#Clean the shell
+# Clean the shell
 import os
-os.system(['clear','cls'][os.name == 'nt'])
+
+os.system(['clear', 'cls'][os.name == 'nt'])
 
 # get new object
 p = ISO8583()
@@ -37,25 +38,26 @@ p.setTransationType(transation)
 #Some tests and 
 print ('Setting bits')
 
-p.setBit(3,"100000")
-p.setBit(4,1200)
-p.setBit(7,"1207231505")
-p.setBit(11,12)
-p.setBit(12,"231505")
-p.setBit(13,1207)
-p.setBit(32,"01020000000")
-p.setBit(40,"002")
-p.setBit(41,"98765432")
-p.setBit(42,"303500098765432")
-p.setBit(49,986)
-p.setBit(62,"PP168149958400135600001499584001356000014995840013560000149958400135600001499584001356000014995840013560000")
-p.setBit(63,"00000105")
+p.setBit(3, "100000")
+p.setBit(4, 1200)
+p.setBit(7, "1207231505")
+p.setBit(11, 12)
+p.setBit(12, "231505")
+p.setBit(13, 1207)
+p.setBit(32, "01020000000")
+p.setBit(40, "002")
+p.setBit(41, "98765432")
+p.setBit(42, "303500098765432")
+p.setBit(49, 986)
+p.setBit(62,
+         "PP168149958400135600001499584001356000014995840013560000149958400135600001499584001356000014995840013560000")
+p.setBit(63, "00000105")
 try:
-	p.setBit(126,"00000000000000105")
+    p.setBit(126, "00000000000000105")
 except ValueToLarge:
-	print ('\t\tSomething happening!!!! The Exception! So, bit 126 is not set!!!!')
-	#if want more information ...
-	#traceback.print_exc()
+    print ('\t\tSomething happening!!!! The Exception! So, bit 126 is not set!!!!')
+#if want more information ...
+#traceback.print_exc()
 
 #show hex bitmap
 print ('Bitmap in HEX')
@@ -74,22 +76,22 @@ print ('\n\n\n------------------------------------------\n')
 
 print ('Getting bits')
 try:
-	print ('Bit 7 is there? %s' % p.getBit(7))
-	print ('Bit 32 is there? %s' % p.getBit(32))
+    print ('Bit 7 is there? %s' % p.getBit(7))
+    print ('Bit 32 is there? %s' % p.getBit(32))
 except:
-	print ('Something is bad...')
-	
+    print ('Something is bad...')
+
 # Testing exceptions...	
 try:
-	print ('Bit 45 is there? %s' % p.getBit(45))
+    print ('Bit 45 is there? %s' % p.getBit(45))
 except:
-	print ("No, this bit is not there :)")	
+    print ("No, this bit is not there :)")
 
 try:
-	print ('Bit 27 is there? %s' % p.getBit(27))
+    print ('Bit 27 is there? %s' % p.getBit(27))
 except BitNotSet, bns:
-	print bns	
-	
+    print bns
+
 
 #More exceptions...	
 print ('\n\n\n------------------------------------------\n')
@@ -97,18 +99,18 @@ print ('Exceptions....')
 
 iso = ISO8583()
 try:
-	iso.setMTI('0800')
-	iso.setBit(2,2)
-	iso.setBit(4,4)
-	iso.setBit(12,12)
-	iso.setBit(21,21)
-	iso.setBit(17,17)
-	iso.setBit(49,9861) # this bit is wrong ...
-	iso.setBit(99,99)
+    iso.setMTI('0800')
+    iso.setBit(2, 2)
+    iso.setBit(4, 4)
+    iso.setBit(12, 12)
+    iso.setBit(21, 21)
+    iso.setBit(17, 17)
+    iso.setBit(49, 9861)  # this bit is wrong ...
+    iso.setBit(99, 99)
 except ValueToLarge, e:
-		print ('Value too large :( %s' % e)
+    print ('Value too large :( %s' % e)
 except InvalidMTI, i:
-		print ('This MTI is wrong :( %s' % i)
+    print ('This MTI is wrong :( %s' % i)
 
 
 
