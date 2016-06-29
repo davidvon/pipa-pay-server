@@ -47,4 +47,6 @@ if not os.path.exists(LOG_DIR):
 POS_PLAT_SERVER_IP = "192.168.200.105"
 POS_PLAT_SERVER_PORT = 8583
 
+DEFAULT_HOST_URL = 'http://123.57.205.55/'
+
 

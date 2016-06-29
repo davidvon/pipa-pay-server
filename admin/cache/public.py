@@ -1,10 +1,8 @@
 from json import JSONEncoder, JSONDecoder
-from flask import json
+from config import DEFAULT_HOST_URL
 
 __author__ = 'fengguanhua'
 from app import redis_client
-
-DEFAULT_HOST_URL = 'http://123.57.205.55/'
 
 
 def cache_url(hosturl):

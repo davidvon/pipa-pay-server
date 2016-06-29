@@ -1,14 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import random
+import string
 import urllib2
 import urllib
 import json
 import xml.etree.ElementTree as ET
+import requests
 from config import WEIXIN_APPID, WEIXIN_SECRET, WEIXIN_TOKEN
 import hashlib
 import time
 from app import logger
-from cache.weixin import access_token_from_cache, cache_access_token
+from cache.weixin import get_cache_access_token, cache_access_token, cache_ticket, get_cache_ticket
 
 
 class WeixinException(Exception):
@@ -37,7 +40,7 @@ class Request(object):
         self.errcode = 0
         self.errmsg = ''
 
-    def get_tokenid(self):
+    def get_access_token(self):
         return self.token.get()
 
     def request(self, url, params, data=None, method='GET', headers=None, times=2, sleep_second=1):
@@ -75,7 +78,6 @@ class Request(object):
         return response
 
 
-
 class APIRequest(Request):
     def __init__(self, token, host=Const.api_host):
         super(APIRequest, self).__init__(token, host)
@@ -88,58 +90,21 @@ class APIRequest(Request):
         return response
 
 
-class TokenRequest(APIRequest):
-    def __init__(self, host=Const.api_host):
-        super(TokenRequest, self).__init__(None, host)
-
-    def request(self, url, params, data=None, method='GET', headers=None, times=2, sleep_second=1):
-        if not headers:
-            headers = {'Content-Type': 'application/json'}
-        if not data:
-            data = {}
-        while times:
-            try:
-                response = self._request(url, params, data, method, headers)
-                if "access_token" in response:
-                    return response
-                self.errcode = response["errcode"]
-                self.errmsg = response["errmsg"]
-            except Exception, e:
-                self.errmsg = e.message
-            time.sleep(sleep_second)
-            times -= 1
-        raise WeixinException(self.errcode, self.errmsg)
-
-
 class Token(object):
-    def __init__(self, request, appid=Const.appid, secret=Const.secret):
-        self.request = request
-        self.appid = appid
-        self.secret = secret
-        logger.info('[WEIXIN] appid=%s, secret=%s' % (self.appid, self.secret))
+    def __init__(self):
+        self.appid = Const.appid
+        self.secret = Const.secret
 
     def get(self):
-        tokenid = access_token_from_cache()
-        if tokenid is None:
-            tokenid = self._create()
-        logger.info('[WEIXIN] token=%s' % tokenid)
-        return tokenid
+        return get_cache_access_token() or self._create()
 
     def refresh(self):
-        tokenid = self._create()
-        logger.info('[WEIXIN] refresh token id:%s' % tokenid)
-        return tokenid
+        return self._create()
 
     def _create(self):
-        """
-        https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET
-        """
-        params = {
-            "grant_type": "client_credential",
-            "appid": self.appid,
-            "secret": self.secret
-        }
-        response = self.request.request("/cgi-bin/token", params)
+        r = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" +
+                         self.appid + "&secret=" + self.secret, verify=False)
+        response = r.json()
         cache_access_token(response["access_token"], response["expires_in"])
         logger.info('[WEIXIN] appid=%s, secret=%s, new token=%s, expires=%s' % (
             self.appid, self.secret, response["access_token"], response["expires_in"]))
@@ -160,8 +125,9 @@ class Qrcode(object):
 
 
 class WeixinHelper(object):
-    def __init__(self, request):
-        self.request = request
+    def __init__(self):
+        self.token = Token()
+        self.request = APIRequest(self.token)
 
     @staticmethod
     def check_signature(signature, timestamp, nonce):
@@ -228,18 +194,8 @@ class WeixinHelper(object):
         return xml
 
     def send_custom_message(self, message):
-        """
-        {
-            "touser":"OPENID",
-            "msgtype":"text",
-            "text":
-            {
-                 "content":"Hello World"
-            }
-        }
-        """
         url = "/cgi-bin/message/custom/send"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         try:
             response = self.request.request(url, params, message, 'POST')
             logger.info(str(response))
@@ -250,7 +206,7 @@ class WeixinHelper(object):
 
     def push_template_message(self, openid, template_id, push_data, push_url):
         url = '/cgi-bin/message/template/send'
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         post_contents = {
             "touser": openid,
             "template_id": template_id,
@@ -269,7 +225,7 @@ class WeixinHelper(object):
         {"group":{"name":"test"}}
         """
         url = "/cgi-bin/groups/create"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params, group, 'POST')
         if "group" in response:
             return response
@@ -282,7 +238,7 @@ class WeixinHelper(object):
         https://api.weixin.qq.com/cgi-bin/groups/get?access_token=ACCESS_TOKEN
         """
         url = "/cgi-bin/groups/get"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params)
         if "groups" in response:
             return response
@@ -296,7 +252,7 @@ class WeixinHelper(object):
         """
         url = "/cgi-bin/user/info"
         params = {
-            "access_token": self.request.get_tokenid(),
+            "access_token": self.request.get_access_token(),
             "openid": openid,
             "lang": lang
         }
@@ -314,7 +270,7 @@ class WeixinHelper(object):
         """
         url = "/cgi-bin/user/get"
         params = {
-            "access_token": self.request.get_tokenid(),
+            "access_token": self.request.get_access_token(),
             "next_openid": next_openid
         }
         response = self.request.request(url, params)
@@ -329,7 +285,7 @@ class WeixinHelper(object):
         {"openid":"od8XIjsmk6QdVTETa9jLtGWA6KBc"}
         """
         url = "/cgi-bin/groups/getid"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params, openid, 'POST')
         if 'groupid' in response:
             return response
@@ -343,7 +299,7 @@ class WeixinHelper(object):
         {"group":{"id":108,"name":"test2_modify2"}}
         """
         url = "/cgi-bin/groups/update"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params, group, 'POST')
         if response['errcode'] == 0:
             return response
@@ -357,7 +313,7 @@ class WeixinHelper(object):
          {"openid":"oDF3iYx0ro3_7jD4HFRDfrjdCM58","to_groupid":108}
         """
         url = "/cgi-bin/groups/members/update"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params, member, 'POST')
         if response['errcode'] == 0:
             return response
@@ -367,7 +323,7 @@ class WeixinHelper(object):
 
     def create_menu(self, menu):
         url = "/cgi-bin/menu/create"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params, menu, 'POST')
         return response
 
@@ -376,7 +332,7 @@ class WeixinHelper(object):
         https://api.weixin.qq.com/cgi-bin/menu/get?access_token=ACCESS_TOKEN
         """
         url = "/cgi-bin/menu/get"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params)
         if "menu" in response:
             return response
@@ -389,7 +345,7 @@ class WeixinHelper(object):
         https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN
         """
         url = "/cgi-bin/menu/delete"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params)
         if response['errcode'] == 0:
             return response
@@ -402,7 +358,7 @@ class WeixinHelper(object):
         # {"expire_seconds": 1800, "action_name": "QR_SCENE", "action_info": {"scene": {"scene_id": 123}}}
         # {"action_name": "QR_LIMIT_SCENE", "action_info": {"scene": {"scene_id": 123}}} """
         url = "/cgi-bin/qrcode/create"
-        params = {"access_token": self.request.get_tokenid()}
+        params = {"access_token": self.request.get_access_token()}
         resp = self.request.request(url, params, json, 'POST')
         if "ticket" in resp:
             return resp
@@ -438,3 +394,42 @@ class WeixinHelper(object):
             errmsg = response["errmsg"]
             raise WeixinException(errcode, errmsg)
         return response
+
+    def get_ticket(self, type='jsapi'):
+        token = get_cache_ticket(type)
+        if not token:
+            access_token = self.token.get()
+            r = requests.get("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" +
+                             access_token + "&type=" + type, verify=False)
+            res = r.json()
+            if res['errcode'] != 0:
+                access_token = self.token.refresh()
+                r = requests.get("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" +
+                                 access_token + "&type=jsapi", verify=False)
+                res = r.json()
+
+                cache_ticket(type, res['ticket'], res['expires_in'])
+                return res['ticket']
+            else:
+                cache_ticket(type, res['ticket'], res['expires_in'])
+                return res['ticket']
+        return token
+
+    @staticmethod
+    def nonce_str():
+        return ''.join(random.sample(string.ascii_letters, 12))
+
+    def sign(self, url):
+        s = self.nonce_str()
+        timestamp = int(time.time())
+        js_ticket = self.get_ticket('jsapi')
+        full_url = "jsapi_ticket=" + js_ticket + "&noncestr=" + s + "&timestamp=" + str(timestamp) + "&url=" + url
+        sha1obj = hashlib.sha1()
+        sha1obj.update(full_url)
+        hash = sha1obj.hexdigest()
+        return {
+            "nonce_str": s,
+            "hash": hash,
+            "timestamp": timestamp,
+            "ticket": js_ticket
+        }

@@ -17,17 +17,14 @@ try:
     from lxml import etree
 except ImportError:
     from xml.etree import cElementTree as etree
-except ImportError:
+except:
     from xml.etree import ElementTree as etree
 
 
 class FlaskWeixin(object):
     def __init__(self, app=None):
         self.session = session
-        token_req = TokenRequest()
-        token = Token(token_req)
-        api_req = APIRequest(token)
-        self.weixin_helper = WeixinHelper(api_req)
+        self.weixin_helper = WeixinHelper()
         self.weixin_reply = ReplyKeyWords(self)
         self._registry = {}
 
