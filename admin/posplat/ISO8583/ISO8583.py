@@ -27,39 +27,39 @@ import struct
 
 class ISO8583:
     """Main Class to work with ISO8583 packages.
-	Used to create, change, send, receive, parse or work with ISO8593 Package version 1993.
-	It's 100% Python :)
-	Enjoy it!
-	Thanks to: Vulcanno IT Solutions <http://www.vulcanno.com.br>
-	Licence: GPL Version 3
-	More information: http://code.google.com/p/iso8583py/
+    Used to create, change, send, receive, parse or work with ISO8593 Package version 1993.
+    It's 100% Python :)
+    Enjoy it!
+    Thanks to: Vulcanno IT Solutions <http://www.vulcanno.com.br>
+    Licence: GPL Version 3
+    More information: http://code.google.com/p/iso8583py/
 
-	Example:
-		from ISO8583.ISO8583 import ISO8583
-		from ISO8583.ISOErrors import *
-		
-		iso = ISO8583()
-		try:
-			iso.setMTI('0800')
-			iso.setBit(2,2)
-			iso.setBit(4,4)
-			iso.setBit(12,12)
-			iso.setBit(21,21)
-			iso.setBit(17,17)
-			iso.setBit(49,986)
-			iso.setBit(99,99)
-		except ValueToLarge, e:
-				print ('Value too large :( %s' % e)
-		except InvalidMTI, i:
-				print ('This MTI is wrong :( %s' % i)
-				
-		print ('The Message Type Indication is = %s' %iso.getMTI()) 
-		
-		print ('The Bitmap is = %s' %iso.getBitmap()) 
-		iso.showIsoBits();
-		print ('This is the ISO8583 complete package %s' % iso.getRawIso())
-		print ('This is the ISO8583 complete package to sent over the TCPIP network %s' % iso.getNetworkISO())
-	
+    Example:
+        from ISO8583.ISO8583 import ISO8583
+        from ISO8583.ISOErrors import *
+        
+        iso = ISO8583()
+        try:
+            iso.setMTI('0800')
+            iso.setBit(2,2)
+            iso.setBit(4,4)
+            iso.setBit(12,12)
+            iso.setBit(21,21)
+            iso.setBit(17,17)
+            iso.setBit(49,986)
+            iso.setBit(99,99)
+        except ValueToLarge, e:
+                print ('Value too large :( %s' % e)
+        except InvalidMTI, i:
+                print ('This MTI is wrong :( %s' % i)
+                
+        print ('The Message Type Indication is = %s' %iso.getMTI()) 
+        
+        print ('The Bitmap is = %s' %iso.getBitmap()) 
+        iso.showIsoBits();
+        print ('This is the ISO8583 complete package %s' % iso.getRawIso())
+        print ('This is the ISO8583 complete package to sent over the TCPIP network %s' % iso.getNetworkISO())
+    
 """
     # Attributes
     # Bitsto be set 00000000 -> _BIT_POSITION_1 ... _BIT_POSITION_8
@@ -205,12 +205,12 @@ class ISO8583:
     # Default constructor of the ISO8583 Object
     def __init__(self, iso="", debug=False):
         """Default Constructor of ISO8583 Package.
-		It inicialize a "brand new" ISO8583 package
-		Example: To Enable debug you can use:
-			pack = ISO8583(debug=True)
-		@param: iso a String that represents the ASCII of the package. The same that you need to pass to setIsoContent() method.
-		@param: debug (True or False) default False -> Used to print some debug infos. Only use if want that messages! 
-		"""
+        It inicialize a "brand new" ISO8583 package
+        Example: To Enable debug you can use:
+            pack = ISO8583(debug=True)
+        @param: iso a String that represents the ASCII of the package. The same that you need to pass to setIsoContent() method.
+        @param: debug (True or False) default False -> Used to print some debug infos. Only use if want that messages! 
+        """
         # Bitmap internal representation
         self.BITMAP = []
         # Values
@@ -234,9 +234,9 @@ class ISO8583:
     # Return bit type
     def getBitType(self, bit):
         """Method that return the bit Type
-		@param: bit -> Bit that will be searched and whose type will be returned
-		@return: str that represents the type of the bit
-		"""
+        @param: bit -> Bit that will be searched and whose type will be returned
+        @return: str that represents the type of the bit
+        """
         return self._BITS_VALUE_TYPE[bit][2]
 
     ################################################################################################
@@ -245,9 +245,9 @@ class ISO8583:
     # Return bit limit
     def getBitLimit(self, bit):
         """Method that return the bit limit (Max size)
-		@param: bit -> Bit that will be searched and whose limit will be returned
-		@return: int that indicate the limit of the bit 
-		"""
+        @param: bit -> Bit that will be searched and whose limit will be returned
+        @return: int that indicate the limit of the bit 
+        """
         return self._BITS_VALUE_TYPE[bit][3]
 
     ################################################################################################
@@ -256,9 +256,9 @@ class ISO8583:
     # Return bit value type
     def getBitValueType(self, bit):
         """Method that return the bit value type
-		@param: bit -> Bit that will be searched and whose value type will be returned
-		@return: str that indicate the valuye type of the bit 
-		"""
+        @param: bit -> Bit that will be searched and whose value type will be returned
+        @return: str that indicate the valuye type of the bit 
+        """
         return self._BITS_VALUE_TYPE[bit][4]
 
     ################################################################################################
@@ -267,9 +267,9 @@ class ISO8583:
     # Return large bit name
     def getLargeBitName(self, bit):
         """Method that return the large bit name
-		@param: bit -> Bit that will be searched and whose name will be returned
-		@return: str that represents the name of the bit
-		"""
+        @param: bit -> Bit that will be searched and whose name will be returned
+        @return: str that represents the name of the bit
+        """
         return self._BITS_VALUE_TYPE[bit][1]
 
     ################################################################################################
@@ -279,9 +279,9 @@ class ISO8583:
     # Set the MTI
     def setTransationType(self, type):
         """Method that set Transation Type (MTI)
-		@param: type -> MTI to be setted
-		@raise: ValueToLarge Exception
-		"""
+        @param: type -> MTI to be setted
+        @raise: ValueToLarge Exception
+        """
 
         type = "%s" % type
         if len(type) > 4:
@@ -301,9 +301,9 @@ class ISO8583:
     # setMTI too
     def setMTI(self, type):
         """Method that set Transation Type (MTI)
-		In fact, is an alias to "setTransationType" method
-		@param: type -> MTI to be setted
-		"""
+        In fact, is an alias to "setTransationType" method
+        @param: type -> MTI to be setted
+        """
         self.setTransationType(type)
 
     ################################################################################################
@@ -312,8 +312,8 @@ class ISO8583:
     # Method that put "zeros" inside bitmap
     def __inicializeBitmap(self):
         """Method that inicialize/reset a internal bitmap representation
-		It's a internal method, so don't call!
-		"""
+        It's a internal method, so don't call!
+        """
 
         if self.DEBUG == True:
             print ('Init bitmap')
@@ -331,8 +331,8 @@ class ISO8583:
     # init with "0" the array of values
     def __inicializeBitmapValues(self):
         """Method that inicialize/reset a internal array used to save bits and values
-		It's a internal method, so don't call!
-		"""
+        It's a internal method, so don't call!
+        """
         if self.DEBUG == True:
             print ('Init bitmap_values')
 
@@ -349,12 +349,12 @@ class ISO8583:
     # Set a value to a bit
     def setBit(self, bit, value):
         """Method used to set a bit with a value.
-		It's one of the most important method to use when using this library
-		@param: bit -> bit number that want to be setted
-		@param: value -> the value of the bit
-		@return: True/False default True -> To be used in the future!
-		@raise: BitInexistent Exception, ValueToLarge Exception
-		"""
+        It's one of the most important method to use when using this library
+        @param: bit -> bit number that want to be setted
+        @param: value -> the value of the bit
+        @return: True/False default True -> To be used in the future!
+        @raise: BitInexistent Exception, ValueToLarge Exception
+        """
         if self.DEBUG == True:
             print ('Setting bit inside bitmap bit[%s] = %s') % (bit, value)
 
@@ -403,8 +403,8 @@ class ISO8583:
     # print bitmap
     def showBitmap(self):
         """Method that print the bitmap in ASCII form
-		Hint: Try to use getBitmap method and format your own print :) 
-		"""
+        Hint: Try to use getBitmap method and format your own print :) 
+        """
 
         self.__buildBitmap()
 
@@ -417,8 +417,8 @@ class ISO8583:
     # Build a bitmap
     def __buildBitmap(self):
         """Method that build the bitmap ASCII
-		It's a internal method, so don't call!
-		"""
+        It's a internal method, so don't call!
+        """
 
         self.BITMAP_HEX = ''
 
@@ -449,9 +449,9 @@ class ISO8583:
     # Get a bitmap from str
     def __getBitmapFromStr(self, bitmap):
         """Method that receive a bitmap str and transfor it to ISO8583 object readable.
-		@param: bitmap -> bitmap str to be readable
-		It's a internal method, so don't call!
-		"""
+        @param: bitmap -> bitmap str to be readable
+        It's a internal method, so don't call!
+        """
         # Need to check if the size is correct etc...
         cont = 0
 
@@ -481,9 +481,9 @@ class ISO8583:
     # print bit array that is present in the bitmap
     def showBitsFromBitmapStr(self, bitmap):
         """Method that receive a bitmap str, process it, and print a array with bits this bitmap string represents.
-		Usualy is used to debug things.
-		@param: bitmap -> bitmap str to be analized and translated to "bits"
-		"""
+        Usualy is used to debug things.
+        @param: bitmap -> bitmap str to be analized and translated to "bits"
+        """
         bits = self.__inicializeBitsFromBitmapStr(bitmap)
         print ('Bits inside %s  = %s' % (bitmap, bits))
 
@@ -493,9 +493,9 @@ class ISO8583:
     # inicialize a bitmap using ASCII str
     def __inicializeBitsFromBitmapStr(self, bitmap):
         """Method that receive a bitmap str, process it, and prepare ISO8583 object to understand and "see" the bits and values inside the ISO ASCII package.
-		It's a internal method, so don't call!
-		@param: bitmap -> bitmap str to be analized and translated to "bits"
-		"""
+        It's a internal method, so don't call!
+        @param: bitmap -> bitmap str to be analized and translated to "bits"
+        """
         bits = []
         for c in range(0, 16):
             for d in range(1, 9):
@@ -533,8 +533,8 @@ class ISO8583:
     # return a array of bits, when processing the bitmap
     def __getBitsFromBitmap(self):
         """Method that process the bitmap and return a array with the bits presents inside it.
-		It's a internal method, so don't call!
-		"""
+        It's a internal method, so don't call!
+        """
         bits = []
         for c in range(0, 16):
             for d in range(1, 9):
@@ -571,13 +571,13 @@ class ISO8583:
     # Set of type LL
     def __setBitTypeLL(self, bit, value):
         """Method that set a bit with value in form LL
-		It put the size in front of the value
-		Example: pack.setBit(99,'123') -> Bit 99 is a LL type, so this bit, in ASCII form need to be 03123. To understand, 03 is the size of the information and 123 is the information/value
-		@param: bit -> bit to be setted
-		@param: value -> value to be setted
-		@raise: ValueToLarge Exception
-		It's a internal method, so don't call!
-		"""
+        It put the size in front of the value
+        Example: pack.setBit(99,'123') -> Bit 99 is a LL type, so this bit, in ASCII form need to be 03123. To understand, 03 is the size of the information and 123 is the information/value
+        @param: bit -> bit to be setted
+        @param: value -> value to be setted
+        @raise: ValueToLarge Exception
+        It's a internal method, so don't call!
+        """
 
         value = "%s" % value
 
@@ -599,14 +599,14 @@ class ISO8583:
     # Set of type LLL
     def __setBitTypeLLL(self, bit, value):
         """Method that set a bit with value in form LLL
-		It put the size in front of the value
-		Example: pack.setBit(104,'12345ABCD67890') -> Bit 104 is a LLL type, so this bit, in ASCII form need to be 01412345ABCD67890. 
-			To understand, 014 is the size of the information and 12345ABCD67890 is the information/value
-		@param: bit -> bit to be setted
-		@param: value -> value to be setted
-		@raise: ValueToLarge Exception
-		It's a internal method, so don't call!
-		"""
+        It put the size in front of the value
+        Example: pack.setBit(104,'12345ABCD67890') -> Bit 104 is a LLL type, so this bit, in ASCII form need to be 01412345ABCD67890. 
+            To understand, 014 is the size of the information and 12345ABCD67890 is the information/value
+        @param: bit -> bit to be setted
+        @param: value -> value to be setted
+        @raise: ValueToLarge Exception
+        It's a internal method, so don't call!
+        """
 
         value = "%s" % value
 
@@ -627,14 +627,14 @@ class ISO8583:
     # Set of type N,
     def __setBitTypeN(self, bit, value):
         """Method that set a bit with value in form N
-		It complete the size of the bit with a default value
-		Example: pack.setBit(3,'30000') -> Bit 3 is a N type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
-			In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
-		@param: bit -> bit to be setted
-		@param: value -> value to be setted
-		@raise: ValueToLarge Exception
-		It's a internal method, so don't call!
-		"""
+        It complete the size of the bit with a default value
+        Example: pack.setBit(3,'30000') -> Bit 3 is a N type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
+            In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
+        @param: bit -> bit to be setted
+        @param: value -> value to be setted
+        @raise: ValueToLarge Exception
+        It's a internal method, so don't call!
+        """
 
         value = "%s" % value
 
@@ -651,14 +651,14 @@ class ISO8583:
     # Set of type A
     def __setBitTypeA(self, bit, value):
         """Method that set a bit with value in form A
-		It complete the size of the bit with a default value
-		Example: pack.setBit(3,'30000') -> Bit 3 is a A type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
-			In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
-		@param: bit -> bit to be setted
-		@param: value -> value to be setted
-		@raise: ValueToLarge Exception
-		It's a internal method, so don't call!
-		"""
+        It complete the size of the bit with a default value
+        Example: pack.setBit(3,'30000') -> Bit 3 is a A type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
+            In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
+        @param: bit -> bit to be setted
+        @param: value -> value to be setted
+        @raise: ValueToLarge Exception
+        It's a internal method, so don't call!
+        """
 
         value = "%s" % value
 
@@ -675,14 +675,14 @@ class ISO8583:
     # Set of type B
     def __setBitTypeB(self, bit, value):
         """Method that set a bit with value in form B
-		It complete the size of the bit with a default value
-		Example: pack.setBit(3,'30000') -> Bit 3 is a B type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
-			In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
-		@param: bit -> bit to be setted
-		@param: value -> value to be setted
-		@raise: ValueToLarge Exception
-		It's a internal method, so don't call!
-		"""
+        It complete the size of the bit with a default value
+        Example: pack.setBit(3,'30000') -> Bit 3 is a B type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
+            In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
+        @param: bit -> bit to be setted
+        @param: value -> value to be setted
+        @raise: ValueToLarge Exception
+        It's a internal method, so don't call!
+        """
 
         value = "%s" % value
 
@@ -699,14 +699,14 @@ class ISO8583:
     # Set of type ANS
     def __setBitTypeANS(self, bit, value):
         """Method that set a bit with value in form ANS
-		It complete the size of the bit with a default value
-		Example: pack.setBit(3,'30000') -> Bit 3 is a ANS type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
-			In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
-		@param: bit -> bit to be setted
-		@param: value -> value to be setted
-		@raise: ValueToLarge Exception
-		It's a internal method, so don't call!
-		"""
+        It complete the size of the bit with a default value
+        Example: pack.setBit(3,'30000') -> Bit 3 is a ANS type, so this bit, in ASCII form need to has size = 6 (ISO especification) so the value 30000 size = 5 need to receive more "1" number.
+            In this case, will be "0" in the left. In the package, the bit will be sent like '030000'
+        @param: bit -> bit to be setted
+        @param: value -> value to be setted
+        @raise: ValueToLarge Exception
+        It's a internal method, so don't call!
+        """
 
         value = "%s" % value
 
@@ -723,17 +723,17 @@ class ISO8583:
     # print os bits insede iso
     def showIsoBits(self):
         """Method that show in detail a list of bits , values and types inside the object
-		Example: output to
-			(...)
-			iso.setBit(2,2)
-			iso.setBit(4,4)
-			(...)
-			iso.showIsoBits()
-			(...)
-			Bit[2] of type LL has limit 19 = 012
-			Bit[4] of type N has limit 12 = 000000000004
-			(...)
-		"""
+        Example: output to
+            (...)
+            iso.setBit(2,2)
+            iso.setBit(4,4)
+            (...)
+            iso.showIsoBits()
+            (...)
+            Bit[2] of type LL has limit 19 = 012
+            Bit[4] of type N has limit 12 = 000000000004
+            (...)
+        """
 
         for cont in range(0, 129):
             if self.BITMAP_VALUES[cont] != self._BIT_DEFAULT_VALUE:
@@ -746,18 +746,18 @@ class ISO8583:
     # print Raw iso
     def showRawIso(self):
         """Method that print ISO8583 ASCII complete representation
-		Example: 
-		iso = ISO8583()
-		iso.setMTI('0800')
-		iso.setBit(2,2)
-		iso.setBit(4,4)
-		iso.setBit(12,12)
-		iso.setBit(17,17)
-		iso.setBit(99,99)
-		iso.showRawIso()
-		output (print) -> 0800d010800000000000000000002000000001200000000000400001200170299
-		Hint: Try to use getRawIso method and format your own print :) 
-		"""
+        Example: 
+        iso = ISO8583()
+        iso.setMTI('0800')
+        iso.setBit(2,2)
+        iso.setBit(4,4)
+        iso.setBit(12,12)
+        iso.setBit(17,17)
+        iso.setBit(99,99)
+        iso.showRawIso()
+        output (print) -> 0800d010800000000000000000002000000001200000000000400001200170299
+        Hint: Try to use getRawIso method and format your own print :) 
+        """
 
         resp = self.getRawIso()
         print(resp)
@@ -768,21 +768,21 @@ class ISO8583:
     # Return raw iso
     def getRawIso(self):
         """Method that return ISO8583 ASCII complete representation
-		Example: 
-		iso = ISO8583()
-		iso.setMTI('0800')
-		iso.setBit(2,2)
-		iso.setBit(4,4)
-		iso.setBit(12,12)
-		iso.setBit(17,17)
-		iso.setBit(99,99)
-		str = iso.getRawIso()
-		print ('This is the ASCII package %s' % str) 
-		output (print) -> This is the ASCII package 0800d010800000000000000000002000000001200000000000400001200170299
-		
-		@return: str with complete ASCII ISO8583
-		@raise: InvalidMTI Exception
-		"""
+        Example: 
+        iso = ISO8583()
+        iso.setMTI('0800')
+        iso.setBit(2,2)
+        iso.setBit(4,4)
+        iso.setBit(12,12)
+        iso.setBit(17,17)
+        iso.setBit(99,99)
+        str = iso.getRawIso()
+        print ('This is the ASCII package %s' % str) 
+        output (print) -> This is the ASCII package 0800d010800000000000000000002000000001200000000000400001200170299
+        
+        @return: str with complete ASCII ISO8583
+        @raise: InvalidMTI Exception
+        """
 
         self.__buildBitmap()
 
@@ -806,19 +806,19 @@ class ISO8583:
     # Redefine a bit
     def redefineBit(self, bit, smallStr, largeStr, bitType, size, valueType):
         """Method that redefine a bit structure in global scope!
-		Can be used to personalize ISO8583 structure to another specification (ISO8583 1987 for example!)
-		Hint: If you have a lot of "ValueToLarge Exception" maybe the especification that you are using is different of mine. So you will need to use this method :)
-		@param: bit -> bit to be redefined
-		@param: smallStr -> a small String representantion of the bit, used to build "user friendly prints", example "2" for bit 2
-		@param: largeStr -> a large String representantion of the bit, used to build "user friendly prints" and to be used to inform the "main use of the bit", 
-			example "Primary account number (PAN)" for bit 2
-		@param: bitType -> type the bit, used to build the values, example "LL" for bit 2. Need to be one of (B, N, AN, ANS, LL, LLL)	
-		@param: size -> limit size the bit, used to build/complete the values, example "19" for bit 2. 	
-		@param: valueType -> value type the bit, used to "validate" the values, example "n" for bit 2. This mean that in bit 2 we need to have only numeric values.
-			Need to be one of (a, an, n, ansb, b)
-		@raise: BitInexistent Exception, InvalidValueType Exception
-		
-		"""
+        Can be used to personalize ISO8583 structure to another specification (ISO8583 1987 for example!)
+        Hint: If you have a lot of "ValueToLarge Exception" maybe the especification that you are using is different of mine. So you will need to use this method :)
+        @param: bit -> bit to be redefined
+        @param: smallStr -> a small String representantion of the bit, used to build "user friendly prints", example "2" for bit 2
+        @param: largeStr -> a large String representantion of the bit, used to build "user friendly prints" and to be used to inform the "main use of the bit", 
+            example "Primary account number (PAN)" for bit 2
+        @param: bitType -> type the bit, used to build the values, example "LL" for bit 2. Need to be one of (B, N, AN, ANS, LL, LLL)    
+        @param: size -> limit size the bit, used to build/complete the values, example "19" for bit 2.     
+        @param: valueType -> value type the bit, used to "validate" the values, example "n" for bit 2. This mean that in bit 2 we need to have only numeric values.
+            Need to be one of (a, an, n, ansb, b)
+        @raise: BitInexistent Exception, InvalidValueType Exception
+        
+        """
 
         if self.DEBUG == True:
             print ('Trying to redefine the bit with (self,%s,%s,%s,%s,%s,%s)' % (
@@ -853,8 +853,8 @@ class ISO8583:
     # a partir de um trem de string, pega o MTI
     def __setMTIFromStr(self, iso):
         """Method that get the first 4 characters to be the MTI.
-		It's a internal method, so don't call!
-		"""
+        It's a internal method, so don't call!
+        """
 
         self.MESSAGE_TYPE_INDICATION = iso[0:4]
 
@@ -867,8 +867,8 @@ class ISO8583:
     # return the MTI
     def getMTI(self):
         """Method that return the MTI of the package
-		@return: str -> with the MTI
-		"""
+        @return: str -> with the MTI
+        """
 
         # Need to validate if the MTI was setted ...etc ...
         return self.MESSAGE_TYPE_INDICATION
@@ -879,8 +879,8 @@ class ISO8583:
     # Return the bitmap
     def getBitmap(self):
         """Method that return the ASCII Bitmap of the package
-		@return: str -> with the ASCII Bitmap
-		"""
+        @return: str -> with the ASCII Bitmap
+        """
         if self.BITMAP_HEX == '':
             self.__buildBitmap()
 
@@ -892,8 +892,8 @@ class ISO8583:
     # return the Varray of values
     def getValuesArray(self):
         """Method that return an internal array of the package
-		@return: array -> with all bits, presents or not in the bitmap
-		"""
+        @return: array -> with all bits, presents or not in the bitmap
+        """
         return self.BITMAP_VALUES
 
     ################################################################################################
@@ -902,9 +902,9 @@ class ISO8583:
     # Receive a str and interpret it to bits and values
     def __getBitFromStr(self, strWithoutMtiBitmap):
         """Method that receive a string (ASCII) without MTI and Bitmaps (first and second), understand it and remove the bits values
-		@param: str -> with all bits presents whithout MTI and bitmap
-		It's a internal method, so don't call!
-		"""
+        @param: str -> with all bits presents whithout MTI and bitmap
+        It's a internal method, so don't call!
+        """
 
         if self.DEBUG == True:
             print ('This is the input string <%s>' % strWithoutMtiBitmap)
@@ -968,24 +968,24 @@ class ISO8583:
     # Parse a ASCII iso to object
     def setIsoContent(self, iso):
         """Method that receive a complete ISO8583 string (ASCII) understand it and remove the bits values
-		Example:
-			iso = '0210B238000102C080040000000000000002100000000000001700010814465469421614465701081100301000000N399915444303500019991544986020   Value not allowed009000095492'
-			i2 = ISO8583()
-			# in this case, we need to redefine a bit because default bit 42 is LL and in this especification is "N"
-			# the rest remain, so we use "get" :)
-			i2.redefineBit(42, '42', i2.getLargeBitName(42), 'N', i2.getBitLimit(42), i2.getBitValueType(42) )
-			i2.setIsoContent(iso2)
-			print ('Bitmap = %s' %i2.getBitmap()) 
-			print ('MTI = %s' %i2.getMTI() )
+        Example:
+            iso = '0210B238000102C080040000000000000002100000000000001700010814465469421614465701081100301000000N399915444303500019991544986020   Value not allowed009000095492'
+            i2 = ISO8583()
+            # in this case, we need to redefine a bit because default bit 42 is LL and in this especification is "N"
+            # the rest remain, so we use "get" :)
+            i2.redefineBit(42, '42', i2.getLargeBitName(42), 'N', i2.getBitLimit(42), i2.getBitValueType(42) )
+            i2.setIsoContent(iso2)
+            print ('Bitmap = %s' %i2.getBitmap()) 
+            print ('MTI = %s' %i2.getMTI() )
 
-			print ('This ISO has bits:')
-			v3 = i2.getBitsAndValues()
-			for v in v3:
-				print ('Bit %s of type %s with value = %s' % (v['bit'],v['type'],v['value']))
-				
-		@param: str -> complete ISO8583 string
-		@raise: InvalidIso8583 Exception
-		"""
+            print ('This ISO has bits:')
+            v3 = i2.getBitsAndValues()
+            for v in v3:
+                print ('Bit %s of type %s with value = %s' % (v['bit'],v['type'],v['value']))
+                
+        @param: str -> complete ISO8583 string
+        @raise: InvalidIso8583 Exception
+        """
         if len(iso) < 20:
             raise InvalidIso8583('This is not a valid iso!!')
         if self.DEBUG == True:
@@ -1008,30 +1008,30 @@ class ISO8583:
     # Method that compare 2 isos
     def __cmp__(self, obj2):
         """Method that compare two objects in "==", "!=" and other things
-		Example:
-			p1 = ISO8583()
-			p1.setMTI('0800')
-			p1.setBit(2,2)
-			p1.setBit(4,4)
-			p1.setBit(12,12)
-			p1.setBit(17,17)
-			p1.setBit(99,99)
+        Example:
+            p1 = ISO8583()
+            p1.setMTI('0800')
+            p1.setBit(2,2)
+            p1.setBit(4,4)
+            p1.setBit(12,12)
+            p1.setBit(17,17)
+            p1.setBit(99,99)
 
-			#get the rawIso and save in the iso variable
-			iso = p1.getRawIso()
+            #get the rawIso and save in the iso variable
+            iso = p1.getRawIso()
 
-			p2 = ISO8583()
-			p2.setIsoContent(iso)
+            p2 = ISO8583()
+            p2.setIsoContent(iso)
 
-			print ('Is equivalent?')
-			if p1 == p1:
-				print ('Yes :)')
-			else:
-				print ('Noooooooooo :(')
-	
-		@param: obj2 -> object that will be compared
-		@return: <0 if is not equal, 0 if is equal
-		"""
+            print ('Is equivalent?')
+            if p1 == p1:
+                print ('Yes :)')
+            else:
+                print ('Noooooooooo :(')
+    
+        @param: obj2 -> object that will be compared
+        @return: <0 if is not equal, 0 if is equal
+        """
         ret = -1  # By default is different
         if (self.getMTI() == obj2.getMTI()) and (self.getBitmap() == obj2.getBitmap()) and (
                     self.getValuesArray() == obj2.getValuesArray()):
@@ -1045,27 +1045,27 @@ class ISO8583:
     # Method that return a array with bits and values inside the iso package
     def getBitsAndValues(self):
         """Method that return an array of bits, values, types etc.
-			Each array value is a dictionary with: {'bit':X ,'type': Y, 'value': Z} Where:
-				bit: is the bit number
-				type: is the bit type
-				value: is the bit value inside this object
-			so the Generic array returned is:  [ (...),{'bit':X,'type': Y, 'value': Z}, (...)] 
-			
-		Example:
-			p1 = ISO8583()
-			p1.setMTI('0800')
-			p1.setBit(2,2)
-			p1.setBit(4,4)
-			p1.setBit(12,12)
-			p1.setBit(17,17)
-			p1.setBit(99,99)
-			
-			v1 = p1.getBitsAndValues()
-			for v in v1:
-				print ('Bit %s of type %s with value = %s' % (v['bit'],v['type'],v['value']))
-	
-		@return: array of values.
-		"""
+            Each array value is a dictionary with: {'bit':X ,'type': Y, 'value': Z} Where:
+                bit: is the bit number
+                type: is the bit type
+                value: is the bit value inside this object
+            so the Generic array returned is:  [ (...),{'bit':X,'type': Y, 'value': Z}, (...)] 
+            
+        Example:
+            p1 = ISO8583()
+            p1.setMTI('0800')
+            p1.setBit(2,2)
+            p1.setBit(4,4)
+            p1.setBit(12,12)
+            p1.setBit(17,17)
+            p1.setBit(99,99)
+            
+            v1 = p1.getBitsAndValues()
+            for v in v1:
+                print ('Bit %s of type %s with value = %s' % (v['bit'],v['type'],v['value']))
+    
+        @return: array of values.
+        """
         ret = []
         for cont in range(2, 129):
             if self.BITMAP_VALUES[cont] != self._BIT_DEFAULT_VALUE:
@@ -1082,9 +1082,9 @@ class ISO8583:
     # Method that return a array with bits and values inside the iso package
     def getBit(self, bit):
         """Return the value of the bit
-		@param: bit -> the number of the bit that you want the value
-		@raise: BitInexistent Exception, BitNotSet Exception
-		"""
+        @param: bit -> the number of the bit that you want the value
+        @raise: BitInexistent Exception, BitNotSet Exception
+        """
 
         if bit < 1 or bit > 128:
             raise BitInexistent("Bit number %s dosen't exist!" % bit)
@@ -1096,6 +1096,7 @@ class ISO8583:
         if self.DEBUG == True:
             print ('This is the array of bits inside the bitmap %s' % arr)
 
+        value = None
         for v in arr:
             if v == bit:
                 value = self.BITMAP_VALUES[bit]
@@ -1113,26 +1114,26 @@ class ISO8583:
     # Method that return ISO8583 to TCPIP network form, with the size in the beginning.
     def getNetworkISO(self, bigEndian=True):
         """Method that return ISO8583 ASCII package with the size in the beginning
-		By default, it return the package with size represented with big-endian.
-		Is the same that:
-			import struct
-			(...)
-			iso = ISO8583()
-			iso.setBit(3,'300000')
-			(...)
-			ascii = iso.getRawIso()
-			# Example: big-endian
-			# To little-endian, replace '!h' with '<h'
-			netIso = struct.pack('!h',len(iso)) 
-			netIso += ascii
-			# Example: big-endian
-			# To little-endian, replace 'iso.getNetworkISO()' with 'iso.getNetworkISO(False)'
-			print ('This <%s> the same that <%s>' % (iso.getNetworkISO(),netIso))
-		
-		@param: bigEndian (True|False) -> if you want that the size be represented in this way. 
-		@return: size + ASCII ISO8583 package ready to go to the network!
-		@raise: InvalidMTI Exception
-		"""
+        By default, it return the package with size represented with big-endian.
+        Is the same that:
+            import struct
+            (...)
+            iso = ISO8583()
+            iso.setBit(3,'300000')
+            (...)
+            ascii = iso.getRawIso()
+            # Example: big-endian
+            # To little-endian, replace '!h' with '<h'
+            netIso = struct.pack('!h',len(iso)) 
+            netIso += ascii
+            # Example: big-endian
+            # To little-endian, replace 'iso.getNetworkISO()' with 'iso.getNetworkISO(False)'
+            print ('This <%s> the same that <%s>' % (iso.getNetworkISO(),netIso))
+        
+        @param: bigEndian (True|False) -> if you want that the size be represented in this way. 
+        @return: size + ASCII ISO8583 package ready to go to the network!
+        @raise: InvalidMTI Exception
+        """
 
         netIso = ""
         asciiIso = self.getRawIso()
@@ -1156,33 +1157,33 @@ class ISO8583:
     # Method that recieve a ISO8583 ASCII package in the network form and parse it.
     def setNetworkISO(self, iso, bigEndian=True):
         """Method that receive sie + ASCII ISO8583 package and transfor it in the ISO8583 object.
-			By default, it recieve the package with size represented with big-endian.
-			Is the same that:
-			import struct
-			(...)
-			iso = ISO8583()
-			iso.setBit(3,'300000')
-			(...)
-			# Example: big-endian
-			# To little-endian, replace 'iso.getNetworkISO()' with 'iso.getNetworkISO(False)'
-			netIso = iso.getNetworkISO()
-			newIso = ISO8583()
-			# Example: big-endian
-			# To little-endian, replace 'newIso.setNetworkISO()' with 'newIso.setNetworkISO(False)'
-			newIso.setNetworkISO(netIso)
-			#Is the same that:
-			#size = netIso[0:2]
-			## To little-endian, replace '!h' with '<h'
-			#size = struct.unpack('!h',size )
-			#newIso.setIsoContent(netIso[2:size])
-			arr = newIso.getBitsAndValues()
-			for v in arr:
-				print ('Bit %s Type %s Value = %s' % (v['bit'],v['type'],v['value']))
-			
-			@param: iso -> str that represents size + ASCII ISO8583 package
-			@param: bigEndian (True|False) -> Codification of the size.
-			@raise: InvalidIso8583 Exception
-		"""
+            By default, it recieve the package with size represented with big-endian.
+            Is the same that:
+            import struct
+            (...)
+            iso = ISO8583()
+            iso.setBit(3,'300000')
+            (...)
+            # Example: big-endian
+            # To little-endian, replace 'iso.getNetworkISO()' with 'iso.getNetworkISO(False)'
+            netIso = iso.getNetworkISO()
+            newIso = ISO8583()
+            # Example: big-endian
+            # To little-endian, replace 'newIso.setNetworkISO()' with 'newIso.setNetworkISO(False)'
+            newIso.setNetworkISO(netIso)
+            #Is the same that:
+            #size = netIso[0:2]
+            ## To little-endian, replace '!h' with '<h'
+            #size = struct.unpack('!h',size )
+            #newIso.setIsoContent(netIso[2:size])
+            arr = newIso.getBitsAndValues()
+            for v in arr:
+                print ('Bit %s Type %s Value = %s' % (v['bit'],v['type'],v['value']))
+            
+            @param: iso -> str that represents size + ASCII ISO8583 package
+            @param: bigEndian (True|False) -> Codification of the size.
+            @raise: InvalidIso8583 Exception
+        """
 
         if len(iso) < 24:
             raise InvalidIso8583('This is not a valid iso!!Invalid Size')

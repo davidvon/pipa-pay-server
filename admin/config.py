@@ -44,3 +44,7 @@ if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 
 
+POS_PLAT_SERVER_IP = "192.168.200.105"
+POS_PLAT_SERVER_PORT = 8583
+
+

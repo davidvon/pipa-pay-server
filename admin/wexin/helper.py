@@ -37,12 +37,6 @@ class Request(object):
         self.errcode = 0
         self.errmsg = ''
 
-    def get_host(self):
-        return self.host
-
-    def get_token(self):
-        return self.token
-
     def get_tokenid(self):
         return self.token.get()
 
@@ -80,30 +74,6 @@ class Request(object):
             response = urllib2.urlopen(req).read()
         return response
 
-
-"""
-class MediaRequest(Request):
-    def __init__(self,token,host=Const.media_host):
-        super(MediaRequest,self).__init__(token,host)
-
-    def _request(self,url,params,data,method,headers):
-        url = '%s%s?%s' % (self.host,url,urllib.urlencode(params))
-        if method == 'GET':
-            f = urllib2.urlopen(url)
-            with open(data["filepath"], "wb") as local_file:
-                local_file.write(f.read())
-            return {"status":"success"}
-        elif method == 'POST':
-            datagen, headers = multipart_encode({params["type"]: open(data["filepath"], "rb")})
-            request = urllib2.Request(url, datagen, headers)
-            response = urllib2.urlopen(request).read()
-            response = json.loads(response)
-            return response
-
-class QrcodeRequest(MediaRequest):
-    def __init__(self,token,host=Const.qrcode_host):
-        super(QrcodeRequest,self).__init__(token,host)
-"""
 
 
 class APIRequest(Request):
@@ -187,41 +157,6 @@ class Qrcode(object):
         # r = self.request.request(url,params,data)
         img = self.request.request(url, params)
         return img
-
-
-class WeixinMedia(object):
-    def __init__(self, request):
-        self.request = request
-
-    def upload_media(self, media_type, media):
-        """
-        http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE
-        """
-        url = "/cgi-bin/media/upload"
-        params = {
-            "access_token": self.request.get_tokenid(),
-            "type": media_type
-        }
-        data = {
-            "filepath": media
-        }
-        r = self.request.request(url, params, data, method='POST')
-        return r
-
-    def get_media(self, media_id, file_path):
-        """
-        http://file.api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID
-        """
-        url = "/cgi-bin/media/get"
-        params = {
-            "access_token": self.request.get_tokenid(),
-            "media_id": media_id
-        }
-        data = {
-            "filepath": file_path
-        }
-        r = self.request.request(url, params, data, method='GET')
-        print(r)
 
 
 class WeixinHelper(object):
@@ -431,41 +366,6 @@ class WeixinHelper(object):
         raise WeixinException(errcode, errmsg)
 
     def create_menu(self, menu):
-        """
-        # https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN
-        {
-         "button":[
-         {
-              "type":"click",
-              "name":"今日歌曲",
-              "key":"V1001_TODAY_MUSIC"
-          },
-          {
-               "type":"click",
-               "name":"歌手简介",
-               "key":"V1001_TODAY_SINGER"
-          },
-          {
-               "name":"菜单",
-               "sub_button":[
-               {
-                   "type":"view",
-                   "name":"搜索",
-                   "url":"http://www.soso.com/"
-                },
-                {
-                   "type":"view",
-                   "name":"视频",
-                   "url":"http://v.qq.com/"
-                },
-                {
-                   "type":"click",
-                   "name":"赞一下我们",
-                   "key":"V1001_GOOD"
-                }]
-           }]
-        }
-        """
         url = "/cgi-bin/menu/create"
         params = {"access_token": self.request.get_tokenid()}
         response = self.request.request(url, params, menu, 'POST')
