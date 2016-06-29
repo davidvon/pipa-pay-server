@@ -3,9 +3,10 @@ import time
 from flask import request
 from app import restful_api
 from flask.ext.restful import Resource
+from config import WEIXIN_APPID
 from models import Order
 from wexin import WX_API_PREFIX
-from wexin.helper import WeixinHelper, Const
+from wexin.helper import WeixinHelper
 from wexin.views import weixin
 
 __author__ = 'fengguanhua'
@@ -30,11 +31,11 @@ class ApiQRcode(Resource):
 
 class ApiSign(Resource):
     def get(self):
-        url = request.url.split('#')[0]
+        url = request.args['url']
         helper = WeixinHelper()
         ret = helper.sign(url)
         return {
-            "appId": Const.appid,
+            "appId": WEIXIN_APPID,
             "timestamp":ret['timestamp'],
             "nonceStr": ret['nonce_str'],
             "signature": ret['hash']

@@ -44,16 +44,16 @@ def auth_notify():
 
 def payable(request, order_serial):
     logger.info('[WEIXIN] payable....')
-    order = Order.query.filter(Order.order_serial == order_serial).first()
-    if not order.is_payable():
-        return 255, ''
+    # order = Order.query.filter(Order.order_serial == order_serial).first()
+    # if not order.is_payable():
+    #     return 255, ''
     parameter = {
-        'body': '比邻洗衣',
-        'out_trade_no': order.order_serial,
+        'body': '噼啪支付',
+        'out_trade_no': random_str(12),   #order.order_serial,
         'spbill_create_ip': request.remote_addr,
-        'total_fee': str(int(order.pay_price * 100)),  # unit is fen check other day
+        'total_fee': '1',  # str(int(order.pay_price * 100)),  # unit is fen check other day
         'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
-        'openid': order.customer.openid
+        'openid': 'oDF3iY9P32sK_5GgYiRkjsCo45bk' #order.customer.openid
     }
     return build_pay_prepayid_form(parameter)
 

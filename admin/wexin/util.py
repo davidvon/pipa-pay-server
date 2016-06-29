@@ -1,4 +1,6 @@
 # coding: utf-8
+import random
+import string
 from app import db, app, logger
 import datetime as dt
 from models import Customer
@@ -63,3 +65,7 @@ def async_update_customer_info(openid):
 def async_unsubscribe_customer(openid):
     sleep(1)
     unsubscribe_customer(openid)
+
+
+def nonce_str(num=12):
+    return ''.join(random.sample(string.ascii_letters, num))

@@ -4,12 +4,8 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # available languages
-LANGUAGES = {'zh_Hans_CN': 'Chinese'}
-BABEL_DEFAULT_LOCALE = 'zh_Hans_CN'
-
-# pagination
-COUNT_PER_PAGE = 20
-MAX_SEARCH_RESULTS = 50
+LANGUAGES = {'zh_CN': 'Chinese'}
+BABEL_DEFAULT_LOCALE = 'zh_CN'
 
 # weixin account
 ISONLINE = 'ONLINE_SERVER' in os.environ
@@ -42,10 +38,6 @@ LOG_DIR = os.path.join(basedir, "../logs")
 LOG_FILE = os.path.join(LOG_DIR, "server.log")
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
-
-
-POS_PLAT_SERVER_IP = "192.168.200.105"
-POS_PLAT_SERVER_PORT = 8583
 
 DEFAULT_HOST_URL = 'http://123.57.205.55/'
 

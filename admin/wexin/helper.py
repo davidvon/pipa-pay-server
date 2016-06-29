@@ -1,7 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import random
-import string
 import urllib2
 import urllib
 import json
@@ -12,6 +10,11 @@ import hashlib
 import time
 from app import logger
 from cache.weixin import get_cache_access_token, cache_access_token, cache_ticket, get_cache_ticket
+from wexin.util import nonce_str
+
+
+api_host = "https://api.weixin.qq.com"
+qrcode_host = "https://mp.weixin.qq.com"
 
 
 class WeixinException(Exception):
@@ -22,15 +25,6 @@ class WeixinException(Exception):
 
     def __str__(self):
         return '%s-%s' % (self.errcode, self.errmsg)
-
-
-class Const(object):
-    api_host = "https://api.weixin.qq.com"
-    media_host = "http://file.api.weixin.qq.com"
-    qrcode_host = "https://mp.weixin.qq.com"
-    appid = WEIXIN_APPID
-    secret = WEIXIN_SECRET
-    token = WEIXIN_TOKEN
 
 
 class Request(object):
@@ -79,7 +73,7 @@ class Request(object):
 
 
 class APIRequest(Request):
-    def __init__(self, token, host=Const.api_host):
+    def __init__(self, token, host=api_host):
         super(APIRequest, self).__init__(token, host)
 
     def _request(self, url, params, data, method, headers):
@@ -91,9 +85,6 @@ class APIRequest(Request):
 
 
 class Token(object):
-    def __init__(self):
-        self.appid = Const.appid
-        self.secret = Const.secret
 
     def get(self):
         return get_cache_access_token() or self._create()
@@ -103,11 +94,11 @@ class Token(object):
 
     def _create(self):
         r = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" +
-                         self.appid + "&secret=" + self.secret, verify=False)
+                         WEIXIN_APPID + "&secret=" + WEIXIN_SECRET, verify=False)
         response = r.json()
         cache_access_token(response["access_token"], response["expires_in"])
         logger.info('[WEIXIN] appid=%s, secret=%s, new token=%s, expires=%s' % (
-            self.appid, self.secret, response["access_token"], response["expires_in"]))
+            WEIXIN_APPID, WEIXIN_SECRET, response["access_token"], response["expires_in"]))
         return response["access_token"]
 
 
@@ -131,7 +122,7 @@ class WeixinHelper(object):
 
     @staticmethod
     def check_signature(signature, timestamp, nonce):
-        tmplist = [Const.token, timestamp, nonce]
+        tmplist = [WEIXIN_TOKEN, timestamp, nonce]
         tmplist.sort()
         sha1 = hashlib.sha1()
         map(sha1.update, tmplist)
@@ -142,9 +133,6 @@ class WeixinHelper(object):
 
     @staticmethod
     def to_json(message):
-        """
-        http://docs.python.org/2/library/xml.etree.elementtree.html#xml.etree.ElementTree.XML
-        """
         j = {}
         root = ET.fromstring(message)
         for child in root:
@@ -154,10 +142,6 @@ class WeixinHelper(object):
                 value = child.text
             j[child.tag.lower()] = value
         return j
-
-    @staticmethod
-    def _to_tag(k):
-        return ''.join([w.capitalize() for w in k.split('_')])
 
     @staticmethod
     def _cdata(data):
@@ -188,7 +172,7 @@ class WeixinHelper(object):
 
         for k in sorted(message.iterkeys(), cmp):
             v = message[k]
-            tag = self._to_tag(k)
+            tag = ''.join([w.capitalize() for w in k.split('_')])
             xml += '<%s>%s</%s>' % (tag, self._cdata(v), tag)
         xml += '</xml>'
         return xml
@@ -368,8 +352,8 @@ class WeixinHelper(object):
     def oauth(self, code):
         token_url = "/sns/oauth2/access_token"
         token_params = {
-            "appid": Const.appid,
-            "secret": Const.secret,
+            "appid": WEIXIN_APPID,
+            "secret": WEIXIN_SECRET,
             "code": code,
             "grant_type": "authorization_code",
         }
@@ -415,12 +399,8 @@ class WeixinHelper(object):
                 return res['ticket']
         return token
 
-    @staticmethod
-    def nonce_str():
-        return ''.join(random.sample(string.ascii_letters, 12))
-
     def sign(self, url):
-        s = self.nonce_str()
+        s = nonce_str()
         timestamp = int(time.time())
         js_ticket = self.get_ticket('jsapi')
         full_url = "jsapi_ticket=" + js_ticket + "&noncestr=" + s + "&timestamp=" + str(timestamp) + "&url=" + url
