@@ -399,7 +399,7 @@ class WeixinHelper(object):
                 return res['ticket']
         return token
 
-    def sign(self, url):
+    def jsapi_sign(self, url):
         s = nonce_str()
         timestamp = int(time.time())
         js_ticket = self.get_ticket('jsapi')
@@ -412,4 +412,27 @@ class WeixinHelper(object):
             "hash": hash,
             "timestamp": timestamp,
             "ticket": js_ticket
+        }
+
+    def card_sign(self, code='', openid='', outer_id=0):
+        nonce = nonce_str()
+        timestamp = int(time.time())
+        sign_type = 'SHA1'
+        card_ticket = self.get_ticket('wx_card')
+        tmplist = [timestamp, nonce, sign_type, card_ticket]
+        code and tmplist.append(openid)
+        openid and tmplist.append(openid)
+        outer_id != 0 and tmplist.append(str(outer_id))
+        signature = ''.join(sorted(tmplist))
+        sha1obj = hashlib.sha1()
+        sha1obj.update(signature)
+        hash = sha1obj.hexdigest()
+        return {
+            "code": code,
+            "openid": openid,
+            "outer_id": outer_id,
+            "nonce_str": nonce,
+            "hash": hash,
+            "timestamp": timestamp,
+            "ticket": card_ticket
         }

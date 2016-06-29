@@ -33,13 +33,30 @@ class ApiSign(Resource):
     def get(self):
         url = request.args['url']
         helper = WeixinHelper()
-        ret = helper.sign(url)
+        ret = helper.jsapi_sign(url)
         return {
             "appId": WEIXIN_APPID,
-            "timestamp":ret['timestamp'],
+            "timestamp": ret['timestamp'],
             "nonceStr": ret['nonce_str'],
             "signature": ret['hash']
         }
 
-restful_api.add_resource(ApiQRcode, WX_API_PREFIX +'/qrcode')
-restful_api.add_resource(ApiSign, WX_API_PREFIX +'/sign')
+
+class CardSign(Resource):
+    def get(self):
+        helper = WeixinHelper()
+        ret = helper.card_sign()
+        return {
+            "timestamp": ret['timestamp'],
+            "nonceStr": ret['nonce_str'],
+            "cardSign": ret['hash'],
+            "signType": 'SHA1',
+            'shopId': '',
+            'carType': '',
+            'carId': ''
+        }
+
+
+restful_api.add_resource(ApiQRcode, WX_API_PREFIX + '/qrcode')
+restful_api.add_resource(ApiSign, WX_API_PREFIX + '/jsapi_sign')
+restful_api.add_resource(CardSign, WX_API_PREFIX + '/card_sign')
