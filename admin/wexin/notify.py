@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from app import logger
 import config
-from models import User
 from signals import signal_order_notify
 from wexin.views import weixin
 from cache.public import url_from_cache
@@ -170,19 +169,20 @@ class FirmOrderNotify(OrderNotifyBase):
         weixin.weixin_helper.push_template_message(openid, template_id, push_data, order_url)
 
     def notify(self, args):
-        assistants = User.query.filter_by(shop_id=args['shop_id'], active=1).all()
-        # cash, create, pay-confirm, done
-        for assistant in assistants:
-            if not assistant.customer:
-                continue
-            if self.status == 'booking':
-                return self.booking_order_notify(args, assistant.customer.openid)
-            elif self.status == 'pay-confirm':
-                return self.order_pay_confirmed_notify(args, assistant.customer.openid)
-            elif self.status == 'cancel':
-                return self.order_status_change_notify(args, assistant.customer.openid)
-            elif self.status == 'update':
-                return self.order_status_change_notify(args, assistant.customer.openid)
+        # assistants = User.query.filter_by(shop_id=args['shop_id'], active=1).all()
+        # # cash, create, pay-confirm, done
+        # for assistant in assistants:
+        #     if not assistant.customer:
+        #         continue
+        #     if self.status == 'booking':
+        #         return self.booking_order_notify(args, assistant.customer.openid)
+        #     elif self.status == 'pay-confirm':
+        #         return self.order_pay_confirmed_notify(args, assistant.customer.openid)
+        #     elif self.status == 'cancel':
+        #         return self.order_status_change_notify(args, assistant.customer.openid)
+        #     elif self.status == 'update':
+        #         return self.order_status_change_notify(args, assistant.customer.openid)
+        pass
 
 
 def order_notify(sender, **extra):

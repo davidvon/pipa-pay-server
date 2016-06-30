@@ -27,7 +27,7 @@ if IS_ONLINE:
 else:
     SQLALCHEMY_RECORD_QUERIES = True
     DEBUG_TB_INTERCEPT_REDIRECTS = False
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:Davidvon12345@127.0.0.1/laundry?unix_socket=/tmp/mysql.sock&charset=utf8'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:Davidvon12345@127.0.0.1/pipapay?unix_socket=/tmp/mysql.sock&charset=utf8'
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 
 # log

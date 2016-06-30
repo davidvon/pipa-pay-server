@@ -4,7 +4,7 @@ from urllib import urlencode
 from flask import request, current_app
 from app import app, logger, db
 from config import WXPAY_CONIFG, WEIXIN_APPID
-from models import Order, Service, get_order_params
+from models import get_order_params, Order
 from signals import signal_order_notify
 from wexin_pay.pub import verify_notify, xml_to_dict, random_str, sign_md5, format_param_map
 from wexin_pay.wxlib_v2 import build_warning_sign, build_right_sign, get_address_sign
@@ -42,18 +42,15 @@ def auth_notify():
         return 'delivery notify failed!', 400
 
 
-def payable(request, order_serial):
+def payable(request, order):
     logger.info('[WEIXIN] payable....')
-    # order = Order.query.filter(Order.order_serial == order_serial).first()
-    # if not order.is_payable():
-    #     return 255, ''
     parameter = {
         'body': '噼啪支付',
-        'out_trade_no': random_str(12),   #order.order_serial,
+        'out_trade_no': order.order_serial,
         'spbill_create_ip': request.remote_addr,
-        'total_fee': '1',  # str(int(order.pay_price * 100)),  # unit is fen check other day
+        'total_fee': str(int(order.pay_price * 100)),  # unit is fen check other day
         'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
-        'openid': 'oDF3iY9P32sK_5GgYiRkjsCo45bk' #order.customer.openid
+        'openid': order.customer.openid
     }
     return build_pay_prepayid_form(parameter)
 
@@ -96,25 +93,26 @@ def get_address_data(request):
 
 @app.route('/wxpay/native/callback', methods=['POST'])
 def native_callback():
-    raw_str = str(request.data)
-    logger.info('[WEIXIN] native callback Request: %s' % unicode(raw_str))
-    params = xml_to_dict(raw_str)
-    service_id = params["service_id"]
-    firm_service = Service.query.filter_by(id=service_id).first()
-    if not firm_service:
-        return '<xml>' \
-               '<return_code><![CDATA[FAIL]]></return_code>' \
-               '<return_msg><![CDATA[Service not exist]]></return_msg>' \
-               '</xml>'
-    parameter = {
-        'body': firm_service.title,
-        'out_trade_no': str(int(time.time())),
-        'spbill_create_ip': request.remote_addr,
-        'total_fee': str(int(firm_service.now_price * 100)),  # unit is fen check other day
-        'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
-        'openid': params['openid']
-    }
-    return build_static_qrcode_form(parameter)
+    # raw_str = str(request.data)
+    # logger.info('[WEIXIN] native callback Request: %s' % unicode(raw_str))
+    # params = xml_to_dict(raw_str)
+    # service_id = params["service_id"]
+    # firm_service = Service.query.filter_by(id=service_id).first()
+    # if not firm_service:
+    #     return '<xml>' \
+    #            '<return_code><![CDATA[FAIL]]></return_code>' \
+    #            '<return_msg><![CDATA[Service not exist]]></return_msg>' \
+    #            '</xml>'
+    # parameter = {
+    #     'body': firm_service.title,
+    #     'out_trade_no': str(int(time.time())),
+    #     'spbill_create_ip': request.remote_addr,
+    #     'total_fee': str(int(firm_service.now_price * 100)),  # unit is fen check other day
+    #     'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
+    #     'openid': params['openid']
+    # }
+    # return build_static_qrcode_form(parameter)
+    pass
 
 
 @app.route('/wxpay/qrcode/static/create', methods=['GET', 'POST'])
@@ -139,19 +137,20 @@ def static_qrcode_create():
 
 @app.route('/wxpay/qrcode/dynamic/create', methods=['GET', 'POST'])
 def dynamic_qrcode_create():
-    if not request.args.get("service_id"):
-        return 'error: service_id not exist'
-    service_id = request.args["service_id"]
-    open_id = request.args["uid"]
-    firm_service = Service.query.filter_by(id=service_id).first()
-    if not firm_service:
-        return 'error: service[%s] not exist' % service_id
-    parameter = {
-        'body': firm_service.title,
-        'out_trade_no': str(int(time.time())),
-        'spbill_create_ip': request.remote_addr,
-        'total_fee': str(int(firm_service.now_price * 100)),  # unit is fen check other day
-        'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
-        'openid': open_id
-    }
-    return build_dynamic_qrcode_form(parameter)
+    # if not request.args.get("service_id"):
+    #     return 'error: service_id not exist'
+    # service_id = request.args["service_id"]
+    # open_id = request.args["uid"]
+    # firm_service = Service.query.filter_by(id=service_id).first()
+    # if not firm_service:
+    #     return 'error: service[%s] not exist' % service_id
+    # parameter = {
+    #     'body': firm_service.title,
+    #     'out_trade_no': str(int(time.time())),
+    #     'spbill_create_ip': request.remote_addr,
+    #     'total_fee': str(int(firm_service.now_price * 100)),  # unit is fen check other day
+    #     'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
+    #     'openid': open_id
+    # }
+    # return build_dynamic_qrcode_form(parameter)
+    pass

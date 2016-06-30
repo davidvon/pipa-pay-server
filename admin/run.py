@@ -11,4 +11,4 @@ application.register_blueprint(weixin_module, url_prefix='/weixin')
 logger.info('initial done')
 
 if __name__ == '__main__':
-    application.run(debug=True, threaded=True)
+    application.run(debug=True, threaded=True, host='192.168.200.101')

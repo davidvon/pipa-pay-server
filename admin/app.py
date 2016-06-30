@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask
+from flask import Flask, g
+from flask.ext.login import current_user
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.restful import Api as RestfulApi
 
@@ -17,6 +18,15 @@ logger = logging.getLogger()
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
+@app.before_request
+def before_request():
+    g.session = db.session
+    g.user = current_user
+
+@app.teardown_request
+def teardown_request(exception):
+    g.session.close()
+
 import redis
 app.is_online = False
 redis_client = redis.StrictRedis(host='127.0.0.1', port=6379)
@@ -30,7 +40,6 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 db = SQLAlchemy(app)
-db.create_all()
 
 @app.after_request
 def after_request(response):
@@ -39,6 +48,7 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
 
+import models
 import api
 
-
+db.create_all()
