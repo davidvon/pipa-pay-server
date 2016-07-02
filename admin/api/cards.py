@@ -85,7 +85,8 @@ class ApiCardPayRecords(Resource):
         card_id = args['cardId']
         left = datetime.date.today()
         right = datetime.date.today() - datetime.timedelta(30)
-        records = CustomerTradeRecords.query.filter_by(card_id=card_id).between(left, right).all()
+        records = CustomerTradeRecords.query.filter(CustomerTradeRecords.card_id == card_id,
+                                                    CustomerTradeRecords.time.between(left, right)).all()
         recharge_total = 0
         expend_total = 0
         for item in records:
