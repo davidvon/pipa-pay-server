@@ -39,7 +39,7 @@ class CustomerOrderNotify(OrderNotifyBase):
         template_id = 'XAa3kQ76ruWmEqFKSDfAct3m4dQ6Cp-j1-OZ3PPj50I' if config.ISONLINE else \
             'RKtd74YCSgG5tEmHsG_5ddbRaK8hTzHsyIZHQWTJh2c'
         push_data = dict(first={"value": "您好，您已下单成功", "color": "#173177"},
-                         keyword1={"value": args['order_serial'], "color": "#173177"},
+                         keyword1={"value": args['order_id'], "color": "#173177"},
                          keyword2={"value": args['name'], "color": "#173177"},
                          keyword3={"value": args['phone'], "color": "#000000"},
                          keyword4={"value": args['address'], "color": "#173177"},
@@ -60,7 +60,7 @@ class CustomerOrderNotify(OrderNotifyBase):
         template_id = 'hhhp9z46Ql8xCjhI4cvDEuiUQf2wGBhn-kWjie4K-RY' if config.ISONLINE else \
             'tGBWVmXAUdB7gCnDnYGTVfXkO9rvaej4bm7HmT4V75Y'
         push_data = dict(first={"value": "您的订单已支付", "color": "#173177"},
-                         keyword1={"value": args['order_serial'], "color": "#173177"},
+                         keyword1={"value": args['order_id'], "color": "#173177"},
                          keyword2={"value": '洗衣%s件' % args['sum'], "color": "#173177"},
                          keyword3={"value": args['price'], "color": "#173177"},
                          keyword4={"value": args['status'], "color": "#173177"},
@@ -82,7 +82,7 @@ class CustomerOrderNotify(OrderNotifyBase):
         status_info = '订单已取消' if self.status == 'cancel' else '订单信息有调整' if self.status == 'update' else '订单状态有新变更'
         remark = '洗衣管家提醒您，您的订单可以微信支付了' if not args['paid'] and args['price'] else ''
         push_data = dict(first={"value": '您的%s' % status_info, "color": "#173177"},
-                         keyword1={"value": args.get('order_serial'), "color": "#173177"},
+                         keyword1={"value": args.get('order_id'), "color": "#173177"},
                          keyword2={"value": '预约洗衣\n订单金额：%s\n预约上门收衣时间：%s\n预约上门送衣时间：%s' % (args['price'], args['delivery_time'], args['received_time']), "color": "#000000"},
                          keyword3={"value": args.get('sum'), "color": "#173177"},
                          keyword4={"value": args.get('status'), "color": "#173177"},
@@ -138,7 +138,7 @@ class FirmOrderNotify(OrderNotifyBase):
         template_id = 'hhhp9z46Ql8xCjhI4cvDEuiUQf2wGBhn-kWjie4K-RY' if config.ISONLINE else \
             'tGBWVmXAUdB7gCnDnYGTVfXkO9rvaej4bm7HmT4V75Y'
         push_data = dict(first={"value": "客户（%s）订单支付已完成" % args['name'], "color": "#173177"},
-                         keyword1={"value": args['order_serial'], "color": "#173177"},
+                         keyword1={"value": args['order_id'], "color": "#173177"},
                          keyword2={"value": '洗衣%s件' % args['sum'], "color": "#173177"},
                          keyword3={"value": args['price'], "color": "#173177"},
                          keyword4={"value": args['status'], "color": "#173177"},
@@ -159,7 +159,7 @@ class FirmOrderNotify(OrderNotifyBase):
             'BUfIMn1xtiD9ikahiDhA90NJwxPB8pXOa_hun8hpqlE'
         status_info = '订单已取消' if self.status == 'cancel' else '订单信息有调整' if self.status == 'update' else '订单状态有新变更'
         push_data = dict(first={"value": "客户（%s）%s" % (args['name'], status_info), "color": "#173177"},
-                         keyword1={"value": args.get('order_serial'), "color": "#173177"},
+                         keyword1={"value": args.get('order_id'), "color": "#173177"},
                          keyword2={"value": '预约洗衣\n预约上门收衣时间：%s\n预约上门送衣时间：%s' % (args['delivery_time'], args['received_time']), "color": "#000000"},
                          keyword3={"value": args.get('sum'), "color": "#173177"},
                          keyword4={"value": args.get('status'), "color": "#173177"},
@@ -169,7 +169,7 @@ class FirmOrderNotify(OrderNotifyBase):
         weixin.weixin_helper.push_template_message(openid, template_id, push_data, order_url)
 
     def notify(self, args):
-        # assistants = User.query.filter_by(shop_id=args['shop_id'], active=1).all()
+        # assistants = User.query.filter_by(merchant_id=args['merchant_id'], active=1).all()
         # # cash, create, pay-confirm, done
         # for assistant in assistants:
         #     if not assistant.customer:
@@ -188,12 +188,12 @@ class FirmOrderNotify(OrderNotifyBase):
 def order_notify(sender, **extra):
     args = extra['args']
     status = extra['status']  # booking, pay-confirm, done
-    logger.info('[WEIXIN] order notify starting: [order.id:%s, status:%s] ...' % (args['order_serial'], status))
+    logger.info('[WEIXIN] order notify starting: [order.id:%s, status:%s] ...' % (args['order_id'], status))
     customer_notify = CustomerOrderNotify(status, args['openid'])
     customer_notify.notify(args)
     firm_notify = FirmOrderNotify(status)
     firm_notify.notify(args)
-    logger.info('[WEIXIN] sync order notify done: [id:%s,status:%s] ...' % (args['order_serial'], status))
+    logger.info('[WEIXIN] sync order notify done: [id:%s,status:%s] ...' % (args['order_id'], status))
 
 
 signal_order_notify.connect(order_notify)

@@ -6,7 +6,7 @@ from api import API_PREFIX
 from app import db, logger, restful_api
 from flask import request
 from flask.ext.restful import Resource
-from models import Order, Customer, Shop
+from models import Order, Customer, Merchant
 from wexin_pay.views import payable
 
 __author__ = 'fengguanhua'
@@ -41,7 +41,7 @@ __author__ = 'fengguanhua'
 #         try:
 #             args = request.args
 #             orderid = args.get('orderid')
-#             order = Order.query.filter_by(order_serial=orderid).first()
+#             order = Order.query.filter_by(order_id=orderid).first()
 #             args = get_order_params(order)
 #             db.session.delete(order)
 #             signal_order_notify.send(self, args=args, status='cancel')  # notify
@@ -67,11 +67,11 @@ __author__ = 'fengguanhua'
 #             customer = Customer.query.filter_by(openid=uid).first()
 #             if not customer:
 #                 return {'result': 'error', 'msg': 'customer not exist'}, 500
-#             order_serial = order_id_increment()
+#             order_id = order_id_increment()
 #             address = CustomerAddress.query.filter_by(id=address_id, customer_id=customer.id).first()
 #             if not address:
 #                 return {'result': 'error', 'msg': 'address not exist'}, 500
-#             order = Order(order_serial=order_serial, customer_id=customer.id, address_id=address_id,
+#             order = Order(order_id=order_id, customer_id=customer.id, address_id=address_id,
 #                           booking_clothes=sum, phone=tel, create_date=dt.date.today(), create_time=dt.datetime.now(),
 #                           booking_delivery_date=booking_delivery_date, booking_delivery_time=booking_delivery_time,
 #                           booking_received_date=booking_received_date, booking_received_time=booking_received_time)
@@ -86,13 +86,13 @@ __author__ = 'fengguanhua'
 #
 #
 # class ApiOrderModify(Resource):
-#     def post(self, order_serial):
+#     def post(self, order_id):
 #         try:
 #             uid = request.form.get('uid')
 #             customer = Customer.query.filter_by(openid=uid).first()
 #             if not customer:
 #                 return {'result': 'error', 'msg': 'customer not exist'}, 500
-#             order = Order.query.filter_by(order_serial=order_serial).first()
+#             order = Order.query.filter_by(order_id=order_id).first()
 #             if not order:
 #                 return {'result': 'error', 'msg': 'order not exist'}, 500
 #             order.address_id = request.form.get('address')
@@ -125,7 +125,7 @@ __author__ = 'fengguanhua'
 # class ApiOrderPayConfirm(Resource):
 #     def post(self):
 #         orderid = request.args.get('orderid')
-#         order = Order.query.filter_by(order_serial=orderid).first()
+#         order = Order.query.filter_by(order_id=orderid).first()
 #         code = order.to_pay(2)  # weixin pay
 #         args = get_order_params(order)
 #         signal_order_notify.send(self, args=args, status='pay-confirm')  # notify
@@ -136,15 +136,15 @@ __author__ = 'fengguanhua'
 #     def post(self):
 #         try:
 #             dicts = request.form if request.form else request.args
-#             order_serial = dicts.get('orderid')
+#             order_id = dicts.get('orderid')
 #             uid = dicts.get('uid')
-#             order = Order.query.filter_by(order_serial=order_serial).first()
+#             order = Order.query.filter_by(order_id=order_id).first()
 #             comment = CustomerOrderReview.query.filter(CustomerOrderReview.customer_id == uid,
-#                                                        CustomerOrderReview.order_serial == order_serial).first()
+#                                                        CustomerOrderReview.order_id == order_id).first()
 #             if not comment:
 #                 comment = CustomerOrderReview()
 #             comment.customer_id = uid
-#             comment.order_serial = order_serial
+#             comment.order_id = order_id
 #             comment.message = dicts.get('text')
 #             comment.datetime = dt.datetime.now()
 #             db.session.add(comment)
@@ -161,7 +161,7 @@ __author__ = 'fengguanhua'
 #     def post(self):
 #         try:
 #             orderid = request.args.get('orderid')
-#             order = Order.query.filter_by(order_serial=orderid).first()
+#             order = Order.query.filter_by(order_id=orderid).first()
 #             order.step('closed')
 #             db.session.add(order)
 #             db.session.commit()
@@ -179,7 +179,7 @@ __author__ = 'fengguanhua'
 #             auto_close = Order.query.filter(Order.paid == True, Order.status == 3,
 #                                             Order.create_time.between(left, auto_close_end)).all()
 #             for order in auto_close:
-#                 logger.info('[TASK] auto close customer[%s] order[%s].' % (order.customer, order.order_serial))
+#                 logger.info('[TASK] auto close customer[%s] order[%s].' % (order.customer, order.order_id))
 #                 order.step('closed')
 #                 db.session.add(order)
 #                 db.session.commit()
@@ -198,12 +198,12 @@ def random_digit(length=10):
     return str
 
 
-def create_order(shopid, price, openid, count):
-    shop = Shop.query.get(shopid)
+def create_order(merchant_id, price, openid, count):
+    merchant = Merchant.query.get(merchant_id)
     customer = Customer.query.filter_by(openid=openid).first()
     serial = random_digit()
     card = random_digit()
-    order = Order(order_serial=serial, card=card, shop_id=shop.id, customer_id=customer.id, pay_price=price)
+    order = Order(order_id=serial, card=card, merchant_id=merchant.id, customer_id=customer.id, pay_price=price)
     db.session.add(order)
     db.session.commit()
     return order
@@ -213,15 +213,15 @@ class ApiCardBuy(Resource):
     def post(self):
         try:
             args = json.loads(request.data)
-            shopid = args.get('merchantId')
+            merchant_id = args.get('merchantId')
             price = args.get('price')
             count = args.get('count')
             openid = args.get('openid')
-            order = create_order(shopid, price, openid, count)
+            order = create_order(merchant_id, price, openid, count)
             res, outputs = payable(request, order)
             logger.info('[ApiOrderPayable] data=%s' % str(outputs))
             if res == 0:
-                outputs['order_id'] = order.order_serial
+                outputs['orderId'] = order.order_id
                 return {'result': 0, 'content': outputs}, 200
             return {'result': res}, 200
         except Exception as e:
@@ -231,7 +231,7 @@ class ApiCardBuy(Resource):
 
 restful_api.add_resource(ApiCardBuy, API_PREFIX + 'card/buy')
 # restful_api.add_resource(ApiOrderBooking, API_PREFIX + 'order/booking')
-# restful_api.add_resource(ApiOrderModify, API_PREFIX + 'order/modify/<string:order_serial>')
+# restful_api.add_resource(ApiOrderModify, API_PREFIX + 'order/modify/<string:order_id>')
 # restful_api.add_resource(ApiTaskOrderMaintain, API_PREFIX + 'task/order/maintain')
 # restful_api.add_resource(ApiOrderCancel, API_PREFIX + 'order/cancel')
 # restful_api.add_resource(ApiOrderClose, API_PREFIX + 'order/close')

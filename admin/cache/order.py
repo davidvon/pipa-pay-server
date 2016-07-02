@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import datetime
 import time
 from app import redis_client
+from utils.util import random_digit
+
 __author__ = 'fengguanhua'
 
 
@@ -23,3 +24,13 @@ def order_id_increment(max_len=5):
     val = format_str.format(str(global_order_id))
     result = '%s%s' % (now_date, val)
     return result
+
+
+def cache_qrcode_code(card_id):
+    code = random_digit(20)
+    redis_client.set(code, '%s' % card_id, 70)  # 每分钟刷新
+    return code
+
+
+def parse_qrcode_code(code):
+    return redis_client.get(code) or None

@@ -9,9 +9,9 @@ BABEL_DEFAULT_LOCALE = 'zh_CN'
 
 # weixin account
 ISONLINE = 'ONLINE_SERVER' in os.environ
-WEIXIN_APPID = 'wx67dfef61c86de4c7'
-WEIXIN_SECRET = 'fbc9eaf0ac4cf7a4f4d2947e5a882b8f'
-WEIXIN_TOKEN = 'neighbour_laundry'
+WEIXIN_APPID = 'wxb3ec764893b99722'
+WEIXIN_SECRET = '04a37bc738a0c2759ba850c4334b99fc'
+WEIXIN_TOKEN = 'pipapay'
 WXPAY_CONIFG = {
     'partnerId': '1232854202',
     'partnerKey': '966605',
@@ -39,6 +39,6 @@ LOG_FILE = os.path.join(LOG_DIR, "server.log")
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 
-DEFAULT_HOST_URL = 'http://123.57.205.55/'
+DEFAULT_HOST_URL = 'http://127.0.0.1/'
 
 

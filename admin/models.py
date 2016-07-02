@@ -15,7 +15,7 @@ class City(db.Model):
         return self.city_name
 
 
-class Shop(db.Model):
+class Merchant(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     address = db.Column(db.String(64), nullable=False)
@@ -31,10 +31,12 @@ class Shop(db.Model):
 
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    shop_id = db.Column(db.Integer(), db.ForeignKey('shop.id'), nullable=False)
-    shop = db.relationship(Shop)
-    match_amount = db.Column(db.Integer())  # 满足金额
-    serial = db.Column(db.String(32), nullable=False)
+    card_id = db.Column(db.String(32), unique=True, nullable=False)
+    merchant_id = db.Column(db.Integer(), db.ForeignKey('merchant.id'), nullable=False)
+    merchant = db.relationship(Merchant)
+    title = db.Column(db.String(32), nullable=False)
+    sub_title = db.Column(db.String(128))
+    type = db.Column(db.Integer())  # 卡类型
 
 
 class Customer(db.Model):
@@ -46,12 +48,10 @@ class Customer(db.Model):
     province = db.Column(db.String(20))
     city = db.Column(db.String(20))
     active = db.Column(db.BOOLEAN, default=True)
-    logined = db.Column(db.BOOLEAN, default=False)
     last_visited = db.Column(db.DateTime(), default=datetime.now)
     sex = db.Column(db.Integer())
     head_image = db.Column(db.String(256))
     register_time = db.Column(db.DateTime(), default=datetime.now)
-    frequent = db.Column(db.BOOLEAN)
 
     def __repr__(self):
         return self.show_name()
@@ -74,28 +74,34 @@ class CustomerCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'), nullable=False)
     customer = db.relationship(Customer)
-    card_id = db.Column(db.Integer(), db.ForeignKey('card.id'))
+    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
     card = db.relationship(Card)
+    img = db.Column(db.String(36))
+    amount = db.Column(db.Integer())
+    balance = db.Column(db.Float())
     claimed_time = db.Column(db.DateTime())
+    card_code = db.Column(db.String(32), unique=True)
+    wx_card_code = db.Column(db.String(32))
+    wx_binding_time = db.Column(db.DateTime())
+    expire_date = db.Column(db.Date())
+    status = db.Column(db.Integer())    # 0:未放入微信卡包 1: 已放入微信卡包 2: 已赠送
 
-    def __repr__(self):
-        return '%s-%s' % (self.coupon_type(), self.get_actual_coupon().id)
 
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    order_serial = db.Column(db.String(36), unique=True, nullable=False)
+    order_id = db.Column(db.String(36), unique=True, nullable=False)
     customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'))
     customer = db.relationship(Customer)
-    shop_id = db.Column(db.Integer(), db.ForeignKey('shop.id'), nullable=False)
-    shop = db.relationship(Shop)
-    card = db.Column(db.String(36), unique=True, nullable=False)
-    pay_price = db.Column(db.Integer, nullable=False)
-    pay_time = db.Column(db.DateTime(), default=datetime.now)
+    card_id = db.Column(db.Integer(), db.ForeignKey('card.id'))
+    card = db.relationship(Card)
+    amount = db.Column(db.Float, nullable=False)
+    create_time = db.Column(db.DateTime(), default=datetime.now)
     paid = db.Column(db.BOOLEAN, nullable=False, default=0)
+    order_type = db.Column(db.Integer, nullable=False)  # 1: 购卡, 2:充值
 
     def __repr__(self):
-        return self.order_serial
+        return self.order_id
 
     def is_payable(self):
         return not self.paid
@@ -223,10 +229,10 @@ def get_order_params(order):
     args = {'customer_id': order.customer.id, 'openid': order.customer.openid, 'name': order.address.name,
             'phone': order.phone, 'address': '%s' % order.address,
             'order_date': create_date, 'order_time': create_time, 'price': str(order.pay_price or ''),
-            'order_id': order.id, 'order_serial': order.order_serial,
+            'order_id': order.id, 'order_no': order.order_id,
             'sum': order.booking_clothes,
             'delivery_time': '%s %s' % (order.booking_delivery_date, order.booking_time_format(1)),
             'received_time': '%s %s' % (order.booking_received_date, order.booking_time_format(2)),
             'status': order.status_desc(), 'paid': order.paid,
-            'shop_id': order.shop_id}
+            'merchant_id': order.merchant_id}
     return args

@@ -379,6 +379,7 @@ class WeixinHelper(object):
             raise WeixinException(errcode, errmsg)
         return response
 
+    # type= jsapi, wx_card
     def get_ticket(self, type='jsapi'):
         token = get_cache_ticket(type)
         if not token:
@@ -416,7 +417,7 @@ class WeixinHelper(object):
 
     def card_sign(self, code='', openid='', outer_id=0):
         nonce = nonce_str()
-        timestamp = int(time.time())
+        timestamp = str(int(time.time()))
         sign_type = 'SHA1'
         card_ticket = self.get_ticket('wx_card')
         tmplist = [timestamp, nonce, sign_type, card_ticket]

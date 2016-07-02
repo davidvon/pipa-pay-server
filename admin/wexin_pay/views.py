@@ -25,7 +25,7 @@ def auth_notify():
     logger.info('[WEIXIN] Wechat payment verify succeeded! order[%s] fee[%s]' % (out_trade_no, total_fee))
 
     if request_data['result_code'] == "SUCCESS":
-        order = Order.query.filter_by(order_serial=out_trade_no).first()
+        order = Order.query.filter_by(order_id=out_trade_no).first()
         if not order:
             logger.error('order[%s] not exist' % out_trade_no)
             return "order[%s] not exist" % out_trade_no, 400
@@ -46,7 +46,7 @@ def payable(request, order):
     logger.info('[WEIXIN] payable....')
     parameter = {
         'body': '噼啪支付',
-        'out_trade_no': order.order_serial,
+        'out_trade_no': order.order_id,
         'spbill_create_ip': request.remote_addr,
         'total_fee': str(int(order.pay_price * 100)),  # unit is fen check other day
         'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
