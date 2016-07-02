@@ -87,6 +87,17 @@ class CustomerCard(db.Model):
     status = db.Column(db.Integer())    # 0:未放入微信卡包 1: 已放入微信卡包 2: 已赠送
 
 
+class CustomerTradeRecords(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'), nullable=False)
+    customer = db.relationship(Customer)
+    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
+    card = db.relationship(Card)
+    amount = db.Column(db.Integer())
+    time = db.Column(db.DateTime())
+    expire_date = db.Column(db.DateTime(), default=datetime.now)
+    type = db.Column(db.Integer())    # 0:消费 1: 充值
+
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -28,9 +28,9 @@ def order_id_increment(max_len=5):
 
 def cache_qrcode_code(card_id):
     code = random_digit(20)
-    redis_client.set(code, '%s' % card_id, 70)  # 每分钟刷新
+    old_code = redis_client.get(card_id)
+    old_code and redis_client.set(old_code, card_id, 0)
+    redis_client.set(code, card_id, 70)  # 每分钟刷新
+    redis_client.set(card_id, code, 70)  # 每分钟刷新
     return code
 
-
-def parse_qrcode_code(code):
-    return redis_client.get(code) or None
