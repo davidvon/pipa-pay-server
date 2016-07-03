@@ -31,7 +31,8 @@ class Merchant(db.Model):
 
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    card_id = db.Column(db.String(32), unique=True, nullable=False)
+    card_id = db.Column(db.String(32), unique=True, nullable=False) # 服务器内部卡券号
+    wx_card_id = db.Column(db.String(32))     # 绑定的微信卡券号
     merchant_id = db.Column(db.Integer(), db.ForeignKey('merchant.id'), nullable=False)
     merchant = db.relationship(Merchant)
     title = db.Column(db.String(32), nullable=False)
@@ -74,31 +75,30 @@ class CustomerCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'), nullable=False)
     customer = db.relationship(Customer)
-    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
+    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id')) # 服务器内部卡券ID
     card = db.relationship(Card)
+    card_code = db.Column(db.String(32))  # 动态分配的卡号
     img = db.Column(db.String(36))
     amount = db.Column(db.Integer())
     balance = db.Column(db.Float())
-    claimed_time = db.Column(db.DateTime())
-    card_code = db.Column(db.String(32), unique=True)
-    wx_card_code = db.Column(db.String(32))
+    claimed_time = db.Column(db.DateTime(), default=datetime.now)
     wx_binding_time = db.Column(db.DateTime())
     expire_date = db.Column(db.Date())
-    status = db.Column(db.Integer())    # 0:未放入微信卡包 1: 已放入微信卡包 2: 已赠送
+    status = db.Column(db.Integer())    # 0:未放入微信卡包 1: 已放入微信卡包  2:已过期 3: 已赠送未接收 4:已赠送已接收
 
 
 class CustomerCardShare(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     share_customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'))
     share_customer = db.relationship(Customer)
-    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
-    card = db.relationship(Card)
-    receive_customer_id = db.Column(db.String(64))
+    customer_card_id = db.Column(db.String(32), db.ForeignKey('customer_card.card_id'))
+    customer_card = db.relationship(CustomerCard)
+    acquire_customer_id = db.Column(db.String(64))
     timestamp = db.Column(db.Integer())
     datetime = db.Column(db.DateTime(), default=datetime.now)
     content = db.Column(db.String(32))
     sign = db.Column(db.String(64), nullable=False)
-    status = db.Column(db.Integer(), default=0)    # 0:转赠中对方未接收 1: 已被对方接收
+    status = db.Column(db.Integer(), default=0)    # 0:转赠中未接收 1: 已被对方接收
 
 
 class CustomerTradeRecords(db.Model):
