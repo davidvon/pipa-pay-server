@@ -16,9 +16,9 @@ __author__ = 'fengguanhua'
 # scores = 0
 #     for item in order.order_items.all():
 #         scores += item.service.award_score
-#     customer_scores = CustomerScores.query.filter_by(customer_id=customer.id).first()
+#     customer_scores = CustomerScores.query.filter_by(customer_openid=customer.id).first()
 #     if not customer_scores:
-#         customer_scores = CustomerScores(customer_id=customer.id, total_scores=scores)
+#         customer_scores = CustomerScores(customer_openid=customer.id, total_scores=scores)
 #     else:
 #         customer_scores.total_scores += scores
 #     db.session.add(customer_scores)
@@ -68,10 +68,10 @@ __author__ = 'fengguanhua'
 #             if not customer:
 #                 return {'result': 'error', 'msg': 'customer not exist'}, 500
 #             order_id = order_id_increment()
-#             address = CustomerAddress.query.filter_by(id=address_id, customer_id=customer.id).first()
+#             address = CustomerAddress.query.filter_by(id=address_id, customer_openid=customer.id).first()
 #             if not address:
 #                 return {'result': 'error', 'msg': 'address not exist'}, 500
-#             order = Order(order_id=order_id, customer_id=customer.id, address_id=address_id,
+#             order = Order(order_id=order_id, customer_openid=customer.id, address_id=address_id,
 #                           booking_clothes=sum, phone=tel, create_date=dt.date.today(), create_time=dt.datetime.now(),
 #                           booking_delivery_date=booking_delivery_date, booking_delivery_time=booking_delivery_time,
 #                           booking_received_date=booking_received_date, booking_received_time=booking_received_time)
@@ -96,7 +96,7 @@ __author__ = 'fengguanhua'
 #             if not order:
 #                 return {'result': 'error', 'msg': 'order not exist'}, 500
 #             order.address_id = request.form.get('address')
-#             address = CustomerAddress.query.filter_by(id=order.address_id, customer_id=customer.id).first()
+#             address = CustomerAddress.query.filter_by(id=order.address_id, customer_openid=customer.id).first()
 #             if not address:
 #                 return {'result': 'error', 'msg': 'address not exist'}, 500
 #             order.address_id = address.id
@@ -139,11 +139,11 @@ __author__ = 'fengguanhua'
 #             order_id = dicts.get('orderid')
 #             uid = dicts.get('uid')
 #             order = Order.query.filter_by(order_id=order_id).first()
-#             comment = CustomerOrderReview.query.filter(CustomerOrderReview.customer_id == uid,
+#             comment = CustomerOrderReview.query.filter(CustomerOrderReview.customer_openid == uid,
 #                                                        CustomerOrderReview.order_id == order_id).first()
 #             if not comment:
 #                 comment = CustomerOrderReview()
-#             comment.customer_id = uid
+#             comment.customer_openid = uid
 #             comment.order_id = order_id
 #             comment.message = dicts.get('text')
 #             comment.datetime = dt.datetime.now()

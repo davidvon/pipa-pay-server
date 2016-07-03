@@ -72,7 +72,7 @@ class Customer(db.Model):
 
 class CustomerCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'), nullable=False)
+    customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'), nullable=False)
     customer = db.relationship(Customer)
     card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
     card = db.relationship(Card)
@@ -87,9 +87,23 @@ class CustomerCard(db.Model):
     status = db.Column(db.Integer())    # 0:未放入微信卡包 1: 已放入微信卡包 2: 已赠送
 
 
+class CustomerCardShare(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    share_customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'))
+    share_customer = db.relationship(Customer)
+    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
+    card = db.relationship(Card)
+    receive_customer_id = db.Column(db.String(64))
+    timestamp = db.Column(db.Integer())
+    datetime = db.Column(db.DateTime(), default=datetime.now)
+    content = db.Column(db.String(32))
+    sign = db.Column(db.String(64), nullable=False)
+    status = db.Column(db.Integer(), default=0)    # 0:转赠中对方未接收 1: 已被对方接收
+
+
 class CustomerTradeRecords(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'), nullable=False)
+    customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'))
     customer = db.relationship(Customer)
     card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
     card = db.relationship(Card)
@@ -237,7 +251,7 @@ class WechatUselessWordReply(db.Model):
 def get_order_params(order):
     create_date = str(order.create_date.strftime("%Y-%m-%d"))
     create_time = str(order.create_time.strftime("%Y-%m-%d %H:%M:%S"))
-    args = {'customer_id': order.customer.id, 'openid': order.customer.openid, 'name': order.address.name,
+    args = {'customer_openid': order.customer.id, 'openid': order.customer.openid, 'name': order.address.name,
             'phone': order.phone, 'address': '%s' % order.address,
             'order_date': create_date, 'order_time': create_time, 'price': str(order.pay_price or ''),
             'order_id': order.id, 'order_no': order.order_id,
