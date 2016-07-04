@@ -421,7 +421,7 @@ class WeixinHelper(object):
         sign_type = 'SHA1'
         card_ticket = self.get_ticket('wx_card')
         tmplist = [timestamp, nonce, sign_type, card_ticket]
-        code and tmplist.append(openid)
+        code and tmplist.append(code)
         openid and tmplist.append(openid)
         outer_id != 0 and tmplist.append(str(outer_id))
         signature = ''.join(sorted(tmplist))
