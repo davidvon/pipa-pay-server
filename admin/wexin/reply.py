@@ -1,17 +1,14 @@
 # coding: utf-8
 import time
-from flask import Response, request, session
+import traceback
+from flask import Response, session
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
-    WechatSystemReply, LIKE_MATCH, WechatImageNews
+    WechatSystemReply, LIKE_MATCH, WechatImageNews, CustomerCardShare, CustomerCard
 from wexin.util import *
-from cache.public import cache_url
+# from cache.public import cache_url
 # from signals import signal_customer_message_cached_notify
 
-CACHE_DB_NEWS = 'DB_TABLE_NEWS'
-CACHE_DB_TEXT = 'DB_TABLE_TXT'
 CACHE_OPENID_STR = "WEIXIN_OPENID"
-CACHE_BACKEND_USER = "BACKEND_USER"
-
 REPLY_NONE = '0'
 REPLY_TEXT = '1'
 REPLY_NEWS = '2'
@@ -21,43 +18,21 @@ REPLY_SYSTEM = '3'
 class ReplyKeyWords(object):
     def __init__(self, weixin):
         self._weixin = weixin
-        self.msg_type = ''
         self.username = ''
         self.sender = ''
-        self.content = ''
-        self.event = ''
         self.event = ''
         self.content = ''
-        self.location_x = ''
-        self.location_y = ''
-        self.scale = ''
-        self.event_key = ''
 
-    def msg_request(self, args):
-        self.msg_type = args.get('msgtype')
+    def msg_reply(self, args):
+        result = None
+        msg_type = args.get('msgtype')
+        logger.info('[WEIXIN] msg=%s,event=%s' % (msg_type, self.event))
         self.username = args.get('tousername')
         self.sender = args.get('fromusername')
-        self.content = args.get('content', self.msg_type)
-        self.event = None
-        if self.msg_type == 'event':
-            self.event = args.get('event')
-            self.content = args.get('eventkey')
-            if self.event == 'LOCATION':
-                self.location_x = args.get('latitude')
-                self.location_y = args.get('longitude')
-                self.scale = args.get('precision')
-            elif self.event == 'SCAN':
-                self.event_key = self.content
-            logger.info('[WEIXIN] event=%s, key=%s' % (self.event, self.content))
-
-        cache_url(request.host_url)
         session[CACHE_OPENID_STR] = self.sender
-        logger.info("[WEIXIN] cache openid: %s" % self.sender)
-
-    def msg_reply(self):
-        logger.info('[WEIXIN] msg=%s,event=%s' % (self.msg_type, self.event))
-        result = None
-        if self.msg_type == 'event':
+        self.content = args.get('content', msg_type)
+        if msg_type == 'event':
+            self.event = args.get('event')
             if self.event == 'subscribe':
                 create_customer_try(self.sender)
                 update_customer_info(self.sender)
@@ -68,12 +43,24 @@ class ReplyKeyWords(object):
             elif self.event == 'CLICK':
                 result = self.auto_news_reply()
             elif self.event == 'LOCATION':
-                return self.location_report()
+                location_x = args.get('latitude')
+                location_y = args.get('longitude')
+                scale = args.get('precision')
+                return self.location_report(location_x, location_y, scale)
             elif self.event == 'SCAN':
-                result = self.qrcode()
+                self.content = args.get('eventkey')
+                result = self.qrcode(self.content)
+            elif self.event == 'user_get_card':  # 领取卡券
+                return self.card_give(args)
+            elif self.event == 'user_pay_from_pay_cell':  # 买单卡券
+                return self.card_pay(args)
+            elif self.event == 'user_del_card':  # 删除卡券
+                pass
+            elif self.event == 'user_consume_card':  # 核销卡券
+                pass
             else:
                 result = ''
-        elif self.msg_type == 'text':
+        elif msg_type == 'text':
             result = self.auto_news_reply()
         # signal_customer_message_cached_notify.send(self, openid=self.sender)
         return result
@@ -149,10 +136,10 @@ class ReplyKeyWords(object):
                 jsons.append(json)
         return jsons
 
-    def location_report(self):
-        logger.info('[WEIXIN] location: %s-%s-%s' % (self.location_x, self.location_y, self.scale))
+    def location_report(self, location_x, location_y, scale):
+        logger.info('[WEIXIN] location: %s-%s-%s' % (location_x, location_y, scale))
 
-    def qrcode(self):
+    def qrcode(self, content):
         return ''
 
     def __custom_text_reply(self, username, sender, **kwargs):
@@ -282,3 +269,45 @@ class ReplyKeyWords(object):
         logger.info("push message to user[%s]: %s" % (openid, content))
         return content
 
+    def card_give(self, args):
+        logger.info('customer[%s] card give event[%s] received' % (self.sender, args))
+        is_gived = args.get('isgivebyfriend')
+        share_openid = args.get('friendusername')
+        cardid = args.get('cardid')
+        card_code = args.get('usercardcode')
+        old_card_code = args.get('oldusercardcode')
+        try:
+            if is_gived == 1:
+                card_share = CustomerCardShare.query.filter_by(share_customer_id=share_openid,
+                                                               customer_card_id=cardid).first()
+                old_card = CustomerCard.query.filter_by(customer_id=share_openid, card_id=cardid,
+                                                        card_code=old_card_code).first()
+                new_card = CustomerCard.query.filter_by(customer_id=self.sender, card_id=cardid,
+                                                        card_code=card_code).first()
+                if not new_card:
+                    new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0,
+                                            img=old_card.img, amount=old_card.amount, balance=old_card.balance,
+                                            expire_date=old_card.expire_date)
+                old_card.status = 4
+                card_share.acquire_customer_id = self.sender
+                db.session.add(card_share)
+                db.session.add(old_card)
+                db.session.add(new_card)
+            else:
+                new_card = CustomerCard.query.filter_by(customer_id=self.sender, card_id=cardid,
+                                                        card_code=card_code).first()
+                if not new_card:
+                    new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0)
+                db.session.add(new_card)
+            db.session.commit()
+        except Exception as e:
+            logger.error(traceback.print_exc())
+            logger.error('customer[%s] receive card event[%s] error:%s' % (self.sender, args, e.message))
+
+    def card_pay(self, args):
+        logger.info('customer[%s] card pay event[%s] received' % (self.sender, args))
+        share_openid = args.get('friendusername')
+        cardid = args.get('cardid')
+        card_code = args.get('usercardcode')
+        trans_id = args.get('transid')
+        trans_id = args.get('fee')

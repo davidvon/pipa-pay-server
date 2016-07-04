@@ -13,9 +13,9 @@ WEIXIN_APPID = 'wxb3ec764893b99722'
 WEIXIN_SECRET = '04a37bc738a0c2759ba850c4334b99fc'
 WEIXIN_TOKEN = 'pipapay'
 WXPAY_CONIFG = {
-    'partnerId': '1232854202',
-    'partnerKey': '966605',
-    'apiKey':'polycn600048poly600048poly600048'
+    'partnerId': '1304148101',
+    'partnerKey': '',
+    'apiKey':'85a3027dez49d259pipapay26fr58yJH'
 }
 
 IS_ONLINE = 'ONLINE_SERVER' in os.environ

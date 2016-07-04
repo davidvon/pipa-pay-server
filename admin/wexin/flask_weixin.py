@@ -61,15 +61,13 @@ class FlaskWeixin(object):
         if request.method == 'GET':
             echostr = request.args.get('echostr')
             return echostr
-
         try:
             request_params = self.weixin_helper.to_json(request.data)
         except:
             return 'invalid', 400
 
-        if request_params['msgtype']:
-            self.weixin_reply.msg_request(request_params)
-            return self.weixin_reply.msg_reply()
+        if request_params.get('msgtype'):
+            return self.weixin_reply.msg_reply(request_params)
 
     view_func.methods = ['GET', 'POST']
 
