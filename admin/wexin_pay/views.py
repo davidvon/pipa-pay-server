@@ -8,7 +8,7 @@ from models import get_order_params, Order
 from signals import signal_order_notify
 from wexin_pay.pub import verify_notify, xml_to_dict, random_str, sign_md5, format_param_map
 from wexin_pay.wxlib_v2 import build_warning_sign, build_right_sign, get_address_sign
-from wexin_pay.wxlib_v3 import build_pay_prepayid_form, build_static_qrcode_form, build_dynamic_qrcode_form
+from wexin_pay.wxlib_v3 import build_pay_prepayid_form
 
 
 @app.route('/wxpay/authorize/notify', methods=['POST'])
@@ -42,15 +42,15 @@ def auth_notify():
         return 'delivery notify failed!', 400
 
 
-def payable(request, order):
+def payable(request, openid, order):
     logger.info('[WEIXIN] payable....')
     parameter = {
         'body': '噼啪支付',
         'out_trade_no': order.order_id,
         'spbill_create_ip': request.remote_addr,
-        'total_fee': str(int(order.pay_price * 100)),  # unit is fen check other day
+        'total_fee': str(int(order.pay_amount * 100)),  # unit is fen check other day
         'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,
-        'openid': order.customer.openid
+        'openid': openid
     }
     return build_pay_prepayid_form(parameter)
 
@@ -93,8 +93,8 @@ def get_address_data(request):
 
 @app.route('/wxpay/native/callback', methods=['POST'])
 def native_callback():
-    # raw_str = str(request.data)
-    # logger.info('[WEIXIN] native callback Request: %s' % unicode(raw_str))
+    raw_str = str(request.data)
+    logger.info('[WEIXIN] native callback Request: %s' % unicode(raw_str))
     # params = xml_to_dict(raw_str)
     # service_id = params["service_id"]
     # firm_service = Service.query.filter_by(id=service_id).first()

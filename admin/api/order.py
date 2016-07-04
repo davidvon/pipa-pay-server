@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
-from random import Random
+import random as Random
 import datetime
+import string
 from api import API_PREFIX
 from app import db, logger, restful_api
 from flask import request
@@ -190,46 +191,18 @@ __author__ = 'fengguanhua'
 
 
 def random_digit(length=10):
-    str = ''
-    chars = '0123456789'
-    random = Random()
-    for i in range(length):
-        str += chars[random.randint(0, length)]
-    return str
+    return ''.join(Random.sample(string.digits, length))
 
 
-def create_order(merchant_id, price, openid, count):
-    merchant = Merchant.query.get(merchant_id)
+def create_order(card_id, amount, openid, count):
     customer = Customer.query.filter_by(openid=openid).first()
     serial = random_digit()
-    card = random_digit()
-    order = Order(order_id=serial, card=card, merchant_id=merchant.id, customer_id=customer.id, pay_price=price)
-    db.session.add(order)
-    db.session.commit()
+    pay_amount = int(count*0.99)
+    order = Order(order_id=serial, card_id=card_id, customer_id=customer.id, face_amount=amount,
+                  card_count=count, pay_amount=pay_amount, order_type=1, paid=False)
     return order
 
 
-class ApiCardBuy(Resource):
-    def post(self):
-        try:
-            args = json.loads(request.data)
-            merchant_id = args.get('merchantId')
-            price = args.get('price')
-            count = args.get('count')
-            openid = args.get('openid')
-            order = create_order(merchant_id, price, openid, count)
-            res, outputs = payable(request, order)
-            logger.info('[ApiOrderPayable] data=%s' % str(outputs))
-            if res == 0:
-                outputs['orderId'] = order.order_id
-                return {'result': 0, 'content': outputs}, 200
-            return {'result': res}, 200
-        except Exception as e:
-            print e.message
-            return {'result': 254}, 200
-
-
-restful_api.add_resource(ApiCardBuy, API_PREFIX + 'card/buy')
 # restful_api.add_resource(ApiOrderBooking, API_PREFIX + 'order/booking')
 # restful_api.add_resource(ApiOrderModify, API_PREFIX + 'order/modify/<string:order_id>')
 # restful_api.add_resource(ApiTaskOrderMaintain, API_PREFIX + 'task/order/maintain')

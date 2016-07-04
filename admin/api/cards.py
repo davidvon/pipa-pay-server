@@ -6,10 +6,12 @@ import time
 import traceback
 from flask import request
 from api import API_PREFIX
+from api.order import create_order
 from app import restful_api, db, logger
 from flask.ext.restful import Resource
 from cache.order import cache_qrcode_code
 from models import Customer, CustomerCard, CustomerTradeRecords, CustomerCardShare
+from wexin_pay.views import payable
 
 __author__ = 'fengguanhua'
 
@@ -241,6 +243,28 @@ class ApiCardReceive(Resource):
             return {'result': 255, 'data': e.message}
 
 
+class ApiCardBuy(Resource):
+    def post(self):
+        try:
+            args = json.loads(request.data)
+            cardid = args.get('cardId')
+            price = args.get('price')
+            count = args.get('count')
+            openid = args.get('openId')
+            order = create_order(cardid, price, openid, count)
+            res, outputs = payable(request, openid, order)
+            logger.info('[ApiOrderPayable] data=%s' % str(outputs))
+            if res == 0:
+                outputs['orderId'] = order.order_id
+                db.session.add(order)
+                db.session.commit()
+                return {'result': 0, 'content': outputs}, 200
+            return {'result': res}, 200
+        except Exception as e:
+            print e.message
+            return {'result': 254}, 200
+
+
 restful_api.add_resource(ApiCardMembers, API_PREFIX + 'cards')
 restful_api.add_resource(ApiCardBuyQuery, API_PREFIX + 'card/buy/query')
 restful_api.add_resource(ApiWxCardStatusUpdate, API_PREFIX + 'card/status/update')
@@ -252,4 +276,4 @@ restful_api.add_resource(ApiCardShare, API_PREFIX + 'card/share')
 restful_api.add_resource(ApiCardShareInfo, API_PREFIX + 'card/share/info')
 restful_api.add_resource(ApiCardReceiveCheck, API_PREFIX + 'card/receive/check')
 restful_api.add_resource(ApiCardReceive, API_PREFIX + 'card/receive')
-
+restful_api.add_resource(ApiCardBuy, API_PREFIX + 'card/buy')

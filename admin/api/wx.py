@@ -63,8 +63,7 @@ class ApiWxCards(Resource):
         args = json.loads(request.data)
         helper = WeixinHelper()
         openid = args.get('openid')
-        customer = Customer.query.filter_by(openid=openid).first()
-        cards = CustomerCard.query.filter_by(customer_id=customer.id).all()
+        cards = CustomerCard.query.filter_by(customer_id=openid).all()
         dicts = []
         for card in cards:
             ret = helper.card_sign()

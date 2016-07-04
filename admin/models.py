@@ -118,13 +118,14 @@ class Order(db.Model):
     order_id = db.Column(db.String(36), unique=True, nullable=False)
     customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'))
     customer = db.relationship(Customer)
-    card_id = db.Column(db.Integer(), db.ForeignKey('card.id'))
+    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
     card = db.relationship(Card)
-    amount = db.Column(db.Float, nullable=False)
+    face_amount = db.Column(db.Float, nullable=False)
+    pay_amount = db.Column(db.Float, nullable=False)
     create_time = db.Column(db.DateTime(), default=datetime.now)
     paid = db.Column(db.BOOLEAN, nullable=False, default=0)
-    order_type = db.Column(db.Integer, nullable=False)  # 1: 购卡, 2:充值
-
+    order_type = db.Column(db.Integer, nullable=False, default=0)  # 1: 购卡, 2:充值
+    card_count = db.Column(db.Integer())
     def __repr__(self):
         return self.order_id
 

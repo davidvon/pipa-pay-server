@@ -29,7 +29,6 @@ class ReplyKeyWords(object):
         logger.info('[WEIXIN] msg=%s,event=%s' % (msg_type, self.event))
         self.username = args.get('tousername')
         self.sender = args.get('fromusername')
-        session[CACHE_OPENID_STR] = self.sender
         self.content = args.get('content', msg_type)
         if msg_type == 'event':
             self.event = args.get('event')
