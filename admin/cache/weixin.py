@@ -17,3 +17,10 @@ def cache_ticket(type, token, expires_in):
 
 def get_cache_ticket(type):
     return redis_client.get('%s_ticket' % type)
+
+
+def cache_card_adding_tag(card_id, openid, card_unique_id):
+    return redis_client.set('%s_%s_card' % (card_id, openid), card_unique_id, 100)
+
+def get_cache_card_adding_tag(card_id, openid):
+    return redis_client.get('%s_%s_card' % (card_id, openid))

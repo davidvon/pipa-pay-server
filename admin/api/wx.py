@@ -5,6 +5,7 @@ from flask import request
 from api import API_WX_PREFIX
 from app import restful_api, db
 from flask.ext.restful import Resource
+from cache.weixin import cache_card_adding_tag
 from config import WEIXIN_APPID
 from models import Order, CustomerCard, Customer, Card
 from wexin.helper import WeixinHelper
@@ -42,15 +43,15 @@ class ApiWxJsSign(Resource):
             "nonceStr": ret['nonce_str'],
             "signature": ret['hash']
         }
-        print("url:%s, ret:%s" % (url, data))
         return data, 200
 
 
+# wx.chooseCard cardSign
 class ApiWxCardSign(Resource):
-    def get(self):
+    def post(self):
         helper = WeixinHelper()
         ret = helper.card_sign()
-        return {
+        data = {
             "timestamp": ret['timestamp'],
             "nonceStr": ret['nonce_str'],
             "cardSign": ret['hash'],
@@ -59,30 +60,24 @@ class ApiWxCardSign(Resource):
             'carType': '',
             'carId': ''
         }
+        print("wx card sign:%s" % data)
+        return data, 200
 
 
-class ApiWxCards(Resource):
+# wx.addCard signature
+class ApiWxCardsAdd(Resource):
     def post(self):
         args = json.loads(request.data)
         helper = WeixinHelper()
-        openid = args.get('openid')
-        cards = CustomerCard.query.filter_by(customer_id=openid).all()
-        dicts = []
-        for card in cards:
-            ret = helper.card_sign()
-            dicts.append({
-                "id": card.card_id,
-                "code": card.card_code,
-                "timestamp": ret['timestamp'],
-                "nonce_str": ret['nonce_str'],
-                "signature": ret['hash']
-            })
+        card_global_id = args.get('card_global_id')
+        card = CustomerCard.query.get(card_global_id)
+        cache_card_adding_tag(card.card_id, card.customer_id, card_global_id)
+        ret = helper.card_sign(card.card_id)
+        dicts = [{"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']}]
         return {'result': 0, "data": dicts}
-
-
 
 
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'jsapi_sign')
 restful_api.add_resource(ApiWxCardSign, API_WX_PREFIX + 'card_sign')
-restful_api.add_resource(ApiWxCards, API_WX_PREFIX + 'cards')
+restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')

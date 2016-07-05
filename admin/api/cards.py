@@ -20,9 +20,10 @@ class ApiCardMembers(Resource):
     def post(self):
         args = json.loads(request.data)
         openid = args.get("openid")
-        customer_cards = CustomerCard.query.filter(CustomerCard.customer_id == openid, CustomerCard.status < 2).all()
+        customer_cards = CustomerCard.query.filter(CustomerCard.customer_id == openid).all()
         data = [
-            {'cardId': item.card_id,
+            {'globalId': item.id,
+             'cardId': item.card_id,
              'merchantId': item.card.merchant.id,
              'cardCode': item.card_code,
              'amount': item.amount,
@@ -58,12 +59,20 @@ class ApiCardBuyQuery(Resource):
 
 class ApiWxCardStatusUpdate(Resource):
     def post(self):
-        args = json.loads(request.data)
-        openid = args['openid']
-        for item in args['cards']:
-            CustomerCard.query.filter_by(openid=openid, card_id=item.card_id).update({CustomerCard.status: 1})
-        db.session.commit()
-        return {'result': 0}
+        openid = args = None
+        try:
+            args = json.loads(request.data)
+            openid = args['openid']
+            for item in args['cards']:
+                card_id = item.get('cardId')
+                CustomerCard.query.filter_by(customer_id=openid, card_id=card_id).update({CustomerCard.status: 1})
+            db.session.commit()
+            logger.error('customer[%s] arg[%s] wx card status update success' % (openid, args))
+            return {'result': 0}
+        except Exception as e:
+            logger.error(traceback.print_exc())
+            logger.error('customer[%s] arg[%s] wx card status update error:%s' % (openid, args, e.message))
+            return {'result': 255, 'data': e.message}
 
 
 class ApiCardPayCode(Resource):

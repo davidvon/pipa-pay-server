@@ -84,7 +84,8 @@ class CustomerCard(db.Model):
     claimed_time = db.Column(db.DateTime(), default=datetime.now)
     wx_binding_time = db.Column(db.DateTime())
     expire_date = db.Column(db.Date())
-    status = db.Column(db.Integer())    # 0:未放入微信卡包 1: 已放入微信卡包  2:已过期 3: 已赠送未接收 4:已赠送已接收
+    status = db.Column(db.Integer())
+    # 0:已购买未放入微信卡包 1: 已放入微信卡包未激活  2: 已放入微信卡包已激活 3:已过期 4: 已赠送未接收 5:已赠送已接收
 
 
 class CustomerCardShare(db.Model):

@@ -415,25 +415,20 @@ class WeixinHelper(object):
             "ticket": js_ticket
         }
 
-    def card_sign(self, code='', openid='', outer_id=0):
-        nonce = nonce_str()
+    def card_sign(self, card_id, code=None, openid=None):
+        # nonce = nonce_str()
         timestamp = str(int(time.time()))
-        sign_type = 'SHA1'
         card_ticket = self.get_ticket('wx_card')
-        tmplist = [timestamp, nonce, sign_type, card_ticket]
-        code and tmplist.append(code)
-        openid and tmplist.append(openid)
-        outer_id != 0 and tmplist.append(str(outer_id))
-        signature = ''.join(sorted(tmplist))
+        items = [card_id, timestamp, card_ticket]
+        code and items.append(code)
+        openid and items.append(openid)
+        items_str = ''.join(sorted(items))
         sha1obj = hashlib.sha1()
-        sha1obj.update(signature)
-        hash = sha1obj.hexdigest()
+        sha1obj.update(items_str)
+        signature = sha1obj.hexdigest()
         return {
-            "code": code,
-            "openid": openid,
-            "outer_id": outer_id,
-            "nonce_str": nonce,
-            "hash": hash,
+            # "nonce_str": nonce,
+            "signature": signature,
             "timestamp": timestamp,
             "ticket": card_ticket
         }

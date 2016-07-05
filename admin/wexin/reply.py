@@ -1,7 +1,9 @@
 # coding: utf-8
 import time
+from datetime import datetime
 import traceback
 from flask import Response, session
+from cache.weixin import get_cache_card_adding_tag
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
     WechatSystemReply, LIKE_MATCH, WechatImageNews, CustomerCardShare, CustomerCard
 from wexin.util import *
@@ -293,15 +295,19 @@ class ReplyKeyWords(object):
                 db.session.add(old_card)
                 db.session.add(new_card)
             else:
-                new_card = CustomerCard.query.filter_by(customer_id=self.sender, card_id=cardid,
-                                                        card_code=card_code).first()
-                if not new_card:
-                    new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0)
-                db.session.add(new_card)
+                card_global_id = get_cache_card_adding_tag(cardid, self.sender)
+                card = CustomerCard.query.get(card_global_id)
+                if card:
+                    card.wx_binding_time = datetime.now()
+                    card.card_code = card_code
+                    db.session.add(card)
             db.session.commit()
+            return {'result': 'ok'}
         except Exception as e:
             logger.error(traceback.print_exc())
             logger.error('customer[%s] receive card event[%s] error:%s' % (self.sender, args, e.message))
+            return {'result': 'error'}
+
 
     def card_pay(self, args):
         logger.info('customer[%s] card pay event[%s] received' % (self.sender, args))
