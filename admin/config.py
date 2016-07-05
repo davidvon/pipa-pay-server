@@ -15,7 +15,7 @@ WEIXIN_TOKEN = 'pipapay'
 WXPAY_CONIFG = {
     'partnerId': '1304148101',
     'partnerKey': '',
-    'apiKey':'85a3027dez49d259pipapay26fr58yJH'
+    'apiKey': '85a3027dez49d259pipapay26fr58yJH'
 }
 
 IS_ONLINE = 'ONLINE_SERVER' in os.environ

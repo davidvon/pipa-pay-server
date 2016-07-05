@@ -31,16 +31,19 @@ class ApiQRcode(Resource):
 
 
 class ApiWxJsSign(Resource):
-    def get(self):
-        url = request.args['url']
+    def post(self):
+        args = json.loads(request.data)
+        url = args['url']
         helper = WeixinHelper()
         ret = helper.jsapi_sign(url)
-        return {
+        data = {
             "appId": WEIXIN_APPID,
             "timestamp": ret['timestamp'],
             "nonceStr": ret['nonce_str'],
             "signature": ret['hash']
         }
+        print("url:%s, ret:%s" % (url, data))
+        return data, 200
 
 
 class ApiWxCardSign(Resource):
