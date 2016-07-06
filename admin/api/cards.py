@@ -82,7 +82,8 @@ class ApiCardPayCode(Resource):
     def post(self):
         args = json.loads(request.data)
         card_id = args['cardId']
-        card = CustomerCard.query.filter_by(card_id=card_id).first()
+        card_code = args['cardCode']
+        card = CustomerCard.query.filter_by(card_id=card_id, card_code=card_code).first()
         if not card:
             return {'result': 255}
         data = {
