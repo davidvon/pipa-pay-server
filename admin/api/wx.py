@@ -47,21 +47,12 @@ class ApiWxJsSign(Resource):
 
 
 # wx.chooseCard cardSign
-class ApiWxCardSign(Resource):
+class ApiWxCardChooseSign(Resource):
     def post(self):
         helper = WeixinHelper()
-        ret = helper.card_sign()
-        data = {
-            "timestamp": ret['timestamp'],
-            "nonceStr": ret['nonce_str'],
-            "cardSign": ret['hash'],
-            "signType": 'SHA1',
-            'shopId': '',
-            'carType': '',
-            'carId': ''
-        }
-        print("wx card sign:%s" % data)
-        return data, 200
+        ret = helper.choose_card_sign()
+        print("wx card sign:%s" % ret)
+        return ret, 200
 
 
 # wx.addCard signature
@@ -79,5 +70,5 @@ class ApiWxCardsAdd(Resource):
 
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'jsapi_sign')
-restful_api.add_resource(ApiWxCardSign, API_WX_PREFIX + 'card_sign')
+restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'card/choose/sign')
 restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')

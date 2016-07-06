@@ -80,13 +80,14 @@ class CustomerCard(db.Model):
     card_code = db.Column(db.String(32))  # 动态分配的卡号
     img = db.Column(db.String(36))
     amount = db.Column(db.Integer())
-    balance = db.Column(db.Float())
     claimed_time = db.Column(db.DateTime(), default=datetime.now)
     wx_binding_time = db.Column(db.DateTime())
     expire_date = db.Column(db.Date())
     status = db.Column(db.Integer())
-    # 0:已购买未放入微信卡包 1: 已放入微信卡包未激活  2: 已放入微信卡包已激活 3:已过期 4: 已赠送未接收 5:已赠送已接收
+    # 0:已购买未放入微信卡包 1: 已放入微信卡包未激活  2: 已放入微信卡包已激活 3:已过期 4: 赠送中 5:已成功赠送
 
+    def __repr__(self):
+        return "%s-%s-%s" % (self.customer_id, self.card_id, self.card_code)
 
 class CustomerCardShare(db.Model):
     id = db.Column(db.Integer, primary_key=True)

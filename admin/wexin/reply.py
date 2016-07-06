@@ -26,7 +26,6 @@ class ReplyKeyWords(object):
         self.content = ''
 
     def msg_reply(self, args):
-        result = None
         msg_type = args.get('msgtype')
         logger.info('[WEIXIN] msg=%s,event=%s' % (msg_type, self.event))
         self.username = args.get('tousername')
@@ -37,12 +36,12 @@ class ReplyKeyWords(object):
             if self.event == 'subscribe':
                 create_customer_try(self.sender)
                 update_customer_info(self.sender)
-                result = self.event_reply()
+                return self.event_reply()
             elif self.event == 'unsubscribe':
                 async_unsubscribe_customer(self.sender)
                 return self.__response('')
             elif self.event == 'CLICK':
-                result = self.auto_news_reply()
+                return self.auto_news_reply()
             elif self.event == 'LOCATION':
                 location_x = args.get('latitude')
                 location_y = args.get('longitude')
@@ -50,21 +49,21 @@ class ReplyKeyWords(object):
                 return self.location_report(location_x, location_y, scale)
             elif self.event == 'SCAN':
                 self.content = args.get('eventkey')
-                result = self.qrcode(self.content)
+                return self.qrcode(self.content)
             elif self.event == 'user_get_card':  # 领取卡券
                 return self.card_give(args)
             elif self.event == 'user_pay_from_pay_cell':  # 买单卡券
                 return self.card_pay(args)
             elif self.event == 'user_del_card':  # 删除卡券
-                pass
+                return ''
             elif self.event == 'user_consume_card':  # 核销卡券
-                pass
+                return ''
             else:
-                result = ''
+                return ''
         elif msg_type == 'text':
-            result = self.auto_news_reply()
+            return self.auto_news_reply()
         # signal_customer_message_cached_notify.send(self, openid=self.sender)
-        return result
+        return ''
 
     def auto_news_reply(self):
         reply = self.get_reply_news()
@@ -100,7 +99,7 @@ class ReplyKeyWords(object):
             return self.useless_reply()
 
     def system_reply(self):
-        pass
+        return ''
 
     def get_reply_news(self):
         keyword = self.content.lower()
@@ -120,7 +119,7 @@ class ReplyKeyWords(object):
                         logger.info('[WEIXIN] ALL_MATCH, keyword=%s, select_type=%s' % (keyword, model[0]))
                         return reply
         logger.info('[WEIXIN] none, keyword=%s' % keyword)
-        return None
+        return ''
 
     def model_to_dict(self, modelid, sender=None):
         jsons = []
@@ -287,8 +286,7 @@ class ReplyKeyWords(object):
                                                         card_code=card_code).first()
                 if not new_card:
                     new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0,
-                                            img=old_card.img, amount=old_card.amount, balance=old_card.balance,
-                                            expire_date=old_card.expire_date)
+                                            img=old_card.img, amount=old_card.amount, expire_date=old_card.expire_date)
                 old_card.status = 4
                 card_share.acquire_customer_id = self.sender
                 db.session.add(card_share)
@@ -316,3 +314,4 @@ class ReplyKeyWords(object):
         card_code = args.get('usercardcode')
         trans_id = args.get('transid')
         trans_id = args.get('fee')
+        return {'result': 'ok'}

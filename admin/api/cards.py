@@ -11,6 +11,8 @@ from app import restful_api, db, logger
 from flask.ext.restful import Resource
 from cache.order import cache_qrcode_code
 from models import Customer, CustomerCard, CustomerTradeRecords, CustomerCardShare
+from utils.util import nonce_str
+from wexin.helper import WeixinHelper
 from wexin_pay.views import payable
 
 __author__ = 'fengguanhua'
@@ -27,7 +29,6 @@ class ApiCardMembers(Resource):
              'merchantId': item.card.merchant.id,
              'cardCode': item.card_code,
              'amount': item.amount,
-             'balance': item.balance,
              'title': item.card.title,
              'logo': item.card.merchant.logo,
              'img': item.img or '/static/demo/card_blue.png',
@@ -63,15 +64,17 @@ class ApiWxCardStatusUpdate(Resource):
         try:
             args = json.loads(request.data)
             openid = args['openid']
-            for item in args['cards']:
-                card_id = item.get('cardId')
-                CustomerCard.query.filter_by(customer_id=openid, card_id=card_id).update({CustomerCard.status: 1})
+            card_global_id = args['cardGlobalId']
+            card = CustomerCard.query.get(card_global_id)
+            card.status = 1
+            db.session.add(card)
             db.session.commit()
-            logger.error('customer[%s] arg[%s] wx card status update success' % (openid, args))
-            return {'result': 0}
+            logger.info('[ApiWxCardStatusUpdate] customer[%s] arg[%s] card status update success' % (openid, args))
+            return {'result': 0, 'data': card.card_code}
         except Exception as e:
             logger.error(traceback.print_exc())
-            logger.error('customer[%s] arg[%s] wx card status update error:%s' % (openid, args, e.message))
+            logger.error('[ApiWxCardStatusUpdate] customer[%s] arg[%s] card status update error:[%s]' %
+                         (openid, args, e.message))
             return {'result': 255, 'data': e.message}
 
 
@@ -86,7 +89,7 @@ class ApiCardPayCode(Resource):
             'status': card.status,
             'merchantName': card.card.merchant.name,
             'cardName': card.card.title,
-            'balance': card.balance,
+            'amount': card.amount,
             'qrcode': cache_qrcode_code(card_id)
         }
         return {'result': 0, 'data': data}
@@ -122,23 +125,23 @@ class ApiCardShareCheck(Resource):
         args = json.loads(request.data)
         card_id = args['cardId']
         open_id = args['openId']
-        customer_card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id).first()  # TODO
+        card_code = args['cardCode']
+        customer_card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=card_code).first()
         if customer_card:
-            if customer_card.status == 2:
-                return {'result': 0, 'data': {'status': 2, 'card': {}}}  # 已转赠
+            if customer_card.status >= 3:
+                return {'result': 0, 'data': {'status': customer_card.status, 'card': {}}}  # 转赠中或已转赠
             timestamp = str(int(time.time()))
-            sign = 'cardid=%s,openid=%s,timestamp=%s' % (card_id, open_id, timestamp)
-            sha1obj = hashlib.sha1()
-            sha1obj.update(sign)
-            hash = sha1obj.hexdigest()
-            return {'result': 0, 'data': {'status': customer_card.status,
-                                          'card': {
-                                              'sign': hash,
-                                              'cardId': customer_card.card_id,
-                                              'cardName': customer_card.card.title,
-                                              'timestamp': timestamp,
-                                              'logo': customer_card.card.merchant.logo
-                                          }}}
+            hash = nonce_str(12)
+            return {'result': 0,
+                    'data': {'status': customer_card.status,
+                             'card': {
+                                 'sign': hash,
+                                 'cardId': customer_card.card_id,
+                                 'cardCode': customer_card.card_code,
+                                 'cardName': customer_card.card.title,
+                                 'timestamp': timestamp,
+                                 'logo': customer_card.card.merchant.logo
+                             }}}
         return {'result': 255}
 
 
@@ -152,7 +155,7 @@ class ApiCardShare(Resource):
         content = args['content']
         try:
             card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id).first()
-            card.status = 2  # 卡表状态更新为 2:已转赠
+            card.status = 5  # 卡表状态更新为 5:已转赠
             record = CustomerCardShare(share_customer_id=open_id, card_id=card_id,
                                        timestamp=timestamp, shareContent=content, sign=sign, status=0)
             db.session.add(card)
@@ -177,7 +180,7 @@ class ApiCardShareInfo(Resource):
             if share.acquire_customer_id:
                 acquire_customer = Customer.query.filter_by(openid=share.acquire_customer_id).first()
             return {'result': 0,
-                    'data': {'status': '已领取' if share.status == 1 else '未领取',
+                    'data': {'status': '已领取' if share.status == 2 else '未领取',
                              'cardLogo': share.customer_card.card.merchant.logo,
                              'cardId': share.customer_card_id,
                              'cardName': share.customer_card.card.title,
@@ -224,8 +227,7 @@ class ApiCardReceive(Resource):
             if not new_card:
                 old_card = CustomerCard.query.filter_by(customer_id=info.share_customer.openid).first()
                 new_card = CustomerCard(customer_id=openid, card_id=info.card_id, img=old_card.img,
-                                        amount=old_card.amount,
-                                        balance=old_card.balance, card_code=old_card.card_code,
+                                        amount=old_card.amount, card_code=old_card.card_code,
                                         expire_date=old_card.expire_date,
                                         status=0)
                 db.session.add(new_card)
@@ -274,9 +276,37 @@ class ApiCardBuy(Resource):
             return {'result': 254}, 200
 
 
+class ApiCardActive(Resource):
+    def post(self):
+        openid = cardid = code = None
+        try:
+            args = json.loads(request.data)
+            logger.info('[ApiCardActive] data=%s' % str(args))
+            cardid = args.get('card_id')
+            encrypt_code = args.get('encrypt_code')
+            openid = args.get('openid')
+            helper = WeixinHelper()
+            code = helper.decrypt_card_code(encrypt_code)
+            if not code:
+                logger.error('[ApiCardActive] decrypt card code[%s,%s] error' % (openid, cardid))
+                return {'result': 255}, 200
+            card = CustomerCard.query.filter_by(customer_id=openid, card_id=cardid, card_code=code).first()
+            active = helper.active_card(card.amount*100, code, cardid, 0)
+            if not active:
+                logger.error('[ApiCardActive] active card[%s,%s,%s] error' % (openid, cardid, code))
+                return {'result': 255}, 200
+            card.status = 2
+            db.session.add(card)
+            db.session.commit()
+            return {'result': 0}, 200
+        except Exception as e:
+            logger.error('[ApiCardActive] active card[%s,%s,%s] exception' % (openid, cardid, code))
+            return {'result': 255}, 200
+
+
 restful_api.add_resource(ApiCardMembers, API_PREFIX + 'cards')
 restful_api.add_resource(ApiCardBuyQuery, API_PREFIX + 'card/buy/query')
-restful_api.add_resource(ApiWxCardStatusUpdate, API_PREFIX + 'card/status/update')
+restful_api.add_resource(ApiWxCardStatusUpdate, API_PREFIX + 'card/add/status/update')
 restful_api.add_resource(ApiCardPayCode, API_PREFIX + 'card/pay/code')
 restful_api.add_resource(ApiCardPayRecords, API_PREFIX + 'card/pay/records')
 
@@ -285,4 +315,6 @@ restful_api.add_resource(ApiCardShare, API_PREFIX + 'card/share')
 restful_api.add_resource(ApiCardShareInfo, API_PREFIX + 'card/share/info')
 restful_api.add_resource(ApiCardReceiveCheck, API_PREFIX + 'card/receive/check')
 restful_api.add_resource(ApiCardReceive, API_PREFIX + 'card/receive')
+
 restful_api.add_resource(ApiCardBuy, API_PREFIX + 'card/buy')
+restful_api.add_resource(ApiCardActive, API_PREFIX + 'card/active')

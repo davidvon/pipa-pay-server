@@ -415,7 +415,8 @@ class WeixinHelper(object):
             "ticket": js_ticket
         }
 
-    def card_sign(self, card_id, code=None, openid=None):
+    # add card
+    def card_sign(self, card_id=None, code=None, openid=None):
         # nonce = nonce_str()
         timestamp = str(int(time.time()))
         card_ticket = self.get_ticket('wx_card')
@@ -432,3 +433,43 @@ class WeixinHelper(object):
             "timestamp": timestamp,
             "ticket": card_ticket
         }
+
+    # choose card
+    def choose_card_sign(self):
+        nonce = nonce_str()
+        timestamp = str(int(time.time()))
+        card_ticket = self.get_ticket('wx_card')
+        items = [WEIXIN_APPID, nonce, timestamp, card_ticket]
+        items_str = ''.join(sorted(items))
+        sha1obj = hashlib.sha1()
+        sha1obj.update(items_str)
+        signature = sha1obj.hexdigest()
+        return {
+            "nonceStr": nonce,
+            "cardSign": signature,
+            "timestamp": timestamp,
+        }
+
+    def decrypt_card_code(self, encry_code):
+        url = "/card/code/decrypt"
+        params = {"access_token": self.request.get_access_token()}
+        json = {"encrypt_code": encry_code}
+        response = self.request.request(url, params, json, 'POST')
+        if "code" in response:
+            return response['code']
+        return None
+
+    def active_card(self, init_amount, card_code, card_id, init_bonus=0):
+        url = "/card/membercard/activate"
+        params = {"access_token": self.request.get_access_token()}
+        json = {
+            "init_balance": init_amount,
+            "init_bonus": init_bonus,
+            "membership_number": card_code,
+            "code": card_code,
+            "card_id": card_id
+        }
+        response = self.request.request(url, params, json, 'POST')
+        if response["errcode"] == 0:
+            return True
+        return False
