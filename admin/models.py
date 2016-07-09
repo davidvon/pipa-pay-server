@@ -93,7 +93,7 @@ class CustomerCardShare(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     share_customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'))
     share_customer = db.relationship(Customer)
-    customer_card_id = db.Column(db.String(32), db.ForeignKey('customer_card.card_id'))
+    customer_card_id = db.Column(db.Integer(), db.ForeignKey('customer_card.id'))
     customer_card = db.relationship(CustomerCard)
     acquire_customer_id = db.Column(db.String(64))
     timestamp = db.Column(db.Integer())

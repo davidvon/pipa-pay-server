@@ -29,9 +29,9 @@ def teardown_request(exception):
 
 import redis
 app.is_online = False
-redis_client = redis.StrictRedis(host='127.0.0.1', port=6379)
-logger.info("[RUNNING] status: online [%r], test [%r], database [%r]" %
-            (config.IS_ONLINE, config.UNITTEST, config.SQLALCHEMY_DATABASE_URI))
+redis_client = redis.StrictRedis(host=config.REDIS_SERVER_IP, password=config.REDIS_SERVER_PWD,
+                                 db=config.REDIS_SERVER_DB, port=6379)
+logger.info("[RUNNING] status: online [%r], database [%r]" % (config.IS_ONLINE, config.SQLALCHEMY_DATABASE_URI))
 
 restful_api = RestfulApi(app)
 

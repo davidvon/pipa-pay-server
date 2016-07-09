@@ -3,15 +3,25 @@ import json
 import time
 from flask import request
 from api import API_WX_PREFIX
-from app import restful_api, db
+from app import restful_api, db, logger
 from flask.ext.restful import Resource
 from cache.weixin import cache_card_adding_tag
 from config import WEIXIN_APPID
-from models import Order, CustomerCard, Customer, Card
+from models import Order, CustomerCard
 from wexin.helper import WeixinHelper
 
 __author__ = 'fengguanhua'
 
+
+class OAuthDecode(Resource):
+    def post(self):
+        args = json.loads(request.data)
+        code = args['code']
+        helper = WeixinHelper()
+        ret = helper.oauth_user(code)
+        if ret['errcode'] == 0:
+            return {'errcode': 0, 'openid': ret['data']['openid']}, 200
+        return {'errcode': 255}
 
 class ApiQRcode(Resource):
     def get(self):
@@ -68,7 +78,8 @@ class ApiWxCardsAdd(Resource):
         return {'result': 0, "data": dicts}
 
 
+restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
-restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'jsapi_sign')
-restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'card/choose/sign')
+restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'sign/jsapi')
+restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'sign/card/choose')
 restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')

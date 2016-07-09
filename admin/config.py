@@ -20,13 +20,12 @@ WXPAY_CONIFG = {
 
 IS_ONLINE = 'ONLINE_SERVER' in os.environ
 DEBUG = not IS_ONLINE
-UNITTEST = True if 'TEST' in os.environ else False
 
 if IS_ONLINE:
-    SQLALCHEMY_DATABASE_URI = 'mysql://admin:bilin123@127.0.0.1/laundry?unix_socket=/tmp/mysql.sock&charset=utf8'
+    DEFAULT_HOST_URL = 'http://127.0.0.1/'
+    SQLALCHEMY_DATABASE_URI = 'mysql://admin:bilin123@127.0.0.1/pipapay?unix_socket=/tmp/mysql.sock&charset=utf8'
 else:
-    SQLALCHEMY_RECORD_QUERIES = True
-    DEBUG_TB_INTERCEPT_REDIRECTS = False
+    DEFAULT_HOST_URL = 'http://127.0.0.1/'
     SQLALCHEMY_DATABASE_URI = 'mysql://root:Davidvon12345@127.0.0.1/pipapay?unix_socket=/tmp/mysql.sock&charset=utf8'
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 
@@ -39,6 +38,6 @@ LOG_FILE = os.path.join(LOG_DIR, "server.log")
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 
-DEFAULT_HOST_URL = 'http://127.0.0.1/'
-
-
+REDIS_SERVER_IP = '127.0.0.1'
+REDIS_SERVER_PWD = ''
+REDIS_SERVER_DB = 1

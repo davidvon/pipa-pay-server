@@ -151,14 +151,15 @@ class ApiCardShare(Resource):
         args = json.loads(request.data)
         open_id = args['openId']
         card_id = args['cardId']
+        card_code = args['cardCode']
         sign = args['sign']
         timestamp = args['timestamp']
         content = args['content']
         try:
-            card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id).first()
-            card.status = 5  # 卡表状态更新为 5:已转赠
-            record = CustomerCardShare(share_customer_id=open_id, card_id=card_id,
-                                       timestamp=timestamp, shareContent=content, sign=sign, status=0)
+            card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=card_code).first()
+            card.status = 4  # 卡表状态更新为 4:转赠中
+            record = CustomerCardShare(share_customer_id=open_id, customer_card_id=card.id,
+                                       timestamp=timestamp, content=content, sign=sign, status=0)
             db.session.add(card)
             db.session.add(record)
             db.session.commit()
@@ -175,7 +176,11 @@ class ApiCardShareInfo(Resource):
         args = json.loads(request.data)
         open_id = args['openId']
         card_id = args['cardId']
-        share = CustomerCardShare.query.filter_by(share_customer_id=open_id, customer_card_id=card_id).first()
+        card_code = args['cardCode']
+        card = CustomerCard.query.filter_by(card_id=card_id, card_code=card_code).first()
+        if not card:
+            return {'result': 254}
+        share = CustomerCardShare.query.filter_by(share_customer_id=open_id, customer_card_id=card.id).first()
         acquire_customer = None
         if share:
             if share.acquire_customer_id:
@@ -183,7 +188,7 @@ class ApiCardShareInfo(Resource):
             return {'result': 0,
                     'data': {'status': '已领取' if share.status == 2 else '未领取',
                              'cardLogo': share.customer_card.card.merchant.logo,
-                             'cardId': share.customer_card_id,
+                             'cardCode': card_code,
                              'cardName': share.customer_card.card.title,
                              'datetime': str(share.datetime),
                              'content': share.content,
