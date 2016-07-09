@@ -22,7 +22,7 @@ IS_ONLINE = 'PIPA_ONLINE' in os.environ
 DEBUG = not IS_ONLINE
 
 if IS_ONLINE:
-    DEFAULT_HOST_URL = 'http://127.0.0.1/'
+    DEFAULT_HOST_URL = 'http://wx.pipapay.com/'
     SQLALCHEMY_DATABASE_URI = 'mysql://pipa_b:pidb75P23aPavp@rds4w9icyicw33o374fc.mysql.rds.aliyuncs.com/pipa?unix_socket=/tmp/mysql.sock&charset=utf8'
     REDIS_SERVER_IP = '2e57dec587ee4fd5.m.cnsza.kvstore.aliyuncs.com'
     REDIS_SERVER_PWD = 'piPay75P23aPavp'
