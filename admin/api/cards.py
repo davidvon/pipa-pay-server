@@ -22,6 +22,7 @@ class ApiCardMembers(Resource):
     def post(self):
         args = json.loads(request.data)
         openid = args.get("openid")
+        share = args.get("share")
         customer_cards = CustomerCard.query.filter(CustomerCard.customer_id == openid).all()
         data = [
             {'globalId': item.id,
@@ -33,7 +34,8 @@ class ApiCardMembers(Resource):
              'logo': item.card.merchant.logo,
              'img': item.img or '/static/demo/card_blue.png',
              'status': item.status,
-             'expireDate': str(item.expire_date)} for item in customer_cards]
+             'expireDate': str(item.expire_date)} for item in customer_cards if
+            (not share) or (share and item.status < 3)]
         return {"result": 0, "data": data}, 200
 
 
@@ -206,7 +208,7 @@ class ApiCardReceiveCheck(Resource):
         info = CustomerCardShare.query.filter_by(sign=sign).first()
         if not info:
             return {'result': 255}  # sign不存在
-        card = CustomerCard.query.filter_by(customer_id=info.share_customer.openid).first()
+        card = info.customer_card
         return {'result': 0,
                 'data': {
                     'giveUserHeadImg': info.share_customer.head_image,
@@ -228,14 +230,16 @@ class ApiCardReceive(Resource):
         try:
             info = CustomerCardShare.query.filter_by(sign=sign).first()
             if not info:
+                logger.error('customer[%s] card[%s] not sharing' % (openid, info.customer_card.card_code))
                 return {'result': 255}  # sign不存在
-            new_card = CustomerCard.query.filter_by(customer_id=openid, card_id=info.card_id).first()
+            new_card = CustomerCard.query.filter_by(customer_id=openid, card_id=info.customer_card_id).first()
             if not new_card:
                 old_card = CustomerCard.query.filter_by(customer_id=info.share_customer.openid).first()
-                new_card = CustomerCard(customer_id=openid, card_id=info.card_id, img=old_card.img,
+                new_card = CustomerCard(customer_id=openid, card_id=info.customer_card.card_id, img=old_card.img,
                                         amount=old_card.amount, card_code=old_card.card_code,
                                         expire_date=old_card.expire_date,
                                         status=0)
+                old_card.status = 5
                 db.session.add(new_card)
                 need_commit = True
             if info.status != 1:
@@ -249,8 +253,9 @@ class ApiCardReceive(Resource):
             return {'result': 0,
                     'data': {
                         'status': new_card.status,
+                        "cardGlobalId": new_card.id,
                         'wxCardId': new_card.card.wx_card_id,  # 微信卡券ID，可以chooseCard获取
-                        'code': info.card.card_code  # 指定的卡券code码，只能被领一次。use_custom_code字段为true的卡券必须填写，
+                        'code': info.customer_card.card_code  # 指定的卡券code码，只能被领一次。use_custom_code字段为true的卡券必须填写，
                         # 非自定义code不必填写。
                     }
                     }
@@ -297,7 +302,7 @@ class ApiCardActive(Resource):
                 logger.error('[ApiCardActive] decrypt card code[%s,%s] error' % (openid, cardid))
                 return {'result': 255}, 200
             card = CustomerCard.query.filter_by(customer_id=openid, card_id=cardid, card_code=code).first()
-            active = helper.active_card(card.amount*100, code, cardid, 0)
+            active = helper.active_card(card.amount * 100, code, cardid, 0)
             if not active:
                 logger.error('[ApiCardActive] active card[%s,%s,%s] error' % (openid, cardid, code))
                 return {'result': 255}, 200
