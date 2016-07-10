@@ -23,7 +23,8 @@ class ApiCardMembers(Resource):
         args = json.loads(request.data)
         openid = args.get("openid")
         share = args.get("share")
-        customer_cards = CustomerCard.query.filter(CustomerCard.customer_id == openid).all()
+        customer_cards = CustomerCard.query.filter(CustomerCard.customer_id == openid)\
+            .order_by(CustomerCard.status.asc()).all()
         data = [
             {'globalId': item.id,
              'cardId': item.card_id,
