@@ -25,8 +25,8 @@ if IS_ONLINE:
     REDIS_SERVER_IP = '2e57dec587ee4fd5.m.cnsza.kvstore.aliyuncs.com'
     REDIS_SERVER_PWD = 'piPay75P23aPavp'
     REDIS_SERVER_DB = 1
-    WEIXIN_APPID = 'wx6965cc85ec3e801c'
-    WEIXIN_SECRET = '7fb5fff43e61aad157aa107aa8301eb7'
+    WEIXIN_APPID = 'wxb3ec764893b99722'  #'wx6965cc85ec3e801c'
+    WEIXIN_SECRET = '04a37bc738a0c2759ba850c4334b99fc' #'7fb5fff43e61aad157aa107aa8301eb7'
 else:
     DEFAULT_HOST_URL = 'http://127.0.0.1/'
     SQLALCHEMY_DATABASE_URI = 'mysql://root:Davidvon12345@127.0.0.1/pipapay?unix_socket=/tmp/mysql.sock&charset=utf8'
