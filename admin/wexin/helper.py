@@ -373,21 +373,21 @@ class WeixinHelper(object):
             "privilege": []
         }"""
         resp = self.oauth(code)
-        access_token = resp["access_token"]
         openid = resp["openid"]
+        # access_token = resp["access_token"]
         if openid:
-            user_info_url = "/sns/userinfo"
-            user_params = {
-                "access_token": access_token,
-                "openid": openid,
-                "lang": "zh_CN",
-            }
-            response = self.request.request(user_info_url, user_params)
-            if "errcode" in response:
-                errcode = response["errcode"]
-                errmsg = response["errmsg"]
-                return {'result': errcode, 'error': errmsg}
-            return {'errcode': 0, 'data': response}
+            # user_info_url = "/sns/userinfo"
+            # user_params = {
+            #     "access_token": access_token,
+            #     "openid": openid,
+            #     "lang": "zh_CN",
+            # }
+            # response = self.request.request(user_info_url, user_params)
+            # if "errcode" in response:
+            #     errcode = response["errcode"]
+            #     errmsg = response["errmsg"]
+            #     return {'result': errcode, 'error': errmsg}
+            return {'errcode': 0, 'openid': openid}
         return {'errcode': '255', 'error': 'oauth exception'}
 
     # type= jsapi, wx_card

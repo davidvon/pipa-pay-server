@@ -20,7 +20,7 @@ class OAuthDecode(Resource):
         helper = WeixinHelper()
         ret = helper.oauth_user(code)
         if ret['errcode'] == 0:
-            return {'errcode': 0, 'openid': ret['data']['openid']}, 200
+            return {'errcode': 0, 'openid': ret['openid']}, 200
         return {'errcode': 255}
 
 class ApiQRcode(Resource):
