@@ -101,6 +101,7 @@ class CustomerCardShare(db.Model):
     content = db.Column(db.String(32))
     sign = db.Column(db.String(64), nullable=False)
     status = db.Column(db.Integer(), default=0)    # 0:转赠中未接收 1: 已被对方接收
+    new_card_id = db.Column(db.Integer())  # TODO 需与老卡ID关联
 
 
 class CustomerTradeRecords(db.Model):

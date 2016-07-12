@@ -81,5 +81,5 @@ class ApiWxCardsAdd(Resource):
 restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'sign/jsapi')
-restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'sign/card/choose')
+restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'card/choose/sign')
 restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')

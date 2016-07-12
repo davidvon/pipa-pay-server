@@ -33,7 +33,7 @@ class ApiCardMembers(Resource):
              'amount': item.amount,
              'title': item.card.title,
              'logo': item.card.merchant.logo,
-             'img': item.img or '/static/demo/card_blue.png',
+             'img': item.img or '/static/card_blue.png',
              'status': item.status,
              'expireDate': str(item.expire_date)} for item in customer_cards if
             (not share) or (share and item.status < 3)]
