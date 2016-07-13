@@ -56,6 +56,8 @@ class FlaskWeixin(object):
     def view_func(self):
         signature = request.args.get('signature')
         timestamp = request.args.get('timestamp')
+        if not signature and not timestamp:
+            return ''
         nonce = request.args.get('nonce')
         self.weixin_helper.check_signature(signature,timestamp, nonce)
         if request.method == 'GET':
@@ -63,11 +65,11 @@ class FlaskWeixin(object):
             return echostr
         try:
             request_params = self.weixin_helper.to_json(request.data)
+            if request_params.get('msgtype'):
+                return self.weixin_reply.msg_reply(request_params)
+            return ''
         except:
             return 'invalid', 400
-
-        if request_params.get('msgtype'):
-            return self.weixin_reply.msg_reply(request_params)
 
     view_func.methods = ['GET', 'POST']
 

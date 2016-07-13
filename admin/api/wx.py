@@ -15,11 +15,13 @@ __author__ = 'fengguanhua'
 
 class OAuthDecode(Resource):
     def post(self):
+        logger.info('[oauth]: request.data:%s' % request.data)
         args = json.loads(request.data)
         code = args['code']
         helper = WeixinHelper()
         ret = helper.oauth_user(code)
         if ret['errcode'] == 0:
+            logger.info('[oauth]: openid:%s' % ret['openid'])
             return {'errcode': '0-000', 'openid': ret['openid']}, 200
         return {'errcode': '1-255'}
 
