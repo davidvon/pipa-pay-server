@@ -113,7 +113,7 @@ class FirmOrderNotify(OrderNotifyBase):
         {{orderItemName.DATA}}：{{orderItemData.DATA}}
         {{remark.DATA}}
         """
-        template_id = 'QszmWrX38Y0kp0IP2sYS5jxbkUKCx8vbjceXI6vI4jM' if config.IS_ONLINE else \
+        template_id = 'QszmWrX38Y0kp0IP2sYS5jxbkUKCx8vbjceXI6vI4jM' if config.RUN_MODE == 'production' else \
             'EZBgH4qX_ZWXU_o6ksYscvIKjz8gGJA9PtCT_27lp28'
         push_data = dict(first={"value": "您收到了一条新的订单", "color": "#173177"},
                          tradeDateTime={"value": args['order_time'], "color": "#173177"},
