@@ -53,6 +53,7 @@ class ApiWxJsSign(Resource):
     def post(self):
         args = json.loads(request.data)
         url = args['url']
+        logger.info('[ApiWxJsSign] url:%s' % url)
         helper = WeixinHelper()
         ret = helper.jsapi_sign(url)
         data = {
@@ -61,6 +62,7 @@ class ApiWxJsSign(Resource):
             "nonceStr": ret['nonce_str'],
             "signature": ret['hash']
         }
+        logger.info('[ApiWxJsSign] ack:%s' % data)
         return data, 200
 
 
