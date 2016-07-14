@@ -270,21 +270,24 @@ class ApiCardBuy(Resource):
     def post(self):
         try:
             args = json.loads(request.data)
+            logger.info('[ApiCardBuy] args:%s' % args)
             cardid = args.get('cardId')
             price = args.get('price')
             count = args.get('count')
             openid = args.get('openId')
             order = create_order(cardid, price, openid, count)
             res, outputs = payable(request, openid, order)
-            logger.info('[ApiOrderPayable] data=%s' % str(outputs))
+            logger.info('[ApiOrderPayable] data:%s' % str(outputs))
             if res == 0:
                 outputs['orderId'] = order.order_id
                 db.session.add(order)
                 db.session.commit()
+                logger.info('[ApiOrderPayable] create order success:%s' % order.order_id)
                 return {'result': 0, 'content': outputs}, 200
             return {'result': res}, 200
         except Exception as e:
-            print e.message
+            logger.error(traceback.print_exc())
+            logger.error('[ApiCardBuy] except:%s' % e.message)
             return {'result': 254}, 200
 
 
