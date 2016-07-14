@@ -38,7 +38,7 @@ class ReplyKeyWords(object):
                 update_customer_info(self.sender)
                 return self.event_reply()
             elif self.event == 'unsubscribe':
-                async_unsubscribe_customer(self.sender)
+                unsubscribe_customer(self.sender)
                 return self.__response('')
             elif self.event == 'CLICK':
                 return self.auto_news_reply()

@@ -197,7 +197,7 @@ def random_digit(length=10):
 def create_order(card_id, amount, openid, count):
     customer = Customer.query.filter_by(openid=openid).first()
     serial = random_digit()
-    pay_amount = int(count*0.99)
+    pay_amount = int(amount*0.99)
     order = Order(order_id=serial, card_id=card_id, customer_id=customer.id, face_amount=amount,
                   card_count=count, pay_amount=pay_amount, order_type=1, paid=False)
     return order
