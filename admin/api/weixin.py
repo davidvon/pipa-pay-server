@@ -5,7 +5,7 @@ from flask import request
 from api import API_WX_PREFIX
 from app import restful_api, db, logger
 from flask.ext.restful import Resource
-from cache.weixin import cache_card_adding_tag
+from cache.weixin import cache_card_adding_tag, cache_code_openid, get_cache_code_openid
 from config import WEIXIN_APPID
 from models import Order, CustomerCard
 from wexin.helper import WeixinHelper
@@ -18,12 +18,18 @@ class OAuthDecode(Resource):
         logger.info('[oauth]: request.data:%s' % request.data)
         args = json.loads(request.data)
         code = args['code']
+        openid = get_cache_code_openid(code)
+        if openid:
+            logger.info('[oauth]: caching openid:%s' % openid)
+            return {'errcode': '0-000', 'openid': openid}, 200
         helper = WeixinHelper()
         ret = helper.oauth_user(code)
         if ret['errcode'] == 0:
+            cache_code_openid(code, ret['openid'])
             logger.info('[oauth]: openid:%s' % ret['openid'])
             return {'errcode': '0-000', 'openid': ret['openid']}, 200
         return {'errcode': '1-255'}
+
 
 class ApiQRcode(Resource):
     def get(self):

@@ -47,9 +47,7 @@ class Request(object):
                 response = self._request(url, params, data, method, headers)
                 if "errcode" in response and response["errcode"] != 0:
                     logger.error('[WEIXIN] request error[%d], detail:%s' % (response["errcode"], response["errmsg"]))
-                    if response["errcode"] not in [42001, 40001]:
-                        times = 1
-                    else:
+                    if response["errcode"] in [42001, 40001]:
                         params['access_token'] = self.token.refresh()
                     self.errcode = response["errcode"]
                     self.errmsg = response["errmsg"]
@@ -57,8 +55,9 @@ class Request(object):
                     return response
             except Exception, e:
                 self.errmsg = e.message
-            time.sleep(sleep_second)
-            times -= 1
+            finally:
+                time.sleep(sleep_second)
+                times -= 1
         raise WeixinException(self.errcode, self.errmsg)
 
     def _request(self, url, params, data, method, headers):
