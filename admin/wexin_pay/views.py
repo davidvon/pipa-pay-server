@@ -45,7 +45,7 @@ def auth_notify():
 def payable(request, openid, order):
     logger.info('[WEIXIN] payable....')
     parameter = {
-        'body': '噼啪支付',
+        'body': '噼啪支付-电子卡包',
         'out_trade_no': order.order_id,
         'spbill_create_ip': request.remote_addr,
         'total_fee': str(int(order.pay_amount * 100)),  # unit is fen check other day
