@@ -13,7 +13,7 @@ WEIXIN_TOKEN = 'pipapay'
 WXPAY_CONIFG = {
     'partnerId': '1304148101',
     'partnerKey': '',
-    'apiKey': '85a3027dez49d259pipapay26fr58yJH'
+    'apiKey': 'pipapay1234567890apisecret123456'
 }
 
 RUN_MODE = os.environ.get('PIPA_RUN_MODE', 'debug')
@@ -43,8 +43,8 @@ else:
     REDIS_SERVER_IP = '127.0.0.1'
     REDIS_SERVER_PWD = ''
     REDIS_SERVER_DB = 1
-    WEIXIN_APPID = 'wxb3ec764893b99722'
-    WEIXIN_SECRET = '04a37bc738a0c2759ba850c4334b99fc'
+    WEIXIN_APPID = 'wx6965cc85ec3e801c'
+    WEIXIN_SECRET = '7fb5fff43e61aad157aa107aa8301eb7'
 
 
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')

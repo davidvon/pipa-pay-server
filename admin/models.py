@@ -75,7 +75,9 @@ class CustomerCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'), nullable=False)
     customer = db.relationship(Customer)
-    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id')) # 服务器内部卡券ID
+    order_id = db.Column(db.String(32), db.ForeignKey('order.order_id'))
+    order = db.relationship('Order')
+    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))  # 服务器内部卡券ID
     card = db.relationship(Card)
     card_code = db.Column(db.String(32))  # 动态分配的卡号
     img = db.Column(db.String(36))
@@ -118,7 +120,7 @@ class CustomerTradeRecords(db.Model):
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.String(36), unique=True, nullable=False)
+    order_id = db.Column(db.String(32), unique=True, nullable=False)
     customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'))
     customer = db.relationship(Customer)
     card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))

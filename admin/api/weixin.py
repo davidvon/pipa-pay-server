@@ -63,7 +63,7 @@ class ApiWxJsSign(Resource):
             "signature": ret['hash']
         }
         logger.info('[ApiWxJsSign] ack:%s' % data)
-        return data, 200
+        return data
 
 
 # wx.chooseCard cardSign
@@ -72,11 +72,28 @@ class ApiWxCardChooseSign(Resource):
         helper = WeixinHelper()
         ret = helper.choose_card_sign()
         print("wx card sign:%s" % ret)
-        return ret, 200
+        return ret
+
+
+# buy cards
+class ApiWxCardsAdd(Resource):
+    def post(self):
+        args = json.loads(request.data)
+        helper = WeixinHelper()
+        order_id = args.get('orderId')
+        cards = CustomerCard.query.filter_by(order_id=order_id).all()
+        dicts = []
+        for card in cards:
+            if card.status > 0:
+                continue
+            # cache_card_adding_tag(card.card_id, card.customer_id, card_global_id)  # TODO
+            ret = helper.card_sign(card.card_id)
+            dicts.append({"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']})
+        return {'result': 0, "data": dicts}
 
 
 # wx.addCard signature
-class ApiWxCardsAdd(Resource):
+class ApiWxCardAdd(Resource):
     def post(self):
         args = json.loads(request.data)
         helper = WeixinHelper()
@@ -88,8 +105,10 @@ class ApiWxCardsAdd(Resource):
         return {'result': 0, "data": dicts}
 
 
+
 restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'sign/jsapi')
 restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'card/choose/sign')
 restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')
+restful_api.add_resource(ApiWxCardAdd, API_WX_PREFIX + 'card/add')

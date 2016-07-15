@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from json import JSONEncoder, JSONDecoder
 import time
 from app import redis_client
+from models import Order
 from utils.util import random_digit
 
 __author__ = 'fengguanhua'
@@ -34,3 +36,21 @@ def cache_qrcode_code(card_id):
     redis_client.set(card_id, code, 70)  # 每分钟刷新
     return code
 
+
+def cache_order(order, expire_seconds=100):
+    order_json = {'order_id': order.order_id, 'card_id': order.card_id, 'customer_id': order.customer_id,
+                  'face_amount': order.face_amount, 'card_count': order.card_count, 'pay_amount': order.pay_amount,
+                  'order_type': order.order_type, 'paid': order.paid}
+    order_str = JSONEncoder().encode(order_json)
+    redis_client.set('order-%s' % order.order_id, order_str, expire_seconds)
+
+
+def get_cache_order(order_id):
+    val = redis_client.get('order-%s' % order_id)
+    if not val:
+        return None
+    tmp = JSONDecoder().decode(val)
+    order = Order(order_id=tmp['order_id'], card_id=tmp['card_id'], customer_id=tmp['customer_id'],
+                  face_amount=tmp['face_amount'], card_count=tmp['card_count'], pay_amount=tmp['pay_amount'],
+                  order_type=tmp['order_type'], paid=tmp['paid'])
+    return order

@@ -1,21 +1,14 @@
 # -*- coding: utf-8 -*-
-import json
 import random as Random
-import datetime
-import string
-from api import API_PREFIX
-from app import db, logger, restful_api
-from flask import request
-from flask.ext.restful import Resource
+from cache.order import cache_order
 from models import Order, Customer, Merchant
-from wexin_pay.views import payable
 
 __author__ = 'fengguanhua'
 
 
 # def grant_customer_scores(order, customer):
 # scores = 0
-#     for item in order.order_items.all():
+# for item in order.order_items.all():
 #         scores += item.service.award_score
 #     customer_scores = CustomerScores.query.filter_by(customer_openid=customer.id).first()
 #     if not customer_scores:
@@ -191,15 +184,16 @@ __author__ = 'fengguanhua'
 
 
 def random_digit(length=10):
-    return ''.join(Random.sample(string.digits, length))
+    return str(int(''.join(Random.sample('012345678901234567890123456789012345678901234567890123456789', length))))
 
 
 def create_order(card_id, amount, openid, count):
     customer = Customer.query.filter_by(openid=openid).first()
-    serial = random_digit()
-    pay_amount = int(amount*0.99)
-    order = Order(order_id=serial, card_id=card_id, customer_id=customer.id, face_amount=amount,
+    order_id = random_digit(16)
+    pay_amount = int(amount * 0.99)
+    order = Order(order_id=order_id, card_id=card_id, customer_id=customer.id, face_amount=amount,
                   card_count=count, pay_amount=pay_amount, order_type=1, paid=False)
+    cache_order(order)
     return order
 
 
