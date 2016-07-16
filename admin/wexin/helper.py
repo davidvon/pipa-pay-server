@@ -360,32 +360,9 @@ class WeixinHelper(object):
         return resp
 
     def oauth_user(self, code):
-        """{
-            "openid": "oLVPpjqs9BhvzwPj5A-vTYAX3GLc",
-            "nickname": "刺猬宝宝",
-            "sex": 1,
-            "language": "zh_CN",
-            "city": "深圳",
-            "province": "广东",
-            "country": "中国",
-            "headimgurl": "http://wx.qlogo.cn/mmopen/utpKYf69VAbCRDRlbUsPsdQN38DoibCkrU6SAMCSNx558eTaLVM8PyM6jlEGzOrH67hyZibIZPXu4BK1XNWzSXB3Cs4qpBBg18/0",
-            "privilege": []
-        }"""
         resp = self.oauth(code)
         openid = resp["openid"]
-        # access_token = resp["access_token"]
         if openid:
-            # user_info_url = "/sns/userinfo"
-            # user_params = {
-            #     "access_token": access_token,
-            #     "openid": openid,
-            #     "lang": "zh_CN",
-            # }
-            # response = self.request.request(user_info_url, user_params)
-            # if "errcode" in response:
-            #     errcode = response["errcode"]
-            #     errmsg = response["errmsg"]
-            #     return {'result': errcode, 'error': errmsg}
             return {'errcode': 0, 'openid': openid}
         return {'errcode': '255', 'error': 'oauth exception'}
 
