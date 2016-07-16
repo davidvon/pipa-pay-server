@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import random as Random
+import string
 from cache.order import cache_order
 from models import Order, Customer, Merchant
 
@@ -184,14 +185,15 @@ __author__ = 'fengguanhua'
 
 
 def random_digit(length=10):
-    return str(int(''.join(Random.sample('012345678901234567890123456789012345678901234567890123456789', length))))
+    val = ''.join(Random.sample(string.digits*3, length))
+    return random_digit(length) if val[0] == '0' else val
 
 
 def create_order(card_id, amount, openid, count):
     customer = Customer.query.filter_by(openid=openid).first()
     order_id = random_digit(16)
     pay_amount = int(amount * 0.99)
-    order = Order(order_id=order_id, card_id=card_id, customer_id=customer.id, face_amount=amount,
+    order = Order(order_id=order_id, card_id=card_id, customer_id=customer.openid, face_amount=amount,
                   card_count=count, pay_amount=pay_amount, order_type=1, paid=False)
     cache_order(order)
     return order
