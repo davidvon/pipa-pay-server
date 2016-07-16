@@ -12,8 +12,8 @@ ISONLINE = 'ONLINE_SERVER' in os.environ
 WEIXIN_TOKEN = 'pipapay'
 WXPAY_CONIFG = {
     'mch_id': '1304148101',
-    'partnerKey': '',
-    'api_key': 'pipapay1234567890apisecret123456'
+    'api_key': 'pipapay1234567890apisecret123456',
+    'partnerKey': ''  # v2
 }
 
 RUN_MODE = os.environ.get('PIPA_RUN_MODE', 'debug')
@@ -57,4 +57,3 @@ LOG_DIR = os.path.join(basedir, "../logs")
 LOG_FILE = os.path.join(LOG_DIR, "server.log")
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
-
