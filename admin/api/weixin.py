@@ -101,7 +101,7 @@ class ApiWxCardAdd(Resource):
         card = CustomerCard.query.get(card_global_id)
         cache_card_adding_tag(card.card_id, card.customer_id, card_global_id)
         ret = helper.card_sign(card.card_id)
-        dicts = [{"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']}]
+        dicts = {"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']}
         return {'result': 0, "data": dicts}
 
 
