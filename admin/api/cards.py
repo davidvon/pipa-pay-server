@@ -282,7 +282,7 @@ class ApiCardBuy(Resource):
             logger.info('[ApiOrderPayable] data:%s' % str(outputs))
             if res == 0:
                 outputs['orderId'] = order.order_id
-                logger.info('[ApiOrderPayable] create tmp order success:%s' % order.order_id)
+                logger.info('[ApiOrderPayable] create temp order success:%s' % order.order_id)
                 return {'result': 0, 'content': outputs}
             return {'result': res}
         except Exception as e:
@@ -305,7 +305,6 @@ class ApiCardBuyCommit(Resource):
             logger.info('ApiCardBuyCommit order:%s buy success' % order_id)
             return {'result': '0-0-0'}
         except Exception as e:
-            logger.error(traceback.print_exc())
             logger.error('ApiCardBuyCommit order:%s buy error:%s' % (order_id, e.message))
             return {'result': '255-0-0'}
 

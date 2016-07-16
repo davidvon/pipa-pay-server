@@ -121,16 +121,16 @@ class CustomerTradeRecords(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.String(32), unique=True, nullable=False)
-    customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'))
+    customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'), nullable=False)
     customer = db.relationship(Customer)
-    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
+    card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'), nullable=False)
     card = db.relationship(Card)
     face_amount = db.Column(db.Float, nullable=False)
     pay_amount = db.Column(db.Float, nullable=False)
     create_time = db.Column(db.DateTime(), default=datetime.now)
     paid = db.Column(db.BOOLEAN, nullable=False, default=0)
     order_type = db.Column(db.Integer, nullable=False, default=0)  # 1: 购卡, 2:充值
-    card_count = db.Column(db.Integer())
+    card_count = db.Column(db.Integer(), nullable=False)
     def __repr__(self):
         return self.order_id
 
