@@ -44,7 +44,7 @@ class CustomerOrderNotify(OrderNotifyBase):
                          keyword3={"value": args['phone'], "color": "#000000"},
                          keyword4={"value": args['address'], "color": "#173177"},
                          keyword5={"value": args['delivery_time'], "color": "#173177"},
-                         remark={"value": '洗衣件数：%s\n\n比邻洗衣感谢您的预订，洗衣管家将第一时间与您联系。'% args['sum'], "color": "#173177"})
+                         remark={"value": '洗衣件数：%s\n\n比邻洗衣感谢您的预订，洗衣管家将第一时间与您联系。' % args['sum'], "color": "#173177"})
         order_url = "%smobile/personal/order?tab=0&uid=%s" % (url_from_cache(), openid)
         weixin.weixin_helper.push_template_message(openid, template_id, push_data, order_url)
 
@@ -77,13 +77,14 @@ class CustomerOrderNotify(OrderNotifyBase):
         状态：{{keyword4.DATA}}
         {{remark.DATA}}
         """
-        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo'  if config.ISONLINE else \
+        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo' if config.ISONLINE else \
             'BUfIMn1xtiD9ikahiDhA90NJwxPB8pXOa_hun8hpqlE'
         status_info = '订单已取消' if self.status == 'cancel' else '订单信息有调整' if self.status == 'update' else '订单状态有新变更'
         remark = '洗衣管家提醒您，您的订单可以微信支付了' if not args['paid'] and args['price'] else ''
         push_data = dict(first={"value": '您的%s' % status_info, "color": "#173177"},
                          keyword1={"value": args.get('order_id'), "color": "#173177"},
-                         keyword2={"value": '预约洗衣\n订单金额：%s\n预约上门收衣时间：%s\n预约上门送衣时间：%s' % (args['price'], args['delivery_time'], args['received_time']), "color": "#000000"},
+                         keyword2={"value": '预约洗衣\n订单金额：%s\n预约上门收衣时间：%s\n预约上门送衣时间：%s' % (
+                         args['price'], args['delivery_time'], args['received_time']), "color": "#000000"},
                          keyword3={"value": args.get('sum'), "color": "#173177"},
                          keyword4={"value": args.get('status'), "color": "#173177"},
                          remark={"value": remark, "color": "#173177"}
@@ -155,12 +156,14 @@ class FirmOrderNotify(OrderNotifyBase):
         状态：{{keyword4.DATA}}
         {{remark.DATA}}
         """
-        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo'  if config.ISONLINE else \
+        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo' if config.ISONLINE else \
             'BUfIMn1xtiD9ikahiDhA90NJwxPB8pXOa_hun8hpqlE'
         status_info = '订单已取消' if self.status == 'cancel' else '订单信息有调整' if self.status == 'update' else '订单状态有新变更'
         push_data = dict(first={"value": "客户（%s）%s" % (args['name'], status_info), "color": "#173177"},
                          keyword1={"value": args.get('order_id'), "color": "#173177"},
-                         keyword2={"value": '预约洗衣\n预约上门收衣时间：%s\n预约上门送衣时间：%s' % (args['delivery_time'], args['received_time']), "color": "#000000"},
+                         keyword2={
+                         "value": '预约洗衣\n预约上门收衣时间：%s\n预约上门送衣时间：%s' % (args['delivery_time'], args['received_time']),
+                         "color": "#000000"},
                          keyword3={"value": args.get('sum'), "color": "#173177"},
                          keyword4={"value": args.get('status'), "color": "#173177"},
                          remark={"value": '', "color": "#173177"}
@@ -172,7 +175,7 @@ class FirmOrderNotify(OrderNotifyBase):
         # assistants = User.query.filter_by(merchant_id=args['merchant_id'], active=1).all()
         # # cash, create, pay-confirm, done
         # for assistant in assistants:
-        #     if not assistant.customer:
+        # if not assistant.customer:
         #         continue
         #     if self.status == 'booking':
         #         return self.booking_order_notify(args, assistant.customer.openid)

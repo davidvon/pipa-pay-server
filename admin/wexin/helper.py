@@ -4,10 +4,12 @@ import urllib2
 import urllib
 import json
 import xml.etree.ElementTree as ET
-import requests
-from config import WEIXIN_APPID, WEIXIN_SECRET, WEIXIN_TOKEN
 import hashlib
 import time
+
+import requests
+
+from config import WEIXIN_APPID, WEIXIN_SECRET, WEIXIN_TOKEN
 from app import logger
 from cache.weixin import get_cache_access_token, cache_access_token, cache_ticket, get_cache_ticket
 from wexin.util import nonce_str
@@ -84,7 +86,6 @@ class APIRequest(Request):
 
 
 class Token(object):
-
     def get(self):
         return get_cache_access_token() or self._create()
 

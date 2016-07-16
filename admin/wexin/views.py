@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from app import app
 from cache.public import cache_url
-from models import Customer, WechatMenu
+from models import WechatMenu
 
 __author__ = 'fengguanhua'
 import time

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import random as Random
 import string
+
 from cache.order import cache_order
-from models import Order, Customer, Merchant
+from models import Order, Customer
+
 
 __author__ = 'fengguanhua'
 
@@ -10,7 +12,7 @@ __author__ = 'fengguanhua'
 # def grant_customer_scores(order, customer):
 # scores = 0
 # for item in order.order_items.all():
-#         scores += item.service.award_score
+# scores += item.service.award_score
 #     customer_scores = CustomerScores.query.filter_by(customer_openid=customer.id).first()
 #     if not customer_scores:
 #         customer_scores = CustomerScores(customer_openid=customer.id, total_scores=scores)
@@ -185,7 +187,7 @@ __author__ = 'fengguanhua'
 
 
 def random_digit(length=10):
-    val = ''.join(Random.sample(string.digits*3, length))
+    val = ''.join(Random.sample(string.digits * 3, length))
     return random_digit(length) if val[0] == '0' else val
 
 

@@ -1,7 +1,9 @@
 ﻿# -*- coding: utf-8 -*-
 import time
 from urllib import urlencode
+
 from flask import request, current_app
+
 from app import app, logger, db
 from config import WXPAY_CONIFG, WEIXIN_APPID
 from models import get_order_params, Order
@@ -48,9 +50,9 @@ def payable(request, openid, order):
         'body': '噼啪支付-电子卡包',
         'out_trade_no': order.order_id,
         'spbill_create_ip': request.remote_addr,
-        'total_fee': int(order.pay_amount*100),  # unit is fen check other day
-        'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,   # 'pipapay.ngrok.cc', #TODO
-        'openid': openid   # 'o80wpvwh6C59IZ7W7EMv9_hu5BW8' # openid #TODO
+        'total_fee': int(order.pay_amount * 100),  # unit is fen check other day
+        'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,  # 'pipapay.ngrok.cc', #TODO
+        'openid': openid  # 'o80wpvwh6C59IZ7W7EMv9_hu5BW8' # openid #TODO
     }
     return build_pay_prepayid_form(parameter)
 
@@ -99,7 +101,7 @@ def native_callback():
     # service_id = params["service_id"]
     # firm_service = Service.query.filter_by(id=service_id).first()
     # if not firm_service:
-    #     return '<xml>' \
+    # return '<xml>' \
     #            '<return_code><![CDATA[FAIL]]></return_code>' \
     #            '<return_msg><![CDATA[Service not exist]]></return_msg>' \
     #            '</xml>'
@@ -138,7 +140,7 @@ def static_qrcode_create():
 @app.route('/wxpay/qrcode/dynamic/create', methods=['GET', 'POST'])
 def dynamic_qrcode_create():
     # if not request.args.get("service_id"):
-    #     return 'error: service_id not exist'
+    # return 'error: service_id not exist'
     # service_id = request.args["service_id"]
     # open_id = request.args["uid"]
     # firm_service = Service.query.filter_by(id=service_id).first()

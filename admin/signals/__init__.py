@@ -1,6 +1,7 @@
 __author__ = 'fengguanhua'
 
 from blinker import Namespace
+
 weixin_signals = Namespace()
 
 signal_order_notify = weixin_signals.signal('order_notify')

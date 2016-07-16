@@ -1,10 +1,11 @@
-from app import config
-from config import WXPAY_CONIFG
-from utils.encoding import smart_str, smart_unicode
 import xml.etree.ElementTree as ET
 import hashlib
 from random import Random
 import urllib2
+
+from config import WXPAY_CONIFG
+from utils.encoding import smart_str, smart_unicode
+
 
 __author__ = 'fengguanhua'
 

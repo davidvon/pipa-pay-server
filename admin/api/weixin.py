@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 import json
 import time
+
 from flask import request
-from api import API_WX_PREFIX
-from app import restful_api, db, logger
 from flask.ext.restful import Resource
+
+from api import API_WX_PREFIX
+from app import restful_api, logger
 from cache.weixin import cache_card_adding_tag, cache_code_openid, get_cache_code_openid
 from config import WEIXIN_APPID
 from models import Order, CustomerCard
 from wexin.helper import WeixinHelper
+
 
 __author__ = 'fengguanhua'
 
@@ -103,7 +106,6 @@ class ApiWxCardAdd(Resource):
         ret = helper.card_sign(card.card_id)
         dicts = {"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']}
         return {'result': 0, "data": dicts}
-
 
 
 restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')

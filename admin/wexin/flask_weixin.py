@@ -9,9 +9,11 @@
     :license: BSD, see LICENSE for more detail.
 """
 from flask import session
+from flask import request
+
 from helper import *
 from reply import ReplyKeyWords
-from flask import request
+
 
 try:
     from lxml import etree
@@ -48,6 +50,7 @@ class FlaskWeixin(object):
                     username, sender=sender, content='text reply'
                 )
         """
+
         def wrapper(func):
             self._registry[key] = func
 
@@ -59,7 +62,7 @@ class FlaskWeixin(object):
         if not signature and not timestamp:
             return ''
         nonce = request.args.get('nonce')
-        self.weixin_helper.check_signature(signature,timestamp, nonce)
+        self.weixin_helper.check_signature(signature, timestamp, nonce)
         if request.method == 'GET':
             echostr = request.args.get('echostr')
             return echostr

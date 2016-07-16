@@ -1,17 +1,20 @@
 # coding: utf-8
 import random
 import string
-from app import db, app, logger
 import datetime as dt
-from models import Customer
 from datetime import datetime
-from utils.util import async
 from time import sleep
+
+from app import db, logger
+from models import Customer
+from utils.util import async
+
 
 def update_customer_info(openid):
     try:
         logger.info('[WEIXIN] customer[%s] update info.' % openid)
         from wexin.views import weixin
+
         userinfo = weixin.weixin_helper.get_user_info(openid)
         customer = Customer.query.filter(Customer.openid == openid).one()
         customer.active = userinfo['subscribe']

@@ -1,12 +1,15 @@
 # coding: utf-8
 import time
 import traceback
+
 from flask import Response
+
 from cache.weixin import get_cache_card_adding_tag
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
     WechatSystemReply, LIKE_MATCH, WechatImageNews, CustomerCardShare, CustomerCard
 from wexin.util import *
 from app import logger
+
 # from cache.public import cache_url
 # from signals import signal_customer_message_cached_notify
 

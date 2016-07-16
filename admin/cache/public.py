@@ -1,5 +1,7 @@
 from json import JSONEncoder, JSONDecoder
+
 from config import DEFAULT_HOST_URL
+
 
 __author__ = 'fengguanhua'
 from app import redis_client
@@ -41,7 +43,7 @@ def phone_auth_code_from_cache(phone):
 def cache_home_info(args):
     key = 'home_info'
     data = JSONEncoder().encode(args)
-    redis_client.set(key, data, 3*60)
+    redis_client.set(key, data, 3 * 60)
 
 
 def home_info_cache():
@@ -52,6 +54,7 @@ def home_info_cache():
     else:
         data = None
     return data
+
 
 def home_order_messages_cache():
     key = 'home_order_messages'

@@ -223,7 +223,7 @@ class ApiCardReceiveCheck(Resource):
                     'shareContent': info.content,
                     'cardStatus': card.status,
                     'giveStatus': info.status,
-                    'acquireUserOpenId': info.acquire_customer_id }
+                    'acquireUserOpenId': info.acquire_customer_id}
                 }
 
 

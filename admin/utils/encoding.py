@@ -1,5 +1,6 @@
 __author__ = 'fengguanhua'
 
+
 def smart_unicode(s, encoding='utf-8'):
     if type(s) != unicode:
         return s.decode(encoding)

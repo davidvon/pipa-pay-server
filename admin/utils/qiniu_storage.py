@@ -1,4 +1,4 @@
-#encoding=utf-8
+# encoding=utf-8
 from qiniu import conf, rsf, io, rs
 
 ACCESS_KEY = '_t2VNt_Z765EiBWXkeSTjZoTwtG-ybvllh8Xe-Q7'
@@ -9,7 +9,6 @@ IMG_SHOW_PARAM = '?imageView2/1/w/900/h/500/q/60'
 
 
 class QiniuStorage(object):
-
     def __init__(self, access_key=ACCESS_KEY, secret_key=SECRET_KEY):
         self.access_key = access_key
         self.secret_key = secret_key

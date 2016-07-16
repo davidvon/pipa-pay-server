@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from json import JSONEncoder, JSONDecoder
 import time
+
 from app import redis_client
 from models import Order
 from utils.util import random_digit
+
 
 __author__ = 'fengguanhua'
 

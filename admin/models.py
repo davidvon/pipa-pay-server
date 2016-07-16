@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from stringold import strip
 from datetime import datetime
+
 from sqlalchemy import Sequence
+
 from app import db
+
 
 __author__ = 'feng.guanhua'
 
@@ -31,8 +34,8 @@ class Merchant(db.Model):
 
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    card_id = db.Column(db.String(32), unique=True, nullable=False) # 服务器内部卡券号
-    wx_card_id = db.Column(db.String(32))     # 绑定的微信卡券号
+    card_id = db.Column(db.String(32), unique=True, nullable=False)  # 服务器内部卡券号
+    wx_card_id = db.Column(db.String(32))  # 绑定的微信卡券号
     merchant_id = db.Column(db.Integer(), db.ForeignKey('merchant.id'), nullable=False)
     merchant = db.relationship(Merchant)
     title = db.Column(db.String(32), nullable=False)
@@ -91,6 +94,7 @@ class CustomerCard(db.Model):
     def __repr__(self):
         return "%s-%s-%s" % (self.customer_id, self.card_id, self.card_code)
 
+
 class CustomerCardShare(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     share_customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'))
@@ -102,7 +106,7 @@ class CustomerCardShare(db.Model):
     datetime = db.Column(db.DateTime(), default=datetime.now)
     content = db.Column(db.String(32))
     sign = db.Column(db.String(64), nullable=False)
-    status = db.Column(db.Integer(), default=0)    # 0:转赠中未接收 1: 已被对方接收
+    status = db.Column(db.Integer(), default=0)  # 0:转赠中未接收 1: 已被对方接收
     new_card_id = db.Column(db.Integer())  # TODO 需与老卡ID关联
 
 
@@ -115,7 +119,7 @@ class CustomerTradeRecords(db.Model):
     amount = db.Column(db.Integer())
     time = db.Column(db.DateTime())
     expire_date = db.Column(db.DateTime(), default=datetime.now)
-    type = db.Column(db.Integer())    # 0:消费 1: 充值
+    type = db.Column(db.Integer())  # 0:消费 1: 充值
 
 
 class Order(db.Model):
@@ -131,12 +135,12 @@ class Order(db.Model):
     paid = db.Column(db.BOOLEAN, nullable=False, default=0)
     order_type = db.Column(db.Integer, nullable=False, default=0)  # 1: 购卡, 2:充值
     card_count = db.Column(db.Integer(), nullable=False)
+
     def __repr__(self):
         return self.order_id
 
     def is_payable(self):
         return not self.paid
-
 
 
 MEDIA_TYPE_TEXT = u'1'
