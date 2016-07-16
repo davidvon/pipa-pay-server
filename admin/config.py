@@ -11,9 +11,9 @@ BABEL_DEFAULT_LOCALE = 'zh_CN'
 ISONLINE = 'ONLINE_SERVER' in os.environ
 WEIXIN_TOKEN = 'pipapay'
 WXPAY_CONIFG = {
-    'partnerId': '1304148101',
+    'mch_id': '1304148101',
     'partnerKey': '',
-    'apiKey': 'pipapay1234567890apisecret123456'
+    'api_key': 'pipapay1234567890apisecret123456'
 }
 
 RUN_MODE = os.environ.get('PIPA_RUN_MODE', 'debug')

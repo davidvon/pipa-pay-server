@@ -19,7 +19,7 @@ def build_form(parameter):
         'bank_type': 'WX',
         'fee_type': '1',
         'input_charset': 'UTF-8',
-        'partner': config.WXPAY_CONIFG['partnerId']
+        'partner': config.WXPAY_CONIFG['mch_id']
     }
     parameter.update(base)
     parameter['package'] = build_package(parameter)
@@ -117,9 +117,9 @@ def order_query(out_trade_no):
     parameter = {
         'appid': config.WEIXIN_APPID,
         'package': 'out_trade_no=' + out_trade_no +
-                   '&partner=' + config.WXPAY_CONIFG['partnerId'] +
+                   '&partner=' + config.WXPAY_CONIFG['mch_id'] +
                    '&sign=' + (hashlib.md5('out_trade_no=' + out_trade_no +
-                                           '&partner=' + config.WXPAY_CONIFG['partnerId'] +
+                                           '&partner=' + config.WXPAY_CONIFG['mch_id'] +
                                            '&key=' + config.WXPAY_CONIFG['partnerkey'])).lower(),
         'timestamp': int(time.time())
     }
@@ -150,7 +150,7 @@ def build_qrcode_form(package_params, inparms):
         'bank_type': 'WX',
         'fee_type': '1',
         'input_charset': 'UTF-8',
-        'partner': config.WXPAY_CONIFG['partnerId']
+        'partner': config.WXPAY_CONIFG['mch_id']
     }
     package_params.update(base)
     package_params['package'] = build_package(package_params)

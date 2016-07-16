@@ -122,7 +122,7 @@ def static_qrcode_create():
     param = {
         'appid': WEIXIN_APPID,
         'nonce_str': random_str(),
-        'mch_id': WXPAY_CONIFG['partnerId'],
+        'mch_id': WXPAY_CONIFG['mch_id'],
         'time_stamp': str(int(time.time())),
         'service_id': str(request.args["service_id"]),
     }
