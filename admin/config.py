@@ -7,8 +7,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 LANGUAGES = {'zh_CN': 'Chinese'}
 BABEL_DEFAULT_LOCALE = 'zh_CN'
 
-# weixin account
 ISONLINE = 'ONLINE_SERVER' in os.environ
+
 WEIXIN_TOKEN = 'pipapay'
 WXPAY_CONIFG = {
     'mch_id': '1304148101',
@@ -17,7 +17,6 @@ WXPAY_CONIFG = {
 }
 
 RUN_MODE = os.environ.get('PIPA_RUN_MODE', 'debug')
-
 if RUN_MODE == 'production':
     DEBUG = False
     DEFAULT_HOST_URL = 'http://wx.pipapay.com/'
@@ -43,9 +42,8 @@ else:
     REDIS_SERVER_IP = '127.0.0.1'
     REDIS_SERVER_PWD = ''
     REDIS_SERVER_DB = 1
-    WEIXIN_APPID = 'wx6965cc85ec3e801c'
-    WEIXIN_SECRET = '7fb5fff43e61aad157aa107aa8301eb7'
-
+    WEIXIN_APPID = 'wxb3ec764893b99722'
+    WEIXIN_SECRET = '04a37bc738a0c2759ba850c4334b99fc'
 
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 

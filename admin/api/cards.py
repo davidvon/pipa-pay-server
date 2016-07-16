@@ -282,7 +282,7 @@ class ApiCardBuy(Resource):
             logger.info('[ApiOrderPayable] data:%s' % str(outputs))
             if res == 0:
                 outputs['orderId'] = order.order_id
-                logger.info('[ApiOrderPayable] create order success:%s' % order.order_id)
+                logger.info('[ApiOrderPayable] create tmp order success:%s' % order.order_id)
                 return {'result': 0, 'content': outputs}
             return {'result': res}
         except Exception as e:
