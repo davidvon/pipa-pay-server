@@ -45,7 +45,7 @@ def createMenu():
         return result
     except Exception as e:
         logger.error(e.message)
-        return jsonify({'errcode': 255, 'errmsg': e.message})
+        return jsonify({'result': 255, 'errmsg': e.message})
 
 
 @weixin_module.route('/weixin_push', methods=['GET', 'POST'])

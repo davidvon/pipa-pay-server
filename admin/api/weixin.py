@@ -21,14 +21,14 @@ class OAuthDecode(Resource):
         openid = get_cache_code_openid(code)
         if openid:
             logger.info('[oauth]: caching openid:%s' % openid)
-            return {'errcode': '0-000', 'openid': openid}, 200
+            return {'result': 0, 'openid': openid}, 200
         helper = WeixinHelper()
         ret = helper.oauth_user(code)
         if ret['errcode'] == 0:
             cache_code_openid(code, ret['openid'])
             logger.info('[oauth]: openid:%s' % ret['openid'])
-            return {'errcode': '0-000', 'openid': ret['openid']}, 200
-        return {'errcode': '1-255'}
+            return {'result': 0, 'openid': ret['openid']}, 200
+        return {'result': 255}
 
 
 class ApiQRcode(Resource):
@@ -36,7 +36,7 @@ class ApiQRcode(Resource):
         id = request.args['id']
         order = Order.query.get(id)
         if not order:
-            return '{"error":"1"}'
+            return {"result": 254}
         try:
             json = {"expire_seconds": 1800, "action_name": "QR_SCENE", "action_info": {"scene": {"scene_id": id}}}
             helper = WeixinHelper()
@@ -44,9 +44,9 @@ class ApiQRcode(Resource):
             url = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + resp["ticket"]
             order.qrcode_make(url)
             now = time.strftime('%Y-%m-%d %H:%M:%S')
+            return {'result': 0, 'qrcode': url, 'time': now}
         except Exception, e:
-            return {'errcode': 255}, 200
-        return {'errcode': 0, 'qrcode': url, 'time': now}, 200
+            return {'result': 255}
 
 
 class ApiWxJsSign(Resource):

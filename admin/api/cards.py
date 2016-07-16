@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
-import hashlib
 import json
 import datetime
 import time
 import traceback
+
 from flask import request
+from flask.ext.restful import Resource
+
 from api import API_PREFIX
 from api.order import create_order
 from app import restful_api, db, logger
-from flask.ext.restful import Resource
 from cache.order import cache_qrcode_code, get_cache_order
 from models import Customer, CustomerCard, CustomerTradeRecords, CustomerCardShare, Order
 from utils.util import nonce_str
 from wexin.helper import WeixinHelper
 from wexin_pay.views import payable
+
 
 __author__ = 'fengguanhua'
 
@@ -47,6 +49,7 @@ class ApiCardDispatch(Resource):
         try:
             order = Order.query.filter_by(order_id=order_id).first()
             if not order:
+                logger.warn('[ApiCardDispatch] order[%s] not exist' % order_id)
                 return {"result": 254}
             expire_date = datetime.date.today() + datetime.timedelta(365 * 3)  # TODO
             count = CustomerCard.query.filter_by(order_id=order_id).count()
@@ -90,6 +93,7 @@ class ApiCardPayCode(Resource):
         card_code = args['cardCode']
         card = CustomerCard.query.filter_by(card_id=card_id, card_code=card_code).first()
         if not card:
+            logger.warn('[ApiCardPayCode] card[id:%s,code:%s] not exist' % (card_id, card_code))
             return {'result': 255}
         data = {
             'status': card.status,
@@ -133,22 +137,22 @@ class ApiCardShareCheck(Resource):
         open_id = args['openId']
         card_code = args['cardCode']
         customer_card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=card_code).first()
-        if customer_card:
-            if customer_card.status >= 3:
-                return {'result': 0, 'data': {'status': customer_card.status, 'card': {}}}  # 转赠中或已转赠
-            timestamp = str(int(time.time()))
-            hash = nonce_str(12)
-            return {'result': 0,
-                    'data': {'status': customer_card.status,
-                             'card': {
-                                 'sign': hash,
-                                 'cardId': customer_card.card_id,
-                                 'cardCode': customer_card.card_code,
-                                 'cardName': customer_card.card.title,
-                                 'timestamp': timestamp,
-                                 'logo': customer_card.card.merchant.logo
-                             }}}
-        return {'result': 255}
+        if not customer_card:
+            logger.warn('[ApiCardShareCheck] openid:%s card[id:%s code:%s] not exist' % (open_id, card_id, card_code))
+            return {'result': 255}
+
+        if customer_card.status >= 3:
+            return {'result': 0, 'status': customer_card.status}  # 转赠中或已转赠
+        return {'result': 0,
+                'status': customer_card.status,
+                'card': {
+                    'sign': nonce_str(12),
+                    'cardId': customer_card.card_id,
+                    'cardCode': customer_card.card_code,
+                    'cardName': customer_card.card.title,
+                    'timestamp': str(int(time.time())),
+                    'logo': customer_card.card.merchant.logo}
+                }
 
 
 class ApiCardShare(Resource):
@@ -184,12 +188,11 @@ class ApiCardShareInfo(Resource):
         card_code = args['cardCode']
         card = CustomerCard.query.filter_by(card_id=card_id, card_code=card_code).first()
         if not card:
+            logger.warn('[ApiCardShareInfo] openid:%s card[id:%s code:%s] not exist' % (open_id, card_id, card_code))
             return {'result': 254}
         share = CustomerCardShare.query.filter_by(share_customer_id=open_id, customer_card_id=card.id).first()
-        acquire_customer = None
-        if share:
-            if share.acquire_customer_id:
-                acquire_customer = Customer.query.filter_by(openid=share.acquire_customer_id).first()
+        if share and share.acquire_customer_id:
+            acquire_customer = Customer.query.filter_by(openid=share.acquire_customer_id).first()
             return {'result': 0,
                     'data': {'status': '已领取' if share.status == 2 else '未领取',
                              'cardLogo': share.customer_card.card.merchant.logo,
@@ -210,6 +213,7 @@ class ApiCardReceiveCheck(Resource):
         sign = args['sign']
         info = CustomerCardShare.query.filter_by(sign=sign).first()
         if not info:
+            logger.warn('[ApiCardReceiveCheck] sign:%s not exist' % sign)
             return {'result': 255}  # sign不存在
         card = info.customer_card
         return {'result': 0,
@@ -219,8 +223,7 @@ class ApiCardReceiveCheck(Resource):
                     'shareContent': info.content,
                     'cardStatus': card.status,
                     'giveStatus': info.status,
-                    'acquireUserOpenId': info.acquire_customer_id
-                }
+                    'acquireUserOpenId': info.acquire_customer_id }
                 }
 
 
@@ -252,7 +255,7 @@ class ApiCardReceive(Resource):
                 need_commit = True
             if need_commit:
                 db.session.commit()
-                logger.info('customer[%s] card[%s] receive ok' % (openid, new_card.card_code))
+                logger.info('customer[%s] card[%s] received success' % (openid, new_card.card_code))
             return {'result': 0,
                     'data': {
                         'status': new_card.status,
@@ -260,8 +263,7 @@ class ApiCardReceive(Resource):
                         'wxCardId': new_card.card.wx_card_id,  # 微信卡券ID，可以chooseCard获取
                         'code': info.customer_card.card_code  # 指定的卡券code码，只能被领一次。use_custom_code字段为true的卡券必须填写，
                         # 非自定义code不必填写。
-                    }
-                    }
+                    }}
         except Exception as e:
             logger.error(traceback.print_exc())
             logger.error('customer[%s] receive card[%s] error:%s' % (openid, sign, e.message))
@@ -279,11 +281,12 @@ class ApiCardBuy(Resource):
             openid = args.get('openId')
             order = create_order(cardid, price, openid, count)
             res, outputs = payable(request, openid, order)
-            logger.info('[ApiOrderPayable] data:%s' % str(outputs))
+            logger.info('[ApiCardBuy] data:%s' % str(outputs))
             if res == 0:
                 outputs['orderId'] = order.order_id
-                logger.info('[ApiOrderPayable] create temp order success:%s' % order.order_id)
+                logger.info('[ApiCardBuy] create temp order success:%s' % order.order_id)
                 return {'result': 0, 'content': outputs}
+            logger.warn('[ApiCardBuy] order:%s pre-pay failed:%d' % (order.order_id, res))
             return {'result': res}
         except Exception as e:
             logger.error(traceback.print_exc())
@@ -297,45 +300,53 @@ class ApiCardBuyCommit(Resource):
         order_id = args.get('orderId')
         order = get_cache_order(order_id)
         if not order:
-            return {'result': '1-0-0'}
+            logger.warn('[ApiCardBuyCommit] order:%s not exist' % order_id)
+            return {'result': 254}
         try:
             order.paid = True
             db.session.add(order)
             db.session.commit()
-            logger.info('ApiCardBuyCommit order:%s buy success' % order_id)
-            return {'result': '0-0-0'}
+            logger.info('[ApiCardBuyCommit] order:%s create success' % order_id)
+            return {'result': 0}
         except Exception as e:
-            logger.error('ApiCardBuyCommit order:%s buy error:%s' % (order_id, e.message))
-            return {'result': '255-0-0'}
+            logger.error('[ApiCardBuyCommit] order:%s create error:%s' % (order_id, e.message))
+            return {'result': 255}
 
 
 class ApiCardActive(Resource):
     def post(self):
-        openid = cardid = code = None
+        open_id = card_id = code = None
         try:
             args = json.loads(request.data)
-            logger.info('[ApiCardActive] data=%s' % str(args))
-            cardid = args.get('card_id')
+            card_id = args.get('card_id')
             encrypt_code = args.get('encrypt_code')
-            openid = args.get('openid')
+            open_id = args.get('openid')
+            logger.info('[ApiCardActive] data=%s' % str(args))
+
             helper = WeixinHelper()
             code = helper.decrypt_card_code(encrypt_code)
             if not code:
-                logger.error('[ApiCardActive] decrypt card code[%s,%s] error' % (openid, cardid))
+                logger.error('[ApiCardActive] decrypt card code[%s,%s] error' % (open_id, card_id))
                 return {'result': 255}
-            card = CustomerCard.query.filter_by(customer_id=openid, card_id=cardid, card_code=code).first()
-            active = helper.active_card(card.amount * 100, code, cardid, 0)
+
+            card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=code).first()
+            active = helper.active_card(card.amount * 100, code, card_id, 0)
             if not active:
-                logger.error('[ApiCardActive] active card[%s,%s,%s] error' % (openid, cardid, code))
+                logger.error('[ApiCardActive] active card[%s,%s,%s] error' % (open_id, card_id, code))
                 return {'result': 255}
+
             card.status = 2
             db.session.add(card)
             db.session.commit()
             return {'result': 0}
         except Exception as e:
-            logger.error('[ApiCardActive] active card[%s,%s,%s] exception' % (openid, cardid, code))
+            logger.error('[ApiCardActive] active card[%s,%s,%s] exception' % (open_id, card_id, code))
             return {'result': 255}
 
+
+restful_api.add_resource(ApiCardBuy, API_PREFIX + 'card/buy')
+restful_api.add_resource(ApiCardBuyCommit, API_PREFIX + 'card/buy/commit')
+restful_api.add_resource(ApiCardActive, API_PREFIX + 'card/active')
 
 restful_api.add_resource(ApiCardMembers, API_PREFIX + 'cards')
 restful_api.add_resource(ApiCardDispatch, API_PREFIX + 'card/dispatch')
@@ -349,6 +360,3 @@ restful_api.add_resource(ApiCardShareInfo, API_PREFIX + 'card/share/info')
 restful_api.add_resource(ApiCardReceiveCheck, API_PREFIX + 'card/receive/check')
 restful_api.add_resource(ApiCardReceive, API_PREFIX + 'card/receive')
 
-restful_api.add_resource(ApiCardBuy, API_PREFIX + 'card/buy')
-restful_api.add_resource(ApiCardBuyCommit, API_PREFIX + 'card/buy/commit')
-restful_api.add_resource(ApiCardActive, API_PREFIX + 'card/active')
