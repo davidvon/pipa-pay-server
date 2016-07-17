@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import traceback
 import urllib2
 import urllib
 import json
@@ -56,10 +57,12 @@ class Request(object):
                 else:
                     return response
             except Exception, e:
+                logger.error('[WEIXIN] request error[%s]' % e.message)
                 self.errmsg = e.message
             finally:
                 time.sleep(sleep_second)
                 times -= 1
+                logger.info('[WEIXIN] request retry[%d]' % times)
         raise WeixinException(self.errcode, self.errmsg)
 
     def _request(self, url, params, data, method, headers):
@@ -97,7 +100,7 @@ class Token(object):
                          WEIXIN_APPID + "&secret=" + WEIXIN_SECRET, verify=False)
         response = r.json()
         cache_access_token(response["access_token"], response["expires_in"])
-        logger.info('[WEIXIN] appid=%s, secret=%s, new token=%s, expires=%s' % (
+        logger.info('[WEIXIN][Token_create] appid=%s, secret=%s, new token=%s, expires=%s' % (
             WEIXIN_APPID, WEIXIN_SECRET, response["access_token"], response["expires_in"]))
         return response["access_token"]
 

@@ -18,19 +18,23 @@ __author__ = 'fengguanhua'
 
 class OAuthDecode(Resource):
     def post(self):
-        logger.info('[oauth]: request.data:%s' % request.data)
         args = json.loads(request.data)
+        logger.info('[oauth] in: args[%s]' % args)
+
         code = args['code']
         openid = get_cache_code_openid(code)
         if openid:
-            logger.info('[oauth]: caching openid:%s' % openid)
+            logger.info('[oauth] caching openid[%s]' % openid)
             return {'result': 0, 'openid': openid}, 200
+
         helper = WeixinHelper()
         ret = helper.oauth_user(code)
         if ret['errcode'] == 0:
             cache_code_openid(code, ret['openid'])
-            logger.info('[oauth]: openid:%s' % ret['openid'])
+            logger.info('[oauth] openid[%s]' % ret['openid'])
             return {'result': 0, 'openid': ret['openid']}, 200
+
+        logger.debug('[oauth] out: result[255]')
         return {'result': 255}
 
 
@@ -55,6 +59,8 @@ class ApiQRcode(Resource):
 class ApiWxJsSign(Resource):
     def post(self):
         args = json.loads(request.data)
+        logger.info('[ApiWxJsSign] in: args[%s]' % args)
+
         url = args['url']
         logger.info('[ApiWxJsSign] url:%s' % url)
         helper = WeixinHelper()
@@ -65,7 +71,7 @@ class ApiWxJsSign(Resource):
             "nonceStr": ret['nonce_str'],
             "signature": ret['hash']
         }
-        logger.info('[ApiWxJsSign] ack:%s' % data)
+        logger.info('[ApiWxJsSign] return:[%s]' % data)
         return data
 
 
@@ -74,7 +80,7 @@ class ApiWxCardChooseSign(Resource):
     def post(self):
         helper = WeixinHelper()
         ret = helper.choose_card_sign()
-        print("wx card sign:%s" % ret)
+        logger.info("[ApiWxCardChooseSign] wx card sign:%s" % ret)
         return ret
 
 
@@ -82,6 +88,8 @@ class ApiWxCardChooseSign(Resource):
 class ApiWxCardsAdd(Resource):
     def post(self):
         args = json.loads(request.data)
+        logger.info('[ApiWxCardsAdd] in: args[%s]' % args)
+
         helper = WeixinHelper()
         order_id = args.get('orderId')
         cards = CustomerCard.query.filter_by(order_id=order_id).all()
@@ -92,6 +100,8 @@ class ApiWxCardsAdd(Resource):
             # cache_card_adding_tag(card.card_id, card.customer_id, card_global_id)  # TODO
             ret = helper.card_sign(card.card_id)
             dicts.append({"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']})
+
+        logger.info('[ApiWxCardsAdd] out: result[0] data[%s]' % dicts)
         return {'result': 0, "data": dicts}
 
 
@@ -99,12 +109,16 @@ class ApiWxCardsAdd(Resource):
 class ApiWxCardAdd(Resource):
     def post(self):
         args = json.loads(request.data)
+        logger.info('[ApiWxCardAdd] in: args[%s]' % args)
+
         helper = WeixinHelper()
         card_global_id = args.get('card_global_id')
         card = CustomerCard.query.get(card_global_id)
         cache_card_adding_tag(card.card_id, card.customer_id, card_global_id)
         ret = helper.card_sign(card.card_id)
         dicts = {"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']}
+
+        logger.info('[ApiWxCardAdd] out: result[0] data[%s]' % dicts)
         return {'result': 0, "data": dicts}
 
 
