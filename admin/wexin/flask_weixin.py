@@ -61,6 +61,7 @@ class FlaskWeixin(object):
     def view_func(self):
         signature = request.args.get('signature')
         timestamp = request.args.get('timestamp')
+        logger.info("[WEIXIN] view_func args:%s" % request.args)
         if not signature and not timestamp:
             return ''
         nonce = request.args.get('nonce')
