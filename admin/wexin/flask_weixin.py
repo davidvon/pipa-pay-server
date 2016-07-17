@@ -8,8 +8,6 @@
     :copyright: (c) 2013 by Hsiaoming Yang.
     :license: BSD, see LICENSE for more detail.
 """
-import traceback
-
 from flask import session
 from flask import request
 
@@ -24,6 +22,7 @@ except ImportError:
 except:
     from xml.etree import ElementTree as etree
 
+logger.info("======= FlaskWeixin =======")
 
 class FlaskWeixin(object):
     def __init__(self, app=None):
@@ -82,3 +81,4 @@ class FlaskWeixin(object):
 
     view_func.methods = ['GET', 'POST']
 
+logger.info("======= FlaskWeixin End =======")
