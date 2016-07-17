@@ -4,7 +4,7 @@ import traceback
 
 from flask import Response
 
-from cache.weixin import get_cache_card_adding_tag
+from cache.weixin import pop_cache_card_id
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
     WechatSystemReply, LIKE_MATCH, WechatImageNews, CustomerCardShare, CustomerCard
 from wexin.util import *
@@ -273,7 +273,7 @@ class ReplyKeyWords(object):
         return content
 
     def card_give(self, args):
-        logger.info('customer[%s] card give event[%s] received' % (self.sender, args))
+        logger.info('[card_give] customer[%s] card give event[%s] received' % (self.sender, args))
         is_gived = args.get('isgivebyfriend')
         share_openid = args.get('friendusername')
         cardid = args.get('cardid')
@@ -296,17 +296,20 @@ class ReplyKeyWords(object):
                 db.session.add(old_card)
                 db.session.add(new_card)
             else:
-                card_global_id = get_cache_card_adding_tag(cardid, self.sender)
-                card = CustomerCard.query.get(card_global_id)
-                if card:
-                    card.wx_binding_time = datetime.now()
-                    card.card_code = card_code
-                    db.session.add(card)
+                card_gid = pop_cache_card_id(cardid, self.sender)
+                if not card_gid:
+                    logger.error('[card_give] customer[%s] card[%s] pop is empty' % (self.sender, cardid))
+                    return
+                card = CustomerCard.query.get(card_gid)
+                card.wx_binding_time = datetime.now()
+                card.card_code = card_code
+                db.session.add(card)
             db.session.commit()
+            logger.info('[card_give] customer[%s] card banding success' % self.sender)
             return {'result': 'ok'}
         except Exception as e:
             logger.error(traceback.print_exc())
-            logger.error('customer[%s] receive card event[%s] error:%s' % (self.sender, args, e.message))
+            logger.error('[card_give] customer[%s] card banding event[%s] error:%s' % (self.sender, args, e.message))
             return {'result': 'error'}
 
 

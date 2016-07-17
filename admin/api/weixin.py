@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
 import time
-
 from flask import request
 from flask.ext.restful import Resource
 
 from api import API_WX_PREFIX
 from app import restful_api, logger
-from cache.weixin import cache_card_adding_tag, cache_code_openid, get_cache_code_openid
+from cache.weixin import cache_code_openid, get_cache_code_openid, push_cache_card_id
 from config import WEIXIN_APPID
 from models import Order, CustomerCard
 from wexin.helper import WeixinHelper
@@ -97,10 +96,9 @@ class ApiWxCardsAdd(Resource):
         for card in cards:
             if card.status > 0:
                 continue
-            # cache_card_adding_tag(card.card_id, card.customer_id, card_global_id)  # TODO
             ret = helper.card_sign(card.card_id)
             dicts.append({"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']})
-
+            push_cache_card_id(card.card_id, card.customer_id, card.id)  # TODO
         logger.info('[ApiWxCardsAdd] out: result[0] data[%s]' % dicts)
         return {'result': 0, "data": dicts}
 
@@ -112,9 +110,9 @@ class ApiWxCardAdd(Resource):
         logger.info('[ApiWxCardAdd] in: args[%s]' % args)
 
         helper = WeixinHelper()
-        card_global_id = args.get('card_global_id')
-        card = CustomerCard.query.get(card_global_id)
-        cache_card_adding_tag(card.card_id, card.customer_id, card_global_id)
+        card_gid = args.get('card_global_id')
+        card = CustomerCard.query.get(card_gid)
+        push_cache_card_id(card.card_id, card.customer_id, card_gid)
         ret = helper.card_sign(card.card_id)
         dicts = {"id": card.card_id, "timestamp": ret['timestamp'], "signature": ret['signature']}
 
