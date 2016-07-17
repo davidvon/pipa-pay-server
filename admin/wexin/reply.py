@@ -141,6 +141,7 @@ class ReplyKeyWords(object):
 
     def location_report(self, location_x, location_y, scale):
         logger.info('[WEIXIN] location: %s-%s-%s' % (location_x, location_y, scale))
+        return ''
 
     def qrcode(self, content):
         return ''

@@ -81,5 +81,3 @@ class FlaskWeixin(object):
             return 'invalid', 400
 
     view_func.methods = ['GET', 'POST']
-
-logger.info("======= FlaskWeixin End =======")
