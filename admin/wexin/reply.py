@@ -56,7 +56,7 @@ class ReplyKeyWords(object):
             elif self.event == 'user_get_card':  # 领取卡券
                 return self.card_give(args)
             elif self.event == 'user_pay_from_pay_cell':  # 买单卡券
-                return self.card_pay(args)
+                return self.card_pay_event_notify(args)
             elif self.event == 'user_del_card':  # 删除卡券
                 return ''
             elif self.event == 'user_consume_card':  # 核销卡券
@@ -310,11 +310,12 @@ class ReplyKeyWords(object):
             return {'result': 'error'}
 
 
-    def card_pay(self, args):
+    def card_pay_event_notify(self, args):
         logger.info('customer[%s] card pay event[%s] received' % (self.sender, args))
         share_openid = args.get('friendusername')
         cardid = args.get('cardid')
         card_code = args.get('usercardcode')
         trans_id = args.get('transid')
         trans_id = args.get('fee')
+        # TODO
         return {'result': 'ok'}
