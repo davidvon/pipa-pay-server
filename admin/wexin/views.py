@@ -9,6 +9,7 @@ import json
 from flask import request, jsonify
 from flask_weixin import FlaskWeixin
 from wexin.util import *
+from app import logger
 
 from flask import Blueprint
 

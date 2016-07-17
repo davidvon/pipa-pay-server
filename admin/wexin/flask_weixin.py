@@ -26,11 +26,11 @@ logger.info("======= FlaskWeixin =======")
 
 class FlaskWeixin(object):
     def __init__(self, app=None):
+        logger.info("======= FlaskWeixin in =======")
         self.session = session
         self.weixin_helper = WeixinHelper()
         self.weixin_reply = ReplyKeyWords(self)
         self._registry = {}
-
 
     def register(self, key, func=None):
         if func:
@@ -58,9 +58,9 @@ class FlaskWeixin(object):
         return wrapper
 
     def view_func(self):
+        logger.info("[WEIXIN] view_func args:%s" % request.args)
         signature = request.args.get('signature')
         timestamp = request.args.get('timestamp')
-        logger.info("[WEIXIN] view_func args:%s" % request.args)
         if not signature and not timestamp:
             return ''
         nonce = request.args.get('nonce')
