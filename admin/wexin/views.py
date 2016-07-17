@@ -13,8 +13,6 @@ from app import logger
 
 from flask import Blueprint
 
-logger.info("======= FlaskWeixin View =======")
-
 weixin_module = Blueprint('weixin', __name__, static_folder='static')
 weixin = FlaskWeixin(app)
 app.add_url_rule('/weixin', view_func=weixin.view_func)
@@ -93,5 +91,3 @@ def batch_update_customer_info():
             error_count += 1
         time.sleep(0.5)
     return '{"err":"%d", "updated":%d, "all":%d}' % (error_count, sucsess_count, len(customers))
-
-logger.info("======= FlaskWeixin View end =======")

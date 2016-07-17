@@ -23,11 +23,9 @@ except ImportError:
 except:
     from xml.etree import ElementTree as etree
 
-logger.info("======= FlaskWeixin =======")
 
 class FlaskWeixin(object):
     def __init__(self, app=None):
-        logger.info("======= FlaskWeixin in =======")
         self.session = session
         self.weixin_helper = WeixinHelper()
         self.weixin_reply = ReplyKeyWords(self)
