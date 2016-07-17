@@ -8,6 +8,7 @@
     :copyright: (c) 2013 by Hsiaoming Yang.
     :license: BSD, see LICENSE for more detail.
 """
+import traceback
 from flask import session
 from flask import request
 

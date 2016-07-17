@@ -4,17 +4,13 @@ import urllib2
 import urllib
 import json
 import xml.etree.ElementTree as ET
+import requests
 import hashlib
 import time
-logger.info("======= Weixin Helper =======")
-import requests
-
 from config import WEIXIN_APPID, WEIXIN_SECRET, WEIXIN_TOKEN
 from app import logger
 from cache.weixin import get_cache_access_token, cache_access_token, cache_ticket, get_cache_ticket
 from wexin.util import nonce_str
-
-logger.info("======= Weixin Helper 2 =======")
 
 api_host = "https://api.weixin.qq.com"
 qrcode_host = "https://mp.weixin.qq.com"
