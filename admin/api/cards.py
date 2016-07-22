@@ -220,6 +220,7 @@ class ApiCardShareInfo(Resource):
             return {'result': 254}
 
         share = CustomerCardShare.query.filter_by(share_customer_id=open_id, customer_card_id=card.id).first()
+        acquire_customer = None
         if share and share.acquire_customer_id:
             acquire_customer = Customer.query.filter_by(openid=share.acquire_customer_id).first()
         data = {'result': 0,
