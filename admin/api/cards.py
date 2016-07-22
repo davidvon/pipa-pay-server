@@ -278,20 +278,24 @@ class ApiCardReceive(Resource):
                              (openid, info.customer_card.card_code))
                 return {'result': 255}  # sign不存在
 
-            new_card = CustomerCard.query.filter_by(customer_id=openid, card_id=info.customer_card.card_id).first()
-            if not new_card:
-                logger.info('[ApiCardReceive] customer[%s] card[%s] not exist' % (openid, info.customer_card_id))
-                old_card = CustomerCard.query.filter_by(customer_id=info.share_customer.openid).first()
-                if info.share_customer.openid != openid:
-                    new_card = CustomerCard(customer_id=openid, card_id=info.customer_card.card_id, img=old_card.img,
-                                            amount=old_card.amount, card_code=old_card.card_code,
-                                            expire_date=old_card.expire_date, status=0)
-                    old_card.status = 5
-                    db.session.add(old_card)
+            new_card = CustomerCard.query.filter_by(customer_id=openid, card_code=info.customer_card.card_code,
+                                                    card_id=info.customer_card.card_id).first()
+            if new_card:
+                if info.share_customer.openid == openid:
+                    new_card.status = 0
                     db.session.add(new_card)
-                else:
-                    old_card.status = 0
-                    db.session.add(old_card)
+                    need_commit = True
+            else:
+                logger.info('[ApiCardReceive] customer[%s] card[%s] not exist' % (openid, info.customer_card_id))
+                old_card = CustomerCard.query.filter_by(customer_id=info.share_customer.openid,
+                                                        card_id=info.customer_card.card_id,
+                                                        card_code=info.customer_card.card_code).first()
+                new_card = CustomerCard(customer_id=openid, card_id=info.customer_card.card_id, img=old_card.img,
+                                        amount=old_card.amount, card_code=old_card.card_code,
+                                        expire_date=old_card.expire_date, status=0)
+                old_card.status = 5
+                db.session.add(old_card)
+                db.session.add(new_card)
                 need_commit = True
             if info.status != 1:
                 info.acquire_customer_id = openid
