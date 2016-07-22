@@ -30,12 +30,13 @@ def order_id_increment(max_len=5):
     return result
 
 
-def cache_qrcode_code(card_id):
-    old_code = redis_client.get(card_id)
+def cache_qrcode_code(card_id, card_code):
+    val = '%s-%s' % (card_id, card_code)
+    old_code = redis_client.get(val)
     old_code and redis_client.delete(old_code)
     code = random_digit(20)
-    redis_client.set(code, card_id, 70)  # 每分钟刷新
-    redis_client.set(card_id, code, 70)  # 每分钟刷新
+    redis_client.set(code, val, 70)  # 每分钟刷新
+    redis_client.set(val, code, 70)  # 每分钟刷新
     return code
 
 

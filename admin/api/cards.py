@@ -114,7 +114,7 @@ class ApiCardPayCode(Resource):
             'merchantName': card.card.merchant.name,
             'cardName': card.card.title,
             'amount': card.amount,
-            'qrcode': cache_qrcode_code(card_id)
+            'qrcode': cache_qrcode_code(card_id, card_code)
         }
         logger.debug('[ApiCardPayCode] out: result[0] data[%s]' % data)
         return {'result': 0, 'data': data}
@@ -222,22 +222,19 @@ class ApiCardShareInfo(Resource):
         share = CustomerCardShare.query.filter_by(share_customer_id=open_id, customer_card_id=card.id).first()
         if share and share.acquire_customer_id:
             acquire_customer = Customer.query.filter_by(openid=share.acquire_customer_id).first()
-            data = {'result': 0,
-                    'data': {'status': '已领取' if share.status == 2 else '未领取',
-                             'cardLogo': share.customer_card.card.merchant.logo,
-                             'cardCode': card_code,
-                             'cardName': share.customer_card.card.title,
-                             'datetime': str(share.datetime),
-                             'content': share.content,
-                             'acquireUserImg': acquire_customer.head_image if acquire_customer else '',
-                             'acquireUserName': acquire_customer.show_name() if acquire_customer else '',
-                             }
-                    }
-            logger.debug('[ApiCardShareInfo] out: return[%s]' % data)
-            return data
-
-        logger.debug('[ApiCardShareInfo] out: result[255]')
-        return {'result': 255}
+        data = {'result': 0,
+                'data': {'status': '已领取' if share.status == 2 else '未领取',
+                         'cardLogo': share.customer_card.card.merchant.logo,
+                         'cardCode': card_code,
+                         'cardName': share.customer_card.card.title,
+                         'datetime': str(share.datetime),
+                         'content': share.content,
+                         'acquireUserImg': acquire_customer.head_image if acquire_customer else '',
+                         'acquireUserName': acquire_customer.show_name() if acquire_customer else '',
+                         }
+                }
+        logger.debug('[ApiCardShareInfo] out: return[%s]' % data)
+        return data
 
 
 class ApiCardReceiveCheck(Resource):
