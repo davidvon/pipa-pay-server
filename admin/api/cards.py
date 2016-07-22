@@ -278,9 +278,9 @@ class ApiCardReceive(Resource):
                              (openid, info.customer_card.card_code))
                 return {'result': 255}  # sign不存在
 
-            new_card = CustomerCard.query.filter_by(customer_id=openid, card_id=info.customer_card_id).first()
+            new_card = CustomerCard.query.filter_by(customer_id=openid, card_id=info.customer_card.card_id).first()
             if not new_card:
-                logger.debug('[ApiCardReceive] customer[%s] card[%s] not exist' % (openid, info.customer_card_id))
+                logger.info('[ApiCardReceive] customer[%s] card[%s] not exist' % (openid, info.customer_card_id))
                 old_card = CustomerCard.query.filter_by(customer_id=info.share_customer.openid).first()
                 new_card = CustomerCard(customer_id=openid, card_id=info.customer_card.card_id, img=old_card.img,
                                         amount=old_card.amount, card_code=old_card.card_code,
