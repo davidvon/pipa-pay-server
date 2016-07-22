@@ -282,18 +282,16 @@ class ApiCardReceive(Resource):
             if not new_card:
                 logger.info('[ApiCardReceive] customer[%s] card[%s] not exist' % (openid, info.customer_card_id))
                 old_card = CustomerCard.query.filter_by(customer_id=info.share_customer.openid).first()
-                new_card = CustomerCard.query.filter_by(customer_id=openid, card_id=info.customer_card.card_id,
-                                                        card_code=old_card.card_code)
-                if not new_card:
+                if info.share_customer.openid != openid:
                     new_card = CustomerCard(customer_id=openid, card_id=info.customer_card.card_id, img=old_card.img,
                                             amount=old_card.amount, card_code=old_card.card_code,
                                             expire_date=old_card.expire_date, status=0)
+                    old_card.status = 5
+                    db.session.add(old_card)
+                    db.session.add(new_card)
                 else:
-                    new_card.amount = old_card.amount
-                    new_card.status = 0
-                old_card.status = 5
-                db.session.add(old_card)
-                db.session.add(new_card)
+                    old_card.status = 0
+                    db.session.add(old_card)
                 need_commit = True
             if info.status != 1:
                 info.acquire_customer_id = openid
