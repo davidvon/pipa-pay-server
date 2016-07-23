@@ -48,3 +48,16 @@ def cache_code_openid(card_id, openid):
 def get_cache_code_openid(card_id):
     return redis_client.get(card_id)
 
+
+def cache_customer_cards(openid, cards):
+    val = JSONEncoder().encode(cards)
+    redis_client.set(openid+'_cards', val, 60)
+
+
+def get_cache_customer_cards(open_id):
+    val = redis_client.get(open_id+'_cards')
+    if not val:
+        return None
+    cards = JSONDecoder().decode(val)
+    return cards
+

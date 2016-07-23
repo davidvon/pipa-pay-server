@@ -48,7 +48,8 @@ db = SQLAlchemy(app)
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    origin = 'http://live.pipapay.com' if config.RUN_MODE == 'production' else '*'
+    response.headers.add('Access-Control-Allow-Origin', origin)
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response

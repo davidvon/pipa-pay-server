@@ -4,13 +4,16 @@ import urllib2
 import urllib
 import json
 import xml.etree.ElementTree as ET
-import requests
 import hashlib
 import time
+
+import requests
+
 from config import WEIXIN_APPID, WEIXIN_SECRET, WEIXIN_TOKEN
 from app import logger
 from cache.weixin import get_cache_access_token, cache_access_token, cache_ticket, get_cache_ticket
 from wexin.util import nonce_str
+
 
 api_host = "https://api.weixin.qq.com"
 qrcode_host = "https://mp.weixin.qq.com"
@@ -53,12 +56,11 @@ class Request(object):
                 else:
                     return response
             except Exception, e:
-                logger.error('[WEIXIN] request error[%s]' % e.message)
+                logger.error('[WEIXIN] request error[%s], retry[%d]' % (e.message, times))
                 self.errmsg = e.message
             finally:
                 time.sleep(sleep_second)
                 times -= 1
-                logger.info('[WEIXIN] request retry[%d]' % times)
         raise WeixinException(self.errcode, self.errmsg)
 
     def _request(self, url, params, data, method, headers):
@@ -460,5 +462,6 @@ class WeixinHelper(object):
         if response["errcode"] == 0:
             return True
         return False
+
 
 logger.info("======= Weixin Helper End =======")

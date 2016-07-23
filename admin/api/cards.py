@@ -10,6 +10,7 @@ from api import API_PREFIX
 from api.order import create_order
 from app import restful_api, db, logger
 from cache.order import cache_qrcode_code, get_cache_order
+from cache.weixin import get_cache_customer_cards, cache_customer_cards
 from models import Customer, CustomerCard, CustomerTradeRecords, CustomerCardShare, Order
 from utils.util import nonce_str
 from wexin.helper import WeixinHelper
@@ -26,20 +27,23 @@ class ApiCardMembers(Resource):
 
         openid = args.get("openid")
         share = args.get("share")
-        customer_cards = CustomerCard.query.filter(CustomerCard.customer_id == openid) \
-            .order_by(CustomerCard.status.asc()).all()
-        data = [
-            {'globalId': item.id,
-             'cardId': item.card_id,
-             'merchantId': item.card.merchant.id,
-             'cardCode': item.card_code,
-             'amount': item.amount,
-             'title': item.card.title,
-             'logo': item.card.merchant.logo,
-             'img': item.img or 'http://wx.cdn.pipapay.com/static/images/card_blue.png',
-             'status': item.status,
-             'expireDate': str(item.expire_date)} for item in customer_cards if
-            (not share) or (share and item.status < 3)]
+        cards = get_cache_customer_cards(openid)
+        if not cards:
+            customer_cards = CustomerCard.query.filter(CustomerCard.customer_id == openid) \
+                .order_by(CustomerCard.status.asc()).all()
+            cards = [
+                {'globalId': item.id,
+                 'cardId': item.card_id,
+                 'merchantId': item.card.merchant.id,
+                 'cardCode': item.card_code,
+                 'amount': item.amount,
+                 'title': item.card.title,
+                 'logo': item.card.merchant.logo,
+                 'img': item.img or 'http://wx.cdn.pipapay.com/static/images/card_blue.png',
+                 'status': item.status,
+                 'expireDate': str(item.expire_date)} for item in customer_cards]
+            cache_customer_cards(openid, cards)
+        data = [card for card in cards if card['status'] < 3] if share else cards
         logger.debug('[ApiCardMembers] out: result[0], data[%s]' % data)
         return {"result": 0, "data": data}
 
@@ -346,7 +350,6 @@ class ApiCardBuy(Resource):
             logger.warn('[ApiCardBuy] order:%s pre-pay failed:%d' % (order.order_id, res))
             return {'result': res}
         except Exception as e:
-            logger.error(traceback.print_exc())
             logger.error('[ApiCardBuy] except:%s' % e.message)
             return {'result': 254}
 
