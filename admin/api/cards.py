@@ -338,7 +338,7 @@ class ApiCardBuy(Resource):
             price = args.get('price')
             count = args.get('count')
             openid = args.get('openId')
-            order = create_order(card_id, price, openid, count)
+            order = create_order(card_id, int(price), openid, count)
             res, outputs = payable(request, openid, order)
             logger.info('[ApiCardBuy] data:%s' % str(outputs))
 
