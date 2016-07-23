@@ -9,6 +9,7 @@ from cache.weixin import cache_code_openid, get_cache_code_openid, push_cache_ca
 from config import WEIXIN_APPID
 from models import Order, CustomerCard
 from wexin.helper import WeixinHelper
+from wexin.util import create_customer_try, update_customer_info
 
 
 __author__ = 'fengguanhua'
@@ -23,16 +24,19 @@ class OAuthDecode(Resource):
         openid = get_cache_code_openid(code)
         if openid:
             logger.info('[oauth] caching openid[%s]' % openid)
-            return {'result': 0, 'openid': openid}, 200
+            return {'result': 0, 'openid': openid}
 
         helper = WeixinHelper()
         ret = helper.oauth_user(code)
         if ret['errcode'] == 0:
-            cache_code_openid(code, ret['openid'])
-            logger.info('[oauth] openid[%s]' % ret['openid'])
-            return {'result': 0, 'openid': ret['openid']}, 200
+            openid = ret['openid']
+            cache_code_openid(code, openid)
+            create_customer_try(openid)
+            update_customer_info(openid)
+            logger.info('[oauth] customer[%s] created' % ret['openid'])
+            return {'result': 0, 'openid': ret['openid']}
 
-        logger.debug('[oauth] out: result[255]')
+        logger.debug('[oauth] out: result[254]')
         return {'result': 255}
 
 
