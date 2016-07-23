@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import datetime
 import time
 import traceback
@@ -22,7 +21,7 @@ __author__ = 'fengguanhua'
 
 class ApiCardMembers(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardMembers] in: args[%s]' % args)
 
         openid = args.get("openid")
@@ -47,7 +46,7 @@ class ApiCardMembers(Resource):
 
 class ApiCardDispatch(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardDispatch] in: args[%s]' % args)
 
         order_id = args.get('order_id')
@@ -79,7 +78,7 @@ class ApiWxCardStatusUpdate(Resource):
     def post(self):
         openid = args = None
         try:
-            args = json.loads(request.data)
+            args = request.values
             logger.debug('[ApiWxCardStatusUpdate] in: args[%s]' % args)
 
             openid = args['openid']
@@ -100,7 +99,7 @@ class ApiWxCardStatusUpdate(Resource):
 
 class ApiCardPayCode(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardPayCode] in: args[%s]' % args)
 
         card_id = args['cardId']
@@ -122,7 +121,7 @@ class ApiCardPayCode(Resource):
 
 class ApiCardPayRecords(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardPayRecords] in: args[%s]' % args)
 
         card_id = args['cardId']
@@ -150,12 +149,16 @@ class ApiCardPayRecords(Resource):
 
 class ApiCardShareCheck(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardShareCheck] in: args[%s]' % args)
 
         card_id = args['cardId']
         open_id = args['openId']
         card_code = args['cardCode']
+        if not card_code:
+            logger.warn('[ApiCardShareCheck] openid:%s card[id:%s] not banding' % (open_id, card_id))
+            return {'result': 254}
+
         customer_card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=card_code).first()
         if not customer_card:
             logger.warn('[ApiCardShareCheck] openid:%s card[id:%s code:%s] not exist' % (open_id, card_id, card_code))
@@ -181,7 +184,7 @@ class ApiCardShareCheck(Resource):
 
 class ApiCardShare(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardShare] in: args[%s]' % args)
 
         open_id = args['openId']
@@ -208,7 +211,7 @@ class ApiCardShare(Resource):
 
 class ApiCardShareInfo(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardShareInfo] in: args[%s]' % args)
 
         open_id = args['openId']
@@ -240,7 +243,7 @@ class ApiCardShareInfo(Resource):
 
 class ApiCardReceiveCheck(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardReceiveCheck] in: args[%s]' % args)
 
         sign = args['sign']
@@ -265,7 +268,7 @@ class ApiCardReceiveCheck(Resource):
 
 class ApiCardReceive(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardReceive] in: args[%s]' % args)
 
         sign = args['sign']
@@ -324,7 +327,7 @@ class ApiCardReceive(Resource):
 class ApiCardBuy(Resource):
     def post(self):
         try:
-            args = json.loads(request.data)
+            args = request.values
             logger.info('[ApiCardBuy] args:%s' % args)
 
             card_id = args.get('cardId')
@@ -350,7 +353,7 @@ class ApiCardBuy(Resource):
 
 class ApiCardBuyCommit(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardBuyCommit] in: args[%s]' % args)
 
         order_id = args.get('orderId')
@@ -373,7 +376,7 @@ class ApiCardBuyCommit(Resource):
 class ApiCardActive(Resource):
     def post(self):
         open_id = card_id = code = None
-        args = json.loads(request.data)
+        args = request.values
         logger.debug('[ApiCardActive] in: args[%s]' % args)
 
         try:

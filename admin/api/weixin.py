@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import time
 from flask import request
 from flask.ext.restful import Resource
@@ -17,7 +16,7 @@ __author__ = 'fengguanhua'
 
 class OAuthDecode(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.info('[oauth] in: args[%s]' % args)
 
         code = args['code']
@@ -57,7 +56,7 @@ class ApiQRcode(Resource):
 
 class ApiWxJsSign(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.info('[ApiWxJsSign] in: args[%s]' % args)
 
         url = args['url']
@@ -86,7 +85,7 @@ class ApiWxCardChooseSign(Resource):
 # buy cards
 class ApiWxCardsAdd(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.info('[ApiWxCardsAdd] in: args[%s]' % args)
 
         helper = WeixinHelper()
@@ -106,7 +105,7 @@ class ApiWxCardsAdd(Resource):
 # wx.addCard signature
 class ApiWxCardAdd(Resource):
     def post(self):
-        args = json.loads(request.data)
+        args = request.values
         logger.info('[ApiWxCardAdd] in: args[%s]' % args)
 
         helper = WeixinHelper()

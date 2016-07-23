@@ -52,7 +52,7 @@ def createMenu():
 def weixin_push():
     cache_url(request.host_url)
     if request.data:
-        data = json.loads(request.data)
+        data = request.values
         tag = data.get('tag')
         newsid = data.get('newsid')
         user = data.get('user')
