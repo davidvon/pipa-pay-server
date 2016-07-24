@@ -350,10 +350,10 @@ class ApiCardBuy(Resource):
                 return {'result': 0, 'content': outputs}
 
             logger.warn('[ApiCardBuy] order:%s pre-pay failed:%d' % (order.order_id, res))
-            return {'result': res}
+            return {'result': res, 'msg': outputs}
         except Exception as e:
             logger.error('[ApiCardBuy] except:%s' % e.message)
-            return {'result': 254}
+            return {'result': 254, 'msg': e.message}
 
 
 class ApiCardBuyCommit(Resource):

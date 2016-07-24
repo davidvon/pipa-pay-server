@@ -39,7 +39,7 @@ class Request(object):
     def get_access_token(self):
         return self.token.get()
 
-    def request(self, url, params, data=None, method='GET', headers=None, times=2, sleep_second=1):
+    def request(self, url, params, data=None, method='GET', headers=None, times=2, sleep_second=0.5):
         if not headers:
             headers = {'Content-Type': 'application/json'}
         if not data:
@@ -53,14 +53,16 @@ class Request(object):
                         params['access_token'] = self.token.refresh()
                     self.errcode = response["errcode"]
                     self.errmsg = response["errmsg"]
+                    time.sleep(sleep_second)
+                    times -= 1
                 else:
                     return response
             except Exception, e:
                 logger.error('[WEIXIN] request error[%s], retry[%d]' % (e.message, times))
                 self.errmsg = e.message
-            finally:
                 time.sleep(sleep_second)
                 times -= 1
+
         raise WeixinException(self.errcode, self.errmsg)
 
     def _request(self, url, params, data, method, headers):
