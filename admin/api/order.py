@@ -196,7 +196,7 @@ def create_order(card_id, amount, openid, count):
     if not customer:
         return None
     order_id = random_digit(12)
-    pay_amount = amount * 0.99
+    pay_amount = amount
     order = Order(order_id=order_id, card_id=card_id, customer_id=customer.openid, face_amount=amount,
                   card_count=count, pay_amount=pay_amount, order_type=1, paid=False)
     cache_order(order)
