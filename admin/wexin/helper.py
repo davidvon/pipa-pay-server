@@ -390,6 +390,7 @@ class WeixinHelper(object):
                 logger.info('[get_ticket] ticket=%s, expire=%s' % (res['ticket'], res['expires_in']))
                 cache_ticket(type, res['ticket'], res['expires_in'])
                 return res['ticket']
+        logger.info('[get_ticket] ticket=%s' % token)
         return token
 
     def jsapi_sign(self, url):
