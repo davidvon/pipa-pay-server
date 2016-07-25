@@ -383,10 +383,11 @@ class WeixinHelper(object):
                 r = requests.get("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" +
                                  access_token + "&type=jsapi", verify=False)
                 res = r.json()
-
+                logger.info('[get_ticket] new ticket=%s, expire=%s' % (res['ticket'], res['expires_in']))
                 cache_ticket(type, res['ticket'], res['expires_in'])
                 return res['ticket']
             else:
+                logger.info('[get_ticket] ticket=%s, expire=%s' % (res['ticket'], res['expires_in']))
                 cache_ticket(type, res['ticket'], res['expires_in'])
                 return res['ticket']
         return token
