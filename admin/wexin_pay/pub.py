@@ -1,10 +1,11 @@
-from app import config
-from config import WXPAY_CONIFG
-from utils.encoding import smart_str, smart_unicode
 import xml.etree.ElementTree as ET
 import hashlib
 from random import Random
 import urllib2
+
+from config import WXPAY_CONIFG
+from utils.encoding import smart_str, smart_unicode
+
 
 __author__ = 'fengguanhua'
 
@@ -28,7 +29,7 @@ def sign_md5(params):
             continue
         array.append("%s=%s" % (key, params[key]))
     string1 = "&".join(array)
-    string_sign_temp = string1 + '&key=' + WXPAY_CONIFG['apiKey']
+    string_sign_temp = string1 + '&key=' + WXPAY_CONIFG['api_key']
     m = hashlib.md5(string_sign_temp.encode('utf-8'))
     return m.hexdigest().upper()
 

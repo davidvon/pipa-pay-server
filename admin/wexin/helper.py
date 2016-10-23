@@ -4,10 +4,12 @@ import urllib2
 import urllib
 import json
 import xml.etree.ElementTree as ET
-import requests
-from config import WEIXIN_APPID, WEIXIN_SECRET, WEIXIN_TOKEN
 import hashlib
 import time
+
+import requests
+
+from config import WEIXIN_APPID, WEIXIN_SECRET, WEIXIN_TOKEN
 from app import logger
 from cache.weixin import get_cache_access_token, cache_access_token, cache_ticket, get_cache_ticket
 from wexin.util import nonce_str
@@ -37,7 +39,7 @@ class Request(object):
     def get_access_token(self):
         return self.token.get()
 
-    def request(self, url, params, data=None, method='GET', headers=None, times=2, sleep_second=1):
+    def request(self, url, params, data=None, method='GET', headers=None, times=2, sleep_second=0.5):
         if not headers:
             headers = {'Content-Type': 'application/json'}
         if not data:
@@ -51,13 +53,16 @@ class Request(object):
                         params['access_token'] = self.token.refresh()
                     self.errcode = response["errcode"]
                     self.errmsg = response["errmsg"]
+                    time.sleep(sleep_second)
+                    times -= 1
                 else:
                     return response
             except Exception, e:
+                logger.error('[WEIXIN] request error[%s], retry[%d]' % (e.message, times))
                 self.errmsg = e.message
-            finally:
                 time.sleep(sleep_second)
                 times -= 1
+
         raise WeixinException(self.errcode, self.errmsg)
 
     def _request(self, url, params, data, method, headers):
@@ -84,7 +89,6 @@ class APIRequest(Request):
 
 
 class Token(object):
-
     def get(self):
         return get_cache_access_token() or self._create()
 
@@ -96,7 +100,7 @@ class Token(object):
                          WEIXIN_APPID + "&secret=" + WEIXIN_SECRET, verify=False)
         response = r.json()
         cache_access_token(response["access_token"], response["expires_in"])
-        logger.info('[WEIXIN] appid=%s, secret=%s, new token=%s, expires=%s' % (
+        logger.info('[WEIXIN][Token_create] appid=%s, secret=%s, new token=%s, expires=%s' % (
             WEIXIN_APPID, WEIXIN_SECRET, response["access_token"], response["expires_in"]))
         return response["access_token"]
 
@@ -360,32 +364,9 @@ class WeixinHelper(object):
         return resp
 
     def oauth_user(self, code):
-        """{
-            "openid": "oLVPpjqs9BhvzwPj5A-vTYAX3GLc",
-            "nickname": "刺猬宝宝",
-            "sex": 1,
-            "language": "zh_CN",
-            "city": "深圳",
-            "province": "广东",
-            "country": "中国",
-            "headimgurl": "http://wx.qlogo.cn/mmopen/utpKYf69VAbCRDRlbUsPsdQN38DoibCkrU6SAMCSNx558eTaLVM8PyM6jlEGzOrH67hyZibIZPXu4BK1XNWzSXB3Cs4qpBBg18/0",
-            "privilege": []
-        }"""
         resp = self.oauth(code)
         openid = resp["openid"]
-        # access_token = resp["access_token"]
         if openid:
-            # user_info_url = "/sns/userinfo"
-            # user_params = {
-            #     "access_token": access_token,
-            #     "openid": openid,
-            #     "lang": "zh_CN",
-            # }
-            # response = self.request.request(user_info_url, user_params)
-            # if "errcode" in response:
-            #     errcode = response["errcode"]
-            #     errmsg = response["errmsg"]
-            #     return {'result': errcode, 'error': errmsg}
             return {'errcode': 0, 'openid': openid}
         return {'errcode': '255', 'error': 'oauth exception'}
 
@@ -402,12 +383,14 @@ class WeixinHelper(object):
                 r = requests.get("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" +
                                  access_token + "&type=jsapi", verify=False)
                 res = r.json()
-
+                logger.info('[get_ticket] token=%s, new ticket=%s' % (access_token, res['ticket']))
                 cache_ticket(type, res['ticket'], res['expires_in'])
                 return res['ticket']
             else:
+                logger.info('[get_ticket] token=%s, ticket=%s' % (access_token, res['ticket']))
                 cache_ticket(type, res['ticket'], res['expires_in'])
                 return res['ticket']
+        logger.info('[get_ticket] ticket=%s' % token)
         return token
 
     def jsapi_sign(self, url):
@@ -483,3 +466,6 @@ class WeixinHelper(object):
         if response["errcode"] == 0:
             return True
         return False
+
+
+logger.info("======= Weixin Helper End =======")

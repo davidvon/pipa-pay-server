@@ -2,10 +2,13 @@
 import string
 from threading import Thread
 from datetime import datetime
-import time, os
 from random import Random, sample
 import datetime as dt
+
+import os
 from flask.ext.login import current_user
+
+
 __author__ = 'fengguanhua'
 
 
@@ -13,11 +16,13 @@ def async(f):
     def wrapper(*args, **kwargs):
         thr = Thread(target=f, args=args, kwargs=kwargs)
         thr.start()
+
     return wrapper
 
 
 def nonce_str(num=12):
-    return ''.join(sample(string.ascii_letters +string.digits, num))
+    return ''.join(sample(string.ascii_letters + string.digits, num))
+
 
 def random_digit(random_len=6):
     str = ''

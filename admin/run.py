@@ -1,12 +1,16 @@
 #!flask/bin/python
 
-import os
 import sys
+
+import os
+
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'site-packages'))
 
 from app import app as application, logger
 
 from wexin.views import weixin_module
+
 application.register_blueprint(weixin_module, url_prefix='/weixin')
 logger.info('initial done')
 

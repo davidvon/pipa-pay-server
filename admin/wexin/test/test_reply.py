@@ -1,8 +1,6 @@
-from app import app
 from wexin.reply import ReplyKeyWords
 
 __author__ = 'fengguanhua'
-
 
 if __name__ == '__main__':
     reply = ReplyKeyWords(None)

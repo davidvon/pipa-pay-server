@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from app import app
 from cache.public import cache_url
-from models import Customer, WechatMenu
+from models import WechatMenu
 
 __author__ = 'fengguanhua'
 import time
@@ -9,9 +9,9 @@ import json
 from flask import request, jsonify
 from flask_weixin import FlaskWeixin
 from wexin.util import *
+from app import logger
 
 from flask import Blueprint
-
 
 weixin_module = Blueprint('weixin', __name__, static_folder='static')
 weixin = FlaskWeixin(app)
@@ -45,14 +45,14 @@ def createMenu():
         return result
     except Exception as e:
         logger.error(e.message)
-        return jsonify({'errcode': 255, 'errmsg': e.message})
+        return jsonify({'result': 255, 'errmsg': e.message})
 
 
 @weixin_module.route('/weixin_push', methods=['GET', 'POST'])
 def weixin_push():
     cache_url(request.host_url)
     if request.data:
-        data = json.loads(request.data)
+        data = request.values
         tag = data.get('tag')
         newsid = data.get('newsid')
         user = data.get('user')
@@ -91,4 +91,3 @@ def batch_update_customer_info():
             error_count += 1
         time.sleep(0.5)
     return '{"err":"%d", "updated":%d, "all":%d}' % (error_count, sucsess_count, len(customers))
-

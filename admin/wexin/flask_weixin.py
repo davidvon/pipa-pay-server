@@ -8,10 +8,13 @@
     :copyright: (c) 2013 by Hsiaoming Yang.
     :license: BSD, see LICENSE for more detail.
 """
+import traceback
 from flask import session
+from flask import request
+
 from helper import *
 from reply import ReplyKeyWords
-from flask import request
+from app import logger
 
 try:
     from lxml import etree
@@ -27,7 +30,6 @@ class FlaskWeixin(object):
         self.weixin_helper = WeixinHelper()
         self.weixin_reply = ReplyKeyWords(self)
         self._registry = {}
-
 
     def register(self, key, func=None):
         if func:
@@ -48,28 +50,32 @@ class FlaskWeixin(object):
                     username, sender=sender, content='text reply'
                 )
         """
+
         def wrapper(func):
             self._registry[key] = func
 
         return wrapper
 
     def view_func(self):
+        logger.info("[WEIXIN] view_func args:%s" % request.args)
         signature = request.args.get('signature')
         timestamp = request.args.get('timestamp')
         if not signature and not timestamp:
             return ''
         nonce = request.args.get('nonce')
-        self.weixin_helper.check_signature(signature,timestamp, nonce)
-        if request.method == 'GET':
-            echostr = request.args.get('echostr')
-            return echostr
         try:
+            self.weixin_helper.check_signature(signature, timestamp, nonce)
+            if request.method == 'GET':
+                echo_str = request.args.get('echostr')
+                return echo_str
+
             request_params = self.weixin_helper.to_json(request.data)
             if request_params.get('msgtype'):
                 return self.weixin_reply.msg_reply(request_params)
             return ''
-        except:
+        except Exception as e:
+            logger.error(traceback.print_exc())
+            logger.error("[WEIXIN] view_func exception:%s" % e.message)
             return 'invalid', 400
 
     view_func.methods = ['GET', 'POST']
-

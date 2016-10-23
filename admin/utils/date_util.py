@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 __author__ = 'fengguanhua'
 import datetime as dt
-from datetime import datetime
 
 
 def current_collect_dates(count, offend=0):
@@ -53,4 +52,4 @@ def time_range_format(time_id):
     for time in times:
         if time['id'] == time_id:
             return time['time']
-    return "%s:00-%s:00" % (time_id, time_id+1)
+    return "%s:00-%s:00" % (time_id, time_id + 1)

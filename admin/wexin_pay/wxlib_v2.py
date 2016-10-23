@@ -2,12 +2,13 @@
 
 import hashlib
 import json
-from random import Random
 import urllib
 import urllib2
 import time
+
 from app import config, logger
 from wexin_pay.pub import para_filter, random_str, do_post
+
 
 DELIVER_NOTIFY_URL = 'https://api.weixin.qq.com/pay/delivernotify'
 ORDER_QUERY_URL = 'https://api.weixin.qq.com/pay/orderquery'
@@ -19,7 +20,7 @@ def build_form(parameter):
         'bank_type': 'WX',
         'fee_type': '1',
         'input_charset': 'UTF-8',
-        'partner': config.WXPAY_CONIFG['partnerId']
+        'partner': config.WXPAY_CONIFG['mch_id']
     }
     parameter.update(base)
     parameter['package'] = build_package(parameter)
@@ -58,13 +59,13 @@ def build_sign(parameter, key_filter):
     parameter['appkey'] = config.WXPAY_CONIFG['paySignKey']
     joined_string = '&'.join(['%s=%s' % (key.lower(), parameter[key]) for key in key_filter])
     sign = hashlib.sha1(joined_string).hexdigest()
-    logger.info('[WEIXIN] qcode=%s, sign=%s' % (joined_string,sign))
+    logger.info('[WEIXIN] qcode=%s, sign=%s' % (joined_string, sign))
     return sign
 
 
 def build_delivery_sign(parameter):
     key_filter = ['appid', 'appkey', 'openid', 'transid', 'out_trade_no', 'deliver_timestamp', 'deliver_status',
-              'deliver_msg']
+                  'deliver_msg']
     key_filter.sort()
     parameter['appkey'] = config.WXPAY_CONIFG['paySignKey']
     joined_string = '&'.join(['%s=%s' % (key.lower(), parameter[key]) for key in key_filter])
@@ -82,7 +83,7 @@ def build_right_sign(parameter):
 
 
 def build_warning_sign(parameter):
-    filter_key = ['alarmcontent','appid','appkey','description','errortype','timestamp']
+    filter_key = ['alarmcontent', 'appid', 'appkey', 'description', 'errortype', 'timestamp']
     filter_key.sort()
     parameter['appkey'] = config.WXPAY_CONIFG['paySignKey']
     joined_string = '&'.join(['%s=%s' % (key.lower(), parameter[key]) for key in filter_key])
@@ -117,9 +118,9 @@ def order_query(out_trade_no):
     parameter = {
         'appid': config.WEIXIN_APPID,
         'package': 'out_trade_no=' + out_trade_no +
-                   '&partner=' + config.WXPAY_CONIFG['partnerId'] +
+                   '&partner=' + config.WXPAY_CONIFG['mch_id'] +
                    '&sign=' + (hashlib.md5('out_trade_no=' + out_trade_no +
-                                           '&partner=' + config.WXPAY_CONIFG['partnerId'] +
+                                           '&partner=' + config.WXPAY_CONIFG['mch_id'] +
                                            '&key=' + config.WXPAY_CONIFG['partnerkey'])).lower(),
         'timestamp': int(time.time())
     }
@@ -150,7 +151,7 @@ def build_qrcode_form(package_params, inparms):
         'bank_type': 'WX',
         'fee_type': '1',
         'input_charset': 'UTF-8',
-        'partner': config.WXPAY_CONIFG['partnerId']
+        'partner': config.WXPAY_CONIFG['mch_id']
     }
     package_params.update(base)
     package_params['package'] = build_package(package_params)
@@ -159,10 +160,10 @@ def build_qrcode_form(package_params, inparms):
         'package': package_params['package'],
         'timestamp': inparms['TimeStamp'],
         'noncestr': inparms['NonceStr'],
-        'retcode':'0',
-        'reterrmsg':'OK'
+        'retcode': '0',
+        'reterrmsg': 'OK'
     }
-    key_filter = ['appid', 'appkey', 'package', 'timestamp', 'noncestr', 'retcode','reterrmsg']
+    key_filter = ['appid', 'appkey', 'package', 'timestamp', 'noncestr', 'retcode', 'reterrmsg']
     pay_sign_array['paysign'] = build_sign(pay_sign_array, key_filter)
     pay_sign_array['signtype'] = 'SHA1'
     del pay_sign_array['appkey']

@@ -2,6 +2,7 @@
 # 微信支付V3接口
 
 import time
+
 from app import logger
 from config import WXPAY_CONIFG, WEIXIN_APPID
 from wexin_pay.pub import xml_to_dict, do_post, dict_to_xml, random_str, sign_md5
@@ -10,7 +11,7 @@ from wexin_pay.pub import xml_to_dict, do_post, dict_to_xml, random_str, sign_md
 def build_form(params, trade_type):
     base_params = {
         'appid': WEIXIN_APPID,
-        'mch_id': WXPAY_CONIFG['partnerId'],
+        'mch_id': WXPAY_CONIFG['mch_id'],
         'nonce_str': random_str(),
         'trade_type': trade_type,
         'body': params['body'],
@@ -69,9 +70,9 @@ def build_static_qrcode_form(params):
     if dict['return_code'] != 'SUCCESS':
         return None
     base_params = {
-        'return_code':'SUCCESS',
+        'return_code': 'SUCCESS',
         'appid': WEIXIN_APPID,
-        'mch_id': WXPAY_CONIFG['partnerId'],
+        'mch_id': WXPAY_CONIFG['mch_id'],
         'nonce_str': random_str(),
         'prepay_id': dict['prepay_id'],
         'result_code': 'SUCCESS',

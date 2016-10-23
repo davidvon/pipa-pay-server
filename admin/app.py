@@ -16,22 +16,26 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
+
 
 @app.before_request
 def before_request():
     g.session = db.session
     g.user = current_user
 
+
 @app.teardown_request
 def teardown_request(exception):
     g.session.close()
 
 import redis
-redis_client = redis.StrictRedis(host=config.REDIS_SERVER_IP, password=config.REDIS_SERVER_PWD, db=config.REDIS_SERVER_DB, port=6379)
+redis_client = redis.StrictRedis(host=config.REDIS_SERVER_IP, password=config.REDIS_SERVER_PWD,
+                                 db=config.REDIS_SERVER_DB, port=6379)
 logger.info("[RUNNING] running mode: %s" % config.RUN_MODE)
-logger.info("[RUNNING] db: [%r]" % config.SQLALCHEMY_DATABASE_URI)
-logger.info("[RUNNING] redis: [%r,%r,%d]" % (config.REDIS_SERVER_IP, config.REDIS_SERVER_PWD, config.REDIS_SERVER_DB))
+logger.info("[RUNNING] db: [%r], redis: [%r,%r,%d]" % (config.SQLALCHEMY_DATABASE_URI, config.REDIS_SERVER_IP,
+                                                       config.REDIS_SERVER_PWD, config.REDIS_SERVER_DB))
+logger.info("[RUNNING] app id:%s, secret:%s" % (config.WEIXIN_APPID, config.WEIXIN_SECRET))
 
 restful_api = RestfulApi(app)
 
@@ -41,12 +45,15 @@ sys.setdefaultencoding('utf-8')
 
 db = SQLAlchemy(app)
 
+
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    origin = 'http://wx.pipapay.com' if config.RUN_MODE == 'production' else '*'
+    response.headers.add('Access-Control-Allow-Origin', origin)
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
+
 
 import models
 import api
