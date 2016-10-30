@@ -139,9 +139,9 @@ class CustomerCard(db.Model):
     card = db.relationship(Card)
     card_code = db.Column(db.String(32))  # 动态分配的卡号
     img = db.Column(db.String(36))
-    amount = db.Column(db.Float())
-    wx_amount = db.Column(db.Float())
-    credit = db.Column(db.Float())
+    balance = db.Column(db.Float())
+    wx_balance = db.Column(db.Float())
+    bonus = db.Column(db.Float())
     claimed_time = db.Column(db.DateTime(), default=datetime.now)
     wx_binding_time = db.Column(db.DateTime())
     expire_date = db.Column(db.Date())
@@ -184,7 +184,7 @@ class CustomerTradeRecords(db.Model):
     customer = db.relationship(Customer)
     card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
     card = db.relationship(Card)
-    amount = db.Column(db.Integer())
+    balance = db.Column(db.Integer())
     time = db.Column(db.DateTime())
     expire_date = db.Column(db.DateTime(), default=datetime.now)
     type = db.Column(db.Integer())  # 0:消费 1: 充值

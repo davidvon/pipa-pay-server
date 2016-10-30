@@ -141,10 +141,10 @@ class ApiWxCardInfoUpdate(Resource):
 class ApiWxCardRecharge(Resource):
     def post(self, id, code):
         args = request.values
-        amount = args['amount']
-        logger.info('[ApiWxCardRecharge] in: card.id[%s] card.code[%s], amount[%s]' % (id, code, amount))
+        balance = args['balance']
+        logger.info('[ApiWxCardRecharge] in: card.id[%s] card.code[%s], balance[%s]' % (id, code, balance))
         helper = WeixinHelper()
-        ret = helper.card_recharge(id, code, amount)
+        ret = helper.card_recharge(id, code, balance)
         logger.info('[ApiWxCardRecharge] out: ret[%s]' % ret)
         return ret
 
@@ -157,7 +157,7 @@ class ApiWxCardInfoSync(Resource):
         ret = helper.card_balance(card.card_id, card.card_code)
         if ret['errcode'] == 0:
             try:
-                card.wx_amount = ret['balance']
+                card.wx_balance = ret['balance']
                 card.credit = ret['bonus']
                 db.session.add(card)
                 db.session.commit()

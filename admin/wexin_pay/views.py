@@ -50,7 +50,7 @@ def payable(request, openid, order):
         'body': '噼啪支付-电子卡包',
         'out_trade_no': order.order_id,
         'spbill_create_ip': request.remote_addr,
-        'total_fee': int(order.pay_amount * 100),  # unit is fen check other day
+        'total_fee': int(order.pay_balance * 100),  # unit is fen check other day
         'notify_url': 'http://%s/wxpay/authorize/notify' % request.host,  # 'pipapay.ngrok.cc', #TODO
         'openid': openid  # 'o80wpvwh6C59IZ7W7EMv9_hu5BW8' # openid #TODO
     }

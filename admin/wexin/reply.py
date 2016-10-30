@@ -291,7 +291,7 @@ class ReplyKeyWords(object):
                                                         card_code=card_code).first()
                 if not new_card:
                     new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0,
-                                            img=old_card.img, amount=old_card.amount, expire_date=old_card.expire_date)
+                                            img=old_card.img, balance=old_card.balance, expire_date=old_card.expire_date)
                 old_card.status = 4
                 card_share.acquire_customer_id = self.sender
                 db.session.add(card_share)

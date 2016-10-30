@@ -444,11 +444,11 @@ class WeixinHelper(object):
             return response['code']
         return None
 
-    def active_card(self, init_amount, card_code, card_id, init_bonus=0):
+    def active_card(self, init_balance, card_code, card_id, init_bonus=0):
         url = "/card/membercard/activate"
         params = {"access_token": self.request.get_access_token()}
         json = {
-            "init_balance": init_amount,
+            "init_balance": init_balance,
             "init_bonus": init_bonus,
             "membership_number": card_code,
             "code": card_code,
@@ -474,15 +474,15 @@ class WeixinHelper(object):
         response = self.request.request(url, params, json_data, 'POST')
         return response
 
-    def card_recharge(self, card_id, card_code, amount):
+    def card_recharge(self, card_id, card_code, balance):
         url = "/card/membercard/updateuser"
         params = {"access_token": self.request.get_access_token()}
         json_data = {"card_id": card_id,
                      "code": card_code,
-                     "bonus": amount,
-                     "record_bonus":"赠送%s积分" % amount,
-                     "balance": amount,
-                     "record_balance": "充入金额%s元" % amount}
+                     "bonus": balance,
+                     "record_bonus":"赠送%s积分" % balance,
+                     "balance": balance,
+                     "record_balance": "充入金额%s元" % balance}
         response = self.request.request(url, params, json_data, 'POST')
         return response
 

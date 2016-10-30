@@ -36,7 +36,7 @@ class ApiCardMembers(Resource):
                  'cardId': item.card_id,
                  'merchantId': item.card.merchant.id,
                  'cardCode': item.card_code,
-                 'amount': item.amount,
+                 'balance': item.balance,
                  'title': item.card.title,
                  'logo': item.card.merchant.logo,
                  'img': item.img or 'http://wx.cdn.pipapay.com/static/images/card_blue.png',
@@ -65,11 +65,11 @@ class ApiCardDispatch(Resource):
             if count < order.card_count:
                 for i in range(count, order.card_count):
                     card = CustomerCard(customer_id=order.customer.openid, order_id=order_id, card_id=order.card_id,
-                                        amount=order.face_amount, expire_date=expire_date, status=0)
+                                        balance=order.face_balance, expire_date=expire_date, status=0)
                     db.session.add(card)
                 db.session.commit()
 
-            output = {"result": 0, "data": {"count": order.card_count, "amount": order.face_amount}}
+            output = {"result": 0, "data": {"count": order.card_count, "balance": order.face_balance}}
             logger.debug('[ApiCardDispatch] out: return [%s]' % output)
             return output
         except Exception as e:
@@ -116,7 +116,7 @@ class ApiCardPayCode(Resource):
             'status': card.status,
             'merchantName': card.card.merchant.name,
             'cardName': card.card.title,
-            'amount': card.amount,
+            'balance': card.balance,
             'qrcode': cache_qrcode_code(card_id, card_code)
         }
         logger.debug('[ApiCardPayCode] out: result[0] data[%s]' % data)
@@ -137,15 +137,15 @@ class ApiCardPayRecords(Resource):
         expend_total = 0
         for item in records:
             if item.type == 0:
-                recharge_total += item.amount
+                recharge_total += item.balance
             else:
-                expend_total += item.amount
+                expend_total += item.balance
         data = {
             'rechargeTotal': recharge_total,
             'expendTotal': expend_total,
             'records': [{'merchantName': item.card.merchant.name,
                          'date': str(item.time),
-                         'amount': item.amount} for item in records]
+                         'balance': item.balance} for item in records]
         }
         logger.debug('[ApiCardPayRecords] out: result[0] data[%s]' % args)
         return {'result': 0, 'data': data}
@@ -298,7 +298,7 @@ class ApiCardReceive(Resource):
                                                         card_id=info.customer_card.card_id,
                                                         card_code=info.customer_card.card_code).first()
                 new_card = CustomerCard(customer_id=openid, card_id=info.customer_card.card_id, img=old_card.img,
-                                        amount=old_card.amount, card_code=old_card.card_code,
+                                        balance=old_card.balance, card_code=old_card.card_code,
                                         expire_date=old_card.expire_date, status=0)
                 old_card.status = 5
                 db.session.add(old_card)
@@ -397,7 +397,7 @@ class ApiCardActive(Resource):
                 return {'result': 255}
 
             card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=code).first()
-            active = helper.active_card(card.amount * 100, code, card_id, 0)
+            active = helper.active_card(card.balance * 100, code, card_id, 0)
             if not active:
                 logger.error('[ApiCardActive] active card[%s,%s,%s] error' % (open_id, card_id, code))
                 return {'result': 255}

@@ -198,14 +198,14 @@ def random_digit(length=10):
     return random_digit(length) if val[0] == '0' else val
 
 
-def create_order(card_id, amount, openid, count):
+def create_order(card_id, balance, openid, count):
     customer = Customer.query.filter_by(openid=openid).first()
     if not customer:
         return None
     order_id = random_digit(12)
-    pay_amount = amount
-    order = Order(order_id=order_id, card_id=card_id, customer_id=customer.openid, face_amount=amount,
-                  card_count=count, pay_amount=pay_amount, order_type=1, paid=False)
+    pay_balance = balance
+    order = Order(order_id=order_id, card_id=card_id, customer_id=customer.openid, face_balance=balance,
+                  card_count=count, pay_balance=pay_balance, order_type=1, paid=False)
     cache_order(order)
     return order
 

@@ -60,9 +60,9 @@ class CustomerCardView(BaseModelView):
     column_searchable_list = ('card_code', 'order.order_id')
     column_labels = {'customer': '客户', 'customer.nickname': '客户', 'order': u'订单',
                      'order.order_id': u'订单', 'card': u'会员卡', 'card_code': u'卡号',
-                     'amount': u'金额', 'wx_amount': u'微信金额',
+                     'balance': u'金额', 'wx_balance': u'微信金额',
                      'claimed_time': u'认领时间', 'wx_binding_time': u'微信绑定时间',
-                     'expire_date': u'过期日期', 'status': '状态', 'credit':'积分'}
+                     'expire_date': u'过期日期', 'status': '状态', 'bonus':'积分'}
 
     def status_format(self, context, model, name):
         return model.status_str()
