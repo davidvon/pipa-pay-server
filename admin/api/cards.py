@@ -316,7 +316,7 @@ class ApiCardReceive(Resource):
                     'data': {
                         'status': new_card.status,
                         "cardGlobalId": new_card.id,
-                        'wxCardId': new_card.card.wx_card_id,  # 微信卡券ID，可以chooseCard获取
+                        'wxCardId': new_card.card.card_id,  # 微信卡券ID，可以chooseCard获取
                         'code': info.customer_card.card_code  # 指定的卡券code码，只能被领一次。use_custom_code字段为true的卡券必须填写，
                         # 非自定义code不必填写。
                     }}

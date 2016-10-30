@@ -6,7 +6,8 @@ from flask import Response
 
 from cache.weixin import pop_cache_card_id
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
-    WechatSystemReply, LIKE_MATCH, WechatImageNews, CustomerCardShare, CustomerCard
+    WechatSystemReply,  WechatImageNews, CustomerCardShare, CustomerCard
+from config import LIKE_MATCH
 from wexin.util import *
 from app import logger
 

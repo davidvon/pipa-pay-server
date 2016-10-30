@@ -117,9 +117,20 @@ class ApiWxCardAdd(Resource):
         return {'result': 0, "data": dicts}
 
 
+class ApiWxCardInfo(Resource):
+    def get(self, card_id):
+        logger.info('[ApiWxCardInfo] in: card_id[%s]' % card_id)
+        helper = WeixinHelper()
+        ret = helper.card_info(card_id)
+        logger.info('[ApiWxCardAdd] out: result[0] data[%s]' % ret)
+        if not ret:
+            return {'result': 255}
+        return {'result': 0, "data": ret}
+
 restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'sign/jsapi')
 restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'card/choose/sign')
 restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')
 restful_api.add_resource(ApiWxCardAdd, API_WX_PREFIX + 'card/add')
+restful_api.add_resource(ApiWxCardInfo, API_WX_PREFIX + 'card/<string:card_id>')

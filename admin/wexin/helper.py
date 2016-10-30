@@ -47,23 +47,21 @@ class Request(object):
         while times:
             try:
                 response = self._request(url, params, data, method, headers)
-                if "errcode" in response and response["errcode"] != 0:
-                    logger.error('[WEIXIN] request error[%d], detail:%s' % (response["errcode"], response["errmsg"]))
-                    if response["errcode"] in [42001, 40001]:
-                        params['access_token'] = self.token.refresh()
-                    self.errcode = response["errcode"]
-                    self.errmsg = response["errmsg"]
-                    time.sleep(sleep_second)
-                    times -= 1
-                else:
-                    return response
-            except Exception, e:
-                logger.error('[WEIXIN] request error[%s], retry[%d]' % (e.message, times))
-                self.errmsg = e.message
-                time.sleep(sleep_second)
                 times -= 1
-
-        raise WeixinException(self.errcode, self.errmsg)
+                if "errcode" not in response or response["errcode"] == 0:
+                    return response
+                self.errcode = response["errcode"]
+                self.errmsg = response["errmsg"]
+                logger.error('[WEIXIN] request error[%d], detail:%s' % (self.errcode, self.errmsg))
+                if response["errcode"] in [42001, 40001]:
+                    params['access_token'] = self.token.refresh()
+                    time.sleep(sleep_second)
+            except Exception, e:
+                self.errcode = 255
+                self.errmsg = e.message
+                logger.error('[WEIXIN] request error[%s]' % e.message)
+        return {"errcode":self.errcode, "errmsg":self.errmsg}
+        # raise WeixinException(self.errcode, self.errmsg)
 
     def _request(self, url, params, data, method, headers):
         url = '%s%s?%s' % (self.host, url, urllib.urlencode(params))
@@ -183,13 +181,9 @@ class WeixinHelper(object):
     def send_custom_message(self, message):
         url = "/cgi-bin/message/custom/send"
         params = {"access_token": self.request.get_access_token()}
-        try:
-            response = self.request.request(url, params, message, 'POST')
-            logger.info(str(response))
-            return response
-        except WeixinException as e:
-            logger.error(e)
-            return {'errcode': e.errcode, 'message': e.errmsg or e.message}
+        response = self.request.request(url, params, message, 'POST')
+        logger.info(str(response))
+        return response
 
     def push_template_message(self, openid, template_id, push_data, push_url):
         url = '/cgi-bin/message/template/send'
@@ -201,11 +195,9 @@ class WeixinHelper(object):
             "topcolor": "#7B68EE",
             "data": push_data
         }
-        try:
-            response = self.request.request(url, params, post_contents, 'POST')
-            logger.info(str(response))
-        except WeixinException as e:
-            logger.error(e)
+        response = self.request.request(url, params, post_contents, 'POST')
+        logger.info(str(response))
+
 
     def create_group(self, group):
         """
@@ -349,8 +341,7 @@ class WeixinHelper(object):
         resp = self.request.request(url, params, json, 'POST')
         if "ticket" in resp:
             return resp
-        else:
-            raise 401
+        raise 401
 
     def oauth(self, code):
         token_url = "/sns/oauth2/access_token"
@@ -360,8 +351,7 @@ class WeixinHelper(object):
             "code": code,
             "grant_type": "authorization_code",
         }
-        resp = self.request.request(token_url, token_params)
-        return resp
+        return self.request.request(token_url, token_params)
 
     def oauth_user(self, code):
         resp = self.oauth(code)
@@ -467,5 +457,13 @@ class WeixinHelper(object):
             return True
         return False
 
+    def card_info(self, card_id):
+        url = "/card/get"
+        params = {"access_token": self.request.get_access_token()}
+        json = {"card_id": card_id}
+        response = self.request.request(url, params, json, 'POST')
+        if response["errcode"] == 0:
+            return response['card']
+        return None
 
 logger.info("======= Weixin Helper End =======")

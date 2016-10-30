@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 import string
+from functools import wraps
 from threading import Thread
 from datetime import datetime
 from random import Random, sample
 import datetime as dt
 
 import os
-from flask.ext.login import current_user
 
+from flask import current_app
+from flask.ext.login import current_user
+from flask.ext.restful import abort
+
+import config
 
 __author__ = 'fengguanhua'
 
@@ -19,6 +24,16 @@ def async(f):
 
     return wrapper
 
+
+def date_random_str(random_len=4):
+    str = ''
+    chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789'
+    length = len(chars) - 1
+    random = Random()
+    now = dt.time.strftime('%Y%m%d%H%M%S')
+    for i in range(random_len):
+        str += chars[random.randint(0, length)]
+    return '%s%s' % (now, str)
 
 def nonce_str(num=12):
     return ''.join(sample(string.ascii_letters + string.digits, num))
@@ -84,3 +99,14 @@ def current_user_firm():
     return is_admin, current_user_firm
 
 
+def staff_role_required(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if current_app.login_manager._login_disabled:
+            return func(*args, **kwargs)
+        matched = current_user.has_role(config.ROLE_SHOP_STAFF) or \
+              current_user.has_role(config.ROLE_ADMIN)
+        if not matched:
+            abort(403)
+        return func(*args, **kwargs)
+    return decorated_view

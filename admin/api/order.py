@@ -2,11 +2,12 @@
 import random as Random
 import string
 
+from flask.ext.restful import Resource
+
+from api import API_PREFIX
+from app import restful_api
 from cache.order import cache_order
 from models import Order, Customer
-
-
-__author__ = 'fengguanhua'
 
 
 # def grant_customer_scores(order, customer):
@@ -185,6 +186,12 @@ __author__ = 'fengguanhua'
 #         except:
 #             return {'result': 255}, 200
 
+class ApiOrders(Resource):
+    def get(self):
+        orders = Order.query.order_by(Order.create_time.desc()).all()
+        ret = {"data": [order.get_order_params() for order in orders]}
+        return ret, 200
+
 
 def random_digit(length=10):
     val = ''.join(Random.sample(string.digits * 3, length))
@@ -203,7 +210,7 @@ def create_order(card_id, amount, openid, count):
     return order
 
 
-# restful_api.add_resource(ApiOrderBooking, API_PREFIX + 'order/booking')
+restful_api.add_resource(ApiOrders, API_PREFIX + 'orders')
 # restful_api.add_resource(ApiOrderModify, API_PREFIX + 'order/modify/<string:order_id>')
 # restful_api.add_resource(ApiTaskOrderMaintain, API_PREFIX + 'task/order/maintain')
 # restful_api.add_resource(ApiOrderCancel, API_PREFIX + 'order/cancel')

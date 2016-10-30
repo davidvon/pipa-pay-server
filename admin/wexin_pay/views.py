@@ -6,7 +6,7 @@ from flask import request, current_app
 
 from app import app, logger, db
 from config import WXPAY_CONIFG, WEIXIN_APPID
-from models import get_order_params, Order
+from models import Order
 from signals import signal_order_notify
 from wexin_pay.pub import verify_notify, xml_to_dict, random_str, sign_md5, format_param_map
 from wexin_pay.wxlib_v2 import build_warning_sign, build_right_sign, get_address_sign
@@ -35,7 +35,7 @@ def auth_notify():
         db.session.add(order)
         db.session.commit()
         logger.info('[WEIXIN] order[%s] pay confirmed!' % out_trade_no)
-        args = get_order_params(order)
+        args = order.get_order_params()
         signal_order_notify.send(current_app._get_current_object(), args=args, status='pay-confirm')  # notify
         return "success"
     else:

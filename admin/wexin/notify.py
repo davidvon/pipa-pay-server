@@ -44,7 +44,7 @@ class CustomerOrderNotify(OrderNotifyBase):
                          keyword3={"value": args['phone'], "color": "#000000"},
                          keyword4={"value": args['address'], "color": "#173177"},
                          keyword5={"value": args['delivery_time'], "color": "#173177"},
-                         remark={"value": '洗衣件数：%s\n\n比邻洗衣感谢您的预订，洗衣管家将第一时间与您联系。' % args['sum'], "color": "#173177"})
+                         remark={"value": '洗衣件数：%s\n\n琵琶金融感谢您的预订，洗衣管家将第一时间与您联系。' % args['sum'], "color": "#173177"})
         order_url = "%smobile/personal/order?tab=0&uid=%s" % (url_from_cache(), openid)
         weixin.weixin_helper.push_template_message(openid, template_id, push_data, order_url)
 
