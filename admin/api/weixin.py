@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import time
 from flask import request
 from flask.ext.restful import Resource
@@ -127,6 +128,16 @@ class ApiWxCardInfo(Resource):
             return {'result': 255}
         return {'result': 0, "data": ret}
 
+
+class ApiWxCardInfoUpdate(Resource):
+    def post(self, card_id):
+        data = json.JSONDecoder().decode(request.data)
+        logger.info('[ApiWxCardInfoUpdate] in: card_id[%s]' % card_id)
+        helper = WeixinHelper()
+        ret = helper.card_info_update(data)
+        return ret
+
+
 restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'sign/jsapi')
@@ -134,3 +145,4 @@ restful_api.add_resource(ApiWxCardChooseSign, API_WX_PREFIX + 'card/choose/sign'
 restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')
 restful_api.add_resource(ApiWxCardAdd, API_WX_PREFIX + 'card/add')
 restful_api.add_resource(ApiWxCardInfo, API_WX_PREFIX + 'card/<string:card_id>')
+restful_api.add_resource(ApiWxCardInfoUpdate, API_WX_PREFIX + 'card/<string:card_id>/update')

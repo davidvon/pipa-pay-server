@@ -28,7 +28,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 redis_client = redis.StrictRedis(host='127.0.0.1', port=6379)
-logger.info("[RUNNING] status: online [%r], database [%r]" % (config.ISONLINE, config.SQLALCHEMY_DATABASE_URI))
+logger.info("[RUNNING] running mode:[%r], database:[%r]" % (config.RUN_MODE, config.SQLALCHEMY_DATABASE_URI))
 
 db = SQLAlchemy(app)
 babel = Babel(app, default_locale=config.BABEL_DEFAULT_LOCALE, default_domain=Domain(domain='admin'))
@@ -75,13 +75,6 @@ def before_first_request():
         db.session.add(role_admin)
         db.session.add(Role(name=config.ROLE_SHOP_STAFF, desc='店员'))
         db.session.commit()
-
-    order_id = redis_client.get('order_max_id')
-    if not order_id:
-        order_id_max = Order.query.filter_by(create_date=datetime.date.today()).count()
-        redis_client.set('order_max_id', int(order_id_max))
-        now_date = time.strftime('%Y%m%d')
-        redis_client.set('order_current_date', now_date)
 
 
 import view

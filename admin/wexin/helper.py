@@ -56,6 +56,8 @@ class Request(object):
                 if response["errcode"] in [42001, 40001]:
                     params['access_token'] = self.token.refresh()
                     time.sleep(sleep_second)
+                else:
+                    break
             except Exception, e:
                 self.errcode = 255
                 self.errmsg = e.message
@@ -463,7 +465,12 @@ class WeixinHelper(object):
         json = {"card_id": card_id}
         response = self.request.request(url, params, json, 'POST')
         if response["errcode"] == 0:
-            return response['card']
+            return {'card': response['card']}
         return None
 
+    def card_info_update(self, json_data):
+        url = "/card/update"
+        params = {"access_token": self.request.get_access_token()}
+        response = self.request.request(url, params, json_data, 'POST')
+        return response
 logger.info("======= Weixin Helper End =======")

@@ -36,7 +36,7 @@ class CustomerOrderNotify(OrderNotifyBase):
         {{remark.DATA}}
         """
 
-        template_id = 'XAa3kQ76ruWmEqFKSDfAct3m4dQ6Cp-j1-OZ3PPj50I' if config.ISONLINE else \
+        template_id = 'XAa3kQ76ruWmEqFKSDfAct3m4dQ6Cp-j1-OZ3PPj50I' if config.RUN_MODE == 'production' else \
             'RKtd74YCSgG5tEmHsG_5ddbRaK8hTzHsyIZHQWTJh2c'
         push_data = dict(first={"value": "您好，您已下单成功", "color": "#173177"},
                          keyword1={"value": args['order_id'], "color": "#173177"},
@@ -57,7 +57,7 @@ class CustomerOrderNotify(OrderNotifyBase):
         订单状态：{{keyword4.DATA}}
         {{remark.DATA}}
         """
-        template_id = 'hhhp9z46Ql8xCjhI4cvDEuiUQf2wGBhn-kWjie4K-RY' if config.ISONLINE else \
+        template_id = 'hhhp9z46Ql8xCjhI4cvDEuiUQf2wGBhn-kWjie4K-RY' if config.RUN_MODE == 'production' else \
             'tGBWVmXAUdB7gCnDnYGTVfXkO9rvaej4bm7HmT4V75Y'
         push_data = dict(first={"value": "您的订单已支付", "color": "#173177"},
                          keyword1={"value": args['order_id'], "color": "#173177"},
@@ -77,7 +77,7 @@ class CustomerOrderNotify(OrderNotifyBase):
         状态：{{keyword4.DATA}}
         {{remark.DATA}}
         """
-        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo' if config.ISONLINE else \
+        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo' if config.RUN_MODE == 'production' else \
             'BUfIMn1xtiD9ikahiDhA90NJwxPB8pXOa_hun8hpqlE'
         status_info = '订单已取消' if self.status == 'cancel' else '订单信息有调整' if self.status == 'update' else '订单状态有新变更'
         remark = '洗衣管家提醒您，您的订单可以微信支付了' if not args['paid'] and args['price'] else ''
@@ -136,7 +136,7 @@ class FirmOrderNotify(OrderNotifyBase):
         订单状态：{{keyword4.DATA}}
         {{remark.DATA}}
         """
-        template_id = 'hhhp9z46Ql8xCjhI4cvDEuiUQf2wGBhn-kWjie4K-RY' if config.ISONLINE else \
+        template_id = 'hhhp9z46Ql8xCjhI4cvDEuiUQf2wGBhn-kWjie4K-RY' if config.RUN_MODE == 'production' else \
             'tGBWVmXAUdB7gCnDnYGTVfXkO9rvaej4bm7HmT4V75Y'
         push_data = dict(first={"value": "客户（%s）订单支付已完成" % args['name'], "color": "#173177"},
                          keyword1={"value": args['order_id'], "color": "#173177"},
@@ -156,7 +156,7 @@ class FirmOrderNotify(OrderNotifyBase):
         状态：{{keyword4.DATA}}
         {{remark.DATA}}
         """
-        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo' if config.ISONLINE else \
+        template_id = '_HuE97r15jjWl8uxZKmBELLLRTp9oepckLYzNibx-Xo' if config.RUN_MODE == 'production' else \
             'BUfIMn1xtiD9ikahiDhA90NJwxPB8pXOa_hun8hpqlE'
         status_info = '订单已取消' if self.status == 'cancel' else '订单信息有调整' if self.status == 'update' else '订单状态有新变更'
         push_data = dict(first={"value": "客户（%s）%s" % (args['name'], status_info), "color": "#173177"},

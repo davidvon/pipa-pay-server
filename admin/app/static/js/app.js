@@ -521,3 +521,4 @@ $.AdminLTE.boxWidget = {
     });
   };
 }(jQuery));
+

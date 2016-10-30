@@ -7,14 +7,27 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 LANGUAGES = {'zh_CN': 'Chinese'}
 BABEL_DEFAULT_LOCALE = 'zh_CN'
 
-ISONLINE = 'PIPAPAY_ONLINE_SERVER' in os.environ
-
 WEIXIN_TOKEN = 'chexianghui365'
 WXPAY_CONIFG = {
     'mch_id': '1220396801',
     'api_key': 'FuiNBoblzcPN9MXq6nFxRnqcwyqf81vc',
     'partnerKey': ''  # v2
 }
+
+# role must be >1
+ROLE_ADMIN = 'ADMIN'
+ROLE_SHOP_STAFF = 'USER_EDIT'
+ROLE_SHOP_STAFF_READONLY = 'USER_READ'
+ROLE_FETCH_STEWARD = 'FETCH_STEWARD'
+ROLE_POST_STEWARD = 'POST_STEWARD'
+ROLES = [ROLE_ADMIN, ROLE_SHOP_STAFF, ROLE_SHOP_STAFF_READONLY, ROLE_FETCH_STEWARD, ROLE_POST_STEWARD]
+
+# Flask-security
+SECRET_KEY = 'its a dog'
+SQLALCHEMY_POOL_RECYCLE = 5  # Solove MySQL has gone away,Sae 30s close connection. set to 5s reconnect.
+THREADS_PER_PAGE = 8
+CSRF_ENABLED = True
+DATABASE_QUERY_TIMEOUT = 0.5  # slow database query threshold (in seconds)
 
 RUN_MODE = os.environ.get('PIPAPAY_RUN_MODE', 'debug')
 if RUN_MODE == 'production':
