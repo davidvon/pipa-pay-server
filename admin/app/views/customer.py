@@ -56,17 +56,21 @@ class CustomerCardView(BaseModelView):
     column_filters = ('customer.nickname', 'card_code', 'order.order_id')
     column_default_sort = ('customer.nickname', True)
     form_excluded_columns = ('card',)
-    column_exclude_list = ('card', 'img', 'cards')
+    column_exclude_list = ('img', 'cards', 'claimed_time', 'expire_date', 'order')
     column_searchable_list = ('card_code', 'order.order_id')
     column_labels = {'customer': '客户', 'customer.nickname': '客户', 'order': u'订单',
                      'order.order_id': u'订单', 'card': u'会员卡', 'card_code': u'卡号',
-                     'amount': u'金额', 'claimed_time': u'认领时间', 'wx_binding_time': u'微信绑定时间',
-                     'expire_date': u'过期日期', 'status': '状态'}
+                     'amount': u'金额', 'wx_amount': u'微信金额',
+                     'claimed_time': u'认领时间', 'wx_binding_time': u'微信绑定时间',
+                     'expire_date': u'过期日期', 'status': '状态', 'credit':'积分'}
 
     def status_format(self, context, model, name):
         return model.status_str()
 
-    column_formatters = dict(dict(status=status_format))
+    def card_format(self, context, model, name):
+        return model.card.title
+
+    column_formatters = dict(dict(status=status_format, card=card_format))
     list_template = './models/customer_card_list.html'
 
 class CustomerCardShareView(BaseModelView):
@@ -100,11 +104,19 @@ class CustomerCardShareView(BaseModelView):
                               'status': status_format})
 
 
-@app.route('/customer/info/<string:customer_id>', methods=['GET', 'POST'])
+admin.add_view(CustomerView(Customer, db.session, tagid='customer-menu', icon='fa-group', name=u"会员",
+                            category=u"会员管理"))
+admin.add_view(CustomerCardView(CustomerCard, db.session, tagid='customer-menu', icon='fa-group', name=u"会员卡",
+                                category=u"会员管理"))
+admin.add_view(CustomerCardShareView(CustomerCardShare, db.session, tagid='customer-menu', icon='fa-group',
+                                     name=u"卡赠送", category=u"会员管理"))
+
+
+@app.route('/customer/<string:customer_id>', methods=['GET', 'POST'])
 @login_required
 def customer_info(customer_id):
     customer = Customer.query.filter_by(id=customer_id).first()
-    back_url = request.args.get('url') or '/customer/info/%s' % customer.id
+    back_url = request.args.get('url')
     if not customer:
         abort(404)
     if request.method == 'GET':
@@ -114,9 +126,11 @@ def customer_info(customer_id):
                                admin_view=admin.index_view), 200
 
 
-admin.add_view(CustomerView(Customer, db.session, tagid='customer-menu', icon='fa-group', name=u"会员",
-                            category=u"会员管理"))
-admin.add_view(CustomerCardView(CustomerCard, db.session, tagid='customer-menu', icon='fa-group', name=u"会员卡",
-                                category=u"会员管理"))
-admin.add_view(CustomerCardShareView(CustomerCardShare, db.session, tagid='customer-menu', icon='fa-group',
-                                     name=u"卡赠送", category=u"会员管理"))
+@app.route('/customer/card/<string:card_id>', methods=['GET'])
+@login_required
+def customer_card_info(card_id):
+    card = CustomerCard.query.filter_by(card_id=card_id).first()
+    back_url = request.args.get('url')
+    return render_template('models/customer_card_info.html', card=card, url=back_url,
+                           admin_base_template='base/_layout.html',
+                           admin_view=admin.index_view), 200

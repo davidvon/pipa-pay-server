@@ -473,4 +473,24 @@ class WeixinHelper(object):
         params = {"access_token": self.request.get_access_token()}
         response = self.request.request(url, params, json_data, 'POST')
         return response
+
+    def card_recharge(self, card_id, card_code, amount):
+        url = "/card/membercard/updateuser"
+        params = {"access_token": self.request.get_access_token()}
+        json_data = {"card_id": card_id,
+                     "code": card_code,
+                     "bonus": amount,
+                     "record_bonus":"赠送%s积分" % amount,
+                     "balance": amount,
+                     "record_balance": "充入金额%s元" % amount}
+        response = self.request.request(url, params, json_data, 'POST')
+        return response
+
+    def card_balance(self, card_id, card_code):
+        url = "/card/membercard/userinfo/get"
+        params = {"access_token": self.request.get_access_token()}
+        json_data = {"card_id": card_id, "code": card_code}
+        response = self.request.request(url, params, json_data, 'POST')
+        return response
+
 logger.info("======= Weixin Helper End =======")

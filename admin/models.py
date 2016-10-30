@@ -140,6 +140,8 @@ class CustomerCard(db.Model):
     card_code = db.Column(db.String(32))  # 动态分配的卡号
     img = db.Column(db.String(36))
     amount = db.Column(db.Float())
+    wx_amount = db.Column(db.Float())
+    credit = db.Column(db.Float())
     claimed_time = db.Column(db.DateTime(), default=datetime.now)
     wx_binding_time = db.Column(db.DateTime())
     expire_date = db.Column(db.Date())

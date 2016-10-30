@@ -1,10 +1,32 @@
 {% extends 'admin/list.html' %}
 
 {%block list_row_action_more %}
-    <a class="icon" style="margin-left:5px;color:#0088cc;" href="/customer/info/{{get_pk_value(row)}}" title="充值">
-        <span class="glyphicon glyphicon-qrcode"></span>
-    </a>
-    <a class="icon" style="margin-left:5px;color:#0088cc;" href="/customer/info/{{get_pk_value(row)}}" title="在线微信信息">
+    <a class="icon" style="margin-left:5px;color:#0088cc;" href="/customer/card/{{get_pk_value(row)}}" title="在线微信信息">
         <span class="glyphicon glyphicon-info-sign"></span>
     </a>
+    <a class="icon" style="margin-left:5px;color:#0088cc;"
+       href='javascript:void(0);' onclick='wxcard_amount_sync("{{get_pk_value(row)}}")' title="同步更新">
+        <span class="glyphicon glyphicon-refresh"></span>
+    </a>
 {%endblock%}
+
+
+{% block tail_base %}
+    <script>
+        function wxcard_amount_sync(index){
+            $.ajax({
+            type: 'POST',
+            url: '/api/weixin/card/'+ index +'/sync',
+            contentType: 'application/json',
+            success: function(resp){
+                if(resp.errcode != 0){
+                    alert("同步微信会员卡余额失败:"+ resp.errmsg)
+                } else {
+                    alert("同步微信会员卡余额成功")
+                }
+            }
+        });
+        }
+    </script>
+    {{ super() }}
+{% endblock %}

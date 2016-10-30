@@ -1,0 +1,50 @@
+{% extends "base/_layout.html" %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_large = '客户卡详情' %}
+{% block head_more %}
+    <!-- iCheck -->
+    <link href="{{ url_for('static', filename='css/skins/skin-purple.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="/admin/static/admin/css/bootstrap3/admin.css" rel="stylesheet">
+{% endblock %}
+
+{% block bread_crumb_title %}
+<li><a href="/admin/customer">订单列表</a></li>
+{% endblock %}
+
+{% block body_content %}
+    <div class="tab-content">
+        <div class="active" id="customer_info">
+            <div >
+            <span><a href="/admin/customer/edit" class="btn btn-success">编辑客户信息</a></span>
+            </div>
+            <h3>基本信息</h3>
+            <div class="widget-container-span ui-sortable">
+                <table class="table table-striped table-bordered table-hover model-list order_info">
+                    <colgroup>
+                      <col class="span2">
+                      <col class="span7">
+                    </colgroup>
+                    <tbody><tr><td>微信ID</td><td style="color:#aaa"></td></tr>
+                    <tr><td>微信头像</td><td><img class="img-circle" style="width:50px;" src=""></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+//    $(document).ready(function() {
+//        $('#example').dataTable( {
+//            "language": {"url": "/static/plugins/datatables/chinese.json"},
+//            "ajax": "/api/customer/{{card.id}}/orders",
+//            "columns": [
+//                {"data": function(obj){return "<a href='/order/info/"+ obj.id+"'>"+obj.serial+"</a>";}},
+//                {"data":"name" },{"data":"phone" },{"data":"clothes"},{"data":"received_time" },
+//                {"data":"delivery_time" },{"data":function(obj){return "¥"+ obj.price}},
+//                {"data":"status" },{"data":"review" }
+//            ]
+//        } );
+//    });
+    </script>
+{% endblock%}

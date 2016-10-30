@@ -5,7 +5,7 @@ from flask import request
 from flask.ext.restful import Resource
 
 from api import API_WX_PREFIX
-from app import restful_api, logger
+from app import restful_api, logger, db
 from cache.weixin import cache_code_openid, get_cache_code_openid, push_cache_card_id
 from config import WEIXIN_APPID
 from models import Order, CustomerCard
@@ -138,6 +138,35 @@ class ApiWxCardInfoUpdate(Resource):
         return ret
 
 
+class ApiWxCardRecharge(Resource):
+    def post(self, id, code):
+        args = request.values
+        amount = args['amount']
+        logger.info('[ApiWxCardRecharge] in: card.id[%s] card.code[%s], amount[%s]' % (id, code, amount))
+        helper = WeixinHelper()
+        ret = helper.card_recharge(id, code, amount)
+        logger.info('[ApiWxCardRecharge] out: ret[%s]' % ret)
+        return ret
+
+
+class ApiWxCardInfoSync(Resource):
+    def post(self, id):
+        logger.info('[ApiWxCardBalance] in: card.id[%s]' % id)
+        card = CustomerCard.query.filter_by(id=id).first()
+        helper = WeixinHelper()
+        ret = helper.card_balance(card.card_id, card.card_code)
+        if ret['errcode'] == 0:
+            try:
+                card.wx_amount = ret['balance']
+                card.credit = ret['bonus']
+                db.session.add(card)
+                db.session.commit()
+                logger.info('[ApiWxCardBalance] sync success')
+            except Exception as e:
+                logger.error('[ApiWxCardBalance] sync failed:%s' % e.message)
+        logger.info('[ApiWxCardBalance] out: ret[%s]' % ret)
+        return ret
+
 restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'sign/jsapi')
@@ -146,3 +175,5 @@ restful_api.add_resource(ApiWxCardsAdd, API_WX_PREFIX + 'cards/add')
 restful_api.add_resource(ApiWxCardAdd, API_WX_PREFIX + 'card/add')
 restful_api.add_resource(ApiWxCardInfo, API_WX_PREFIX + 'card/<string:card_id>')
 restful_api.add_resource(ApiWxCardInfoUpdate, API_WX_PREFIX + 'card/<string:card_id>/update')
+restful_api.add_resource(ApiWxCardRecharge, API_WX_PREFIX + 'card/<string:card_id>/<string:code>/recharge')
+restful_api.add_resource(ApiWxCardInfoSync, API_WX_PREFIX + 'card/<string:id>/sync')
