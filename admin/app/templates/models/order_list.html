@@ -1,0 +1,7 @@
+{% extends 'admin/list.html' %}
+
+{%block list_row_action_more %}
+    <a class="icon" style="margin-left:5px;color:#0088cc;" href="/order/info/{{get_pk_value(row)}}" title="订单信息">
+        <span class="glyphicon glyphicon-info-sign"></span>
+    </a>
+{%endblock%}

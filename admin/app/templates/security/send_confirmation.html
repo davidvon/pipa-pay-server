@@ -1,0 +1,27 @@
+{% from "security/_macros.html" import render_field_errors %}
+{% extends "base/_base.html" %}
+{% block _ibase %}
+    <h1>Resend confirmation instructions</h1>
+    <div class="row-fluid">
+        <div class="dialog">
+            <div class="block">
+                <p class="block-heading">{{_('send confirmation')}}</p>
+                <div class="block-body">
+                    <form action="{{ url_for_security('send_confirmation') }}" method="POST" name="send_confirmation_form">
+                        {{ send_confirmation_form.hidden_tag() }}
+
+                        <div class="control-group {%if send_confirmation_form.email.errors %}error{%endif%}">
+                            <label>{{_('email')}}</label>
+                            <input class="span12" id="email" name="email" type="text">
+                            {{ render_field_errors(send_confirmation_form.email) }}
+                        </div>
+
+                        <button class="btn btn-primary btn-large pull-right">{{ _('send confirmation') }}</button>
+                        <div class="clearfix"></div>
+                    </form>
+                </div>
+            </div>
+            <p class="pull-right"><a href="{{ url_for_security('login') }}">{{ _('login') }} </a></p>
+        </div>
+    </div>
+{% endblock %}

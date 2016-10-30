@@ -1,0 +1,151 @@
+{% extends "base/_layout.html" %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_large = '订单洗衣列表' %}
+{% set body_main_header_small = '创建' %}
+
+{% block head_more %}
+    <!-- iCheck -->
+    <link href="{{ url_for('static', filename='css/skins/skin-purple.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="/admin/static/admin/css/bootstrap3/admin.css" rel="stylesheet">
+    <link href="/admin/static/vendor/select2/select2.css" rel="stylesheet">
+{% endblock %}
+
+{% block bread_crumb_title %}
+<li><a href="{{url}}">订单信息</a></li>
+{% endblock %}
+
+
+{% block body_content %}
+<div class="row">
+  <div class="col-md-10">
+      <ul class="nav nav-tabs">
+          <li class="active">
+              <a href="javascript:void(0)">创建</a>
+          </li>
+      </ul>
+    <div class="box">
+    <form action="" method="POST" role="form" class="admin-form form-horizontal" enctype="multipart/form-data">
+       <!-- form start -->
+          <div class="box-body">
+          <div class="form-group">
+            <label class="col-md-2 control-label">订单序列&nbsp;</label>
+            <label class="col-md-8" style="padding-top:7px">{{order.order_serial}}</label>
+          </div>
+          <div class="form-group">
+            <label class="col-md-2 control-label">联系人姓名&nbsp;</label>
+            <label class="col-md-8" style="padding-top:7px">{{order.address.name}}</label>
+          </div>
+          <div class="form-group">
+            <label for="service" class="col-md-2 control-label">服务项目&nbsp;<strong style="color: red">*</strong></label>
+            <div class="col-md-8">
+                <select class="form-control" id="service" name="service" tabindex="-1" title="服务项目*">
+                    <option value=""></option>
+                    {% for service in service_list %}
+                    <option {%if item and service.id == item.service_id%}selected="selected"{%endif%} value="{{service.id}}">{{service}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <span class="col-md-1"><a href="/admin/service/new?url=/order/item/create/{{order.order_serial}}" class="btn btn-danger" role="button">新增</a></span>
+          </div>
+          <div class="form-group">
+            <label for="service" class="col-md-2 control-label">衣服品牌&nbsp;<strong style="color: red">*</strong></label>
+            <div class="col-md-8">
+                <select class="form-control" id="brand" name="brand" tabindex="-1" title="品牌*">
+                    <option value=""></option>
+                    {% for brand in brand_list %}
+                    <option {%if item and brand.id == item.brand_id%}selected="selected"{%endif%} value="{{brand.id}}">{{brand}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <span class="col-md-1"><button type="button" class="btn btn-danger" data-toggle="modal" data-target="#BrandModal">新增</button></span>
+          </div>
+          <div class="form-group">
+            <label for="count" class="cloth-count col-md-2 control-label">颜色&nbsp;</label>
+            <div class="col-md-8">
+              <input class="form-control" id="color" name="color" type="text" value="{%if item%}{{item.color or ''}}{%endif%}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="count" class="cloth-count col-md-2 control-label">件数/㎡&nbsp;<strong style="color: red">*</strong></label>
+            <div class="col-md-8">
+              <input class="form-control" id="count" name="count" type="text" value="{%if item%}{{item.count}}{%else%}1{%endif%}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="image_path" class="col-md-2 control-label">实拍图片&nbsp;</label>
+            <div class="col-md-8">
+              {%if item and item.image_path%}<img style="width:75px;padding:5px" src="{{item.image_path}}">{%endif%}
+              <input class="form-control" id="image_path" name="image_path" type="file">
+            </div>
+          </div>
+       </div>
+       <hr>
+       <div class="form-group">
+          <div class="col-md-offset-2 col-md-8 submit-row">
+            <input type="submit" class="commit btn btn-primary" value="提交">
+            <a href="/order/info/{{order.id}}" class="btn btn-danger" role="button">取消</a>
+          </div>
+        </div>
+        <br>
+    </form>
+    </div><!-- /.box -->
+    <!-- Brand Modal -->
+    <div class="modal fade" id="BrandModal" tabindex="-1" role="dialog" aria-labelledby="BrandModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">新增衣服品牌</h4>
+          </div>
+          <div class="modal-body">
+            <div class="box-body">
+              <div class="form-group">
+                <label for="name" class="col-md-2 control-label">品牌&nbsp;</label>
+                <input style="float:none;height:30px;" id="name" class="col-md-8" name="name" type="text" value="">
+                <br><label style="padding:10px 0 0 15px;" class="name-message control-label"><i class="fa fa-bell-o"></i></label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            <button type="button" class="btn btn-primary save_close">提交并关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+  $(document).ready(function() {
+      $("#service").select2();
+      $("#brand").select2();
+      $('.name-message').hide();
+      $('#name').change(function(e){
+          var name =$('#name').val();
+          if(!name){
+              $('.name-message i').html("衣服品牌参数不能为空");$('.name-message').show();
+          }else{
+              $('.name-message').hide();
+          }
+      });
+      $('.save_close').click(function (e) {
+          var name =$('#name').val();
+          if(!name){$('.name-message i').html("衣服品牌参数不能为空");$('.name-message').show(); return;}
+          $.ajax({
+                type: 'POST', contentType: 'application/json',
+                url: '/api/brand/create/'+name,
+                success: function(data){
+                    if(data.result){
+                        $('#BrandModal').modal('hide'); window.location.reload();
+                    }else{
+                        $('.name-message i').html('记录重复'); $('.name-message').show();
+                    }
+                }
+            });
+      })
+  });
+</script>
+{% endblock%}

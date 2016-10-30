@@ -1,0 +1,57 @@
+{% from "security/_macros.html" import render_field_errors %}
+{% extends "base/_base.html" %}
+{% block head_more %}
+    <!-- iCheck -->
+    <link href="{{ url_for('static', filename='plugins/iCheck/square/blue.css') }}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% set BODY_CLASS = 'register-page' %}
+{% set APPNAME = '琵琶金融' %}
+
+{% block body_base %}
+<div class="register-box">
+    <div class="register-logo">
+    <a href="#"><b>{{ APPNAME }}</b></a>
+    </div>
+    <div class="register-box-body">
+    <p class="login-box-msg">注册成为新成员</p>
+    <form class="security_form" action="{{ url_for_security('register') }}" method="post"  name="register_user_form">
+      {{ register_user_form.hidden_tag() }}
+      <div class="form-group has-feedback {%if register_user_form.nickname.errors %}has-error{%endif%}">
+        <input type="text" class="form-control" id="nickname" name="nickname" placeholder="{{_('nickname')}}" value="{%if register_user_form.nickname.data %}{{ register_user_form.nickname.data }}{%endif%}">
+        <span class="glyphicon glyphicon-user form-control-feedback"></span>
+        {{ render_field_errors(register_user_form.nickname) }}
+      </div>
+      <div class="form-group has-feedback {%if register_user_form.email.errors %}has-error{%endif%}">
+        <input type="text" class="form-control" id="email" name="email" placeholder="{{_('email')}}" value="{%if register_user_form.email.data %}{{ register_user_form.email.data }}{%endif%}">
+        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+        {{ render_field_errors(register_user_form.email) }}
+      </div>
+      <div class="form-group has-feedback {%if register_user_form.password.errors %}has-error{%endif%}">
+        <input type="password" class="form-control" id="password" name="password" placeholder="{{_('password')}}"/>
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+        {{ render_field_errors(register_user_form.password) }}
+      </div>
+      <div class="form-group has-feedback {%if register_user_form.password_confirm.errors %}has-error{%endif%}">
+        <input type="password" class="form-control" id="password_confirm" name="password_confirm" placeholder="{{_('password_confirm')}}"/>
+        <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
+        {{ render_field_errors(register_user_form.password_confirm) }}
+      </div>
+      <div class="row">
+        <div class="col-xs-8">
+          <!--<div class="checkbox icheck">-->
+            <!--<label>-->
+              <!--<input type="checkbox"> 我同意如下<a href="#">条款</a>-->
+            <!--</label>-->
+          <!--</div>-->
+        </div><!-- /.col -->
+        <div class="col-xs-4">
+          <button type="submit" class="btn btn-primary btn-block btn-flat">注册</button>
+        </div><!-- /.col -->
+      </div>
+    </form>
+    <br>
+    <a href="{{ url_for_security('login') }}" class="text-center">我已有账户</a>
+    </div><!-- /.form-box -->
+</div>
+{% endblock %}

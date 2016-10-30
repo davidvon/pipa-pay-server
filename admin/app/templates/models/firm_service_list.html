@@ -1,0 +1,39 @@
+{% extends 'admin/list.html' %}
+
+{% block _content_breadcrumb%}
+        <ul class="breadcrumb">
+            <li>首页<span class="divider">/</span></li>
+            <li class="active">客户</li>
+        </ul>
+{% endblock %}
+
+
+{% block list_row scoped %}
+    {% if actions %}
+    <td>
+        <input type="checkbox" name="rowid" class="action-checkbox" value="{{ get_pk_value(row) }}" />
+    </td>
+    {% endif %}
+    <td style="width:70px;">
+        {% block list_row_actions scoped %}
+            <a class="icon" style="float:left;margin:5px;" href="/wxpay/qrcode?serviceid={{get_pk_value(row)}}">
+                <i class="icon-qrcode"></i>
+            </a>
+            {%- if admin_view.can_edit -%}
+            <a class="icon" style="float:left;margin:5px;" href="{{ url_for('.edit_view', id=get_pk_value(row), url=return_url) }}">
+                <i class="icon-pencil"></i>
+            </a>
+            {%- endif -%}
+            {%- if admin_view.can_delete -%}
+            <form style="float:left;margin:2px 0 5px 0px;" method="POST" action="{{ url_for('.delete_view', id=get_pk_value(row), url=return_url) }}">
+                <button onclick="return confirm('你确定要删除这项数据吗');">
+                    <i class="icon-trash"></i>
+                </button>
+            </form>
+            {%- endif -%}
+        {% endblock %}
+    </td>
+    {% for c, name in list_columns %}
+    <td>{{ get_value(row, c) }}</td>
+    {% endfor %}
+{% endblock %}

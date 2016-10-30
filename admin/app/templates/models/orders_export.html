@@ -1,0 +1,52 @@
+{% extends "base/_layout.html" %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_large = '导出订单' %}
+{% block head_more %}
+    <!-- iCheck -->
+    <link href="{{ url_for('static', filename='css/skins/skin-purple.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="/admin/static/admin/css/bootstrap3/admin.css" rel="stylesheet">
+{% endblock %}
+
+{% block body_content %}
+<div class="page-content">
+    <div class="col-md-10">
+    <div class="box box-primary">
+    <form action="/orders/export" method="POST" role="form" class="admin-form form-horizontal" enctype="multipart/form-data">
+    <div class="box-body">
+         <div class="form-group">
+            <label class="col-md-2 control-label">起始日期&nbsp;</label>
+            <div class="col-md-4"><input class="form-control" id="start_time" name="start_date" type="date"></div>
+         </div>
+         <div class="form-group">
+            <label class="col-md-2 control-label">结束日期&nbsp;</label>
+            <div class="col-md-4"><input class="form-control" id="end_time" name="end_date" type="date"></div>
+         </div>
+         <div class="form-group">
+            <label class="col-md-2 control-label">订单状态&nbsp;</label>
+            <div class="col-md-4">
+               <div class="checkbox"><label><input name="booking" type="checkbox"><span>订单待确认</span></label></div>
+               <div class="checkbox"><label><input name="delivery" type="checkbox"><span>已上门收衣</span></label></div>
+               <div class="checkbox"><label><input name="washing" type="checkbox"><span>洗涤中</span></label></div>
+               <div class="checkbox"><label><input name="received" type="checkbox"><span>已派送</span></label></div>
+               <div class="checkbox"><label><input name="closed" type="checkbox"><span>已关闭</span></label></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">待处理任务&nbsp;</label>
+            <div class="col-md-4">
+               <div class="checkbox"><label><input name="to_delivery" type="checkbox"><span>待取衣任务</span></label></div>
+               <div class="checkbox"><label><input name="to_receive" type="checkbox"><span>待送衣任务</span></label></div>
+            </div>
+        </div>
+        <div class="clearfix form-actions">
+           <div class="col-md-offset-4 col-md-9">
+                <button class="btn btn-info" type="submit"><i class="fa fa-check"></i>导出</button>
+           </div>
+        </div>
+        </div>
+    </form></div>
+    </div>
+</div>
+{% endblock%}

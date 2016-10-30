@@ -1,0 +1,32 @@
+{% extends "base/_layout.html" %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_small = '查询' %}
+{% set body_main_header_large = '短信第三方接口' %}
+
+
+{% block content %}
+  <!-- Info boxes -->
+  <div class="row">
+    <div class="col-lg-6 col-xs-6">
+      <!-- small box -->
+      <div class="small-box bg-yellow">
+         <div class="inner">
+          <h3><span style="font-size:38px;font-weight: bold;margin: 0 0 10px 0;white-space: nowrap;">{{balance}}</span>
+              <sup style="font-size:15px;margin-left:5px">(赠送:<span>{{sub_balance}}</span>)</sup>
+          </h3>
+          <span>剩余金额（元）</span> <br><span>更新时间： {{date}}</span>
+        </div>
+        <div class="icon">
+          <i class="fa fa-cny"></i>
+        </div>
+        <a href="http://www.yuntongxun.com/user/login" class="small-box-footer">
+          <i class="fa fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div><!-- ./col -->
+  </div>
+{% endblock%}
+
+

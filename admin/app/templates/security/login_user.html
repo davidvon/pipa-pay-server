@@ -1,0 +1,49 @@
+{% from "security/_macros.html" import render_field_errors %}
+{% extends "base/_base.html" %}
+{% block head_more %}
+    <!-- iCheck -->
+    <link href="{{ url_for('static', filename='plugins/iCheck/square/blue.css') }}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% set BODY_CLASS = 'login-page' %}
+{% set APPNAME = '琵琶金融' %}
+
+{% block body_base %}
+<div class="login-box">
+    <div class="login-logo">
+        <a href="#"><b>{{ APPNAME }}</b></a>
+    </div>
+      <div class="login-box-body">
+        <p class="login-box-msg">用户登录</p>
+        <form class="security_form" action="{{ url_for_security('login') }}" method="post" name="login_user_form">
+          {{ login_user_form.hidden_tag() }}
+
+          <div class="form-group has-feedback {%if login_user_form.nickname.errors %}has-error{%endif%}">
+            <input type="text" class="form-control" id="nickname" name="nickname" placeholder="{{_('nickname')}}" value="{%if login_user_form.nickname.data %}{{ login_user_form.nickname.data }}{%endif%}">
+            <span class="glyphicon glyphicon-user form-control-feedback"></span>
+            {{ render_field_errors(login_user_form.nickname) }}
+          </div>
+          <div class="form-group has-feedback {%if login_user_form.password.errors %}has-error{%endif%}">
+            <input type="password" class="form-control" id="password" name="password" placeholder="{{_('password')}}"/>
+            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            {{ render_field_errors(login_user_form.password) }}
+          </div>
+          <div class="row">
+            <div class="col-xs-8">
+              <div class="checkbox icheck">
+                <label>
+                  <input type="checkbox" id="remember" name="remember">{{_('remember me')}}
+                </label>
+              </div>
+            </div><!-- /.col -->
+            <div class="col-xs-4">
+              <button type="submit" class="btn btn-primary btn-block btn-flat">{{ _('login') }}</button>
+            </div><!-- /.col -->
+          </div>
+        </form>
+        <br><!-- /.social-auth-links -->
+        <a href="/reset">我忘记了密码</a><br>
+        <a href="/register" class="text-center">洗衣店用户注册</a>
+      </div><!-- /.login-box-body -->
+</div>
+{% endblock %}

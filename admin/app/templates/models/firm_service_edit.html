@@ -1,0 +1,31 @@
+{% extends 'models/edit.html' %}
+
+{% block body %}
+  <div class="well">
+  {% call lib.form_tag(form) %}
+      {% for f in form if f.type != 'HiddenField' and f.type != 'CSRFTokenField' %}
+          {% if f.name == 'car_service_firm' %}
+              <div class="control-group">
+                  <div class="control-label">服务商<strong style="color: red">*</strong></div>
+                  <div class="controls"><div><select data-role="select2" id="car_service_firm" name="car_service_firm">
+                      <option value="{{ current_user_firm.id }}">{{ current_user_firm.name }}</option>
+                  </select></div></div>
+              </div>
+          {% else %}
+              {% if form_opts %}
+                {% set kwargs = form_opts.widget_args.get(f.name, {}) %}
+              {% else %}
+                {% set kwargs = {} %}
+              {% endif %}
+              {{ lib.render_field(form, f, kwargs) }}
+          {% endif %}
+      {% endfor %}
+
+      <div class="form-buttons">
+        {{ lib.render_form_buttons(return_url) }}
+      </div>
+  {% endcall %}
+  </div>
+{% endblock %}
+
+

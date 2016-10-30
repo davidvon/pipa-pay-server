@@ -1,0 +1,54 @@
+{% macro menu() %}
+    <li class="header"></li>
+    {% for item in admin_view.admin.menu() if item.name !='首页' %}
+        {% if item.get_children() %}
+        <li class="treeview {% if item.is_active(admin_view) %}active{% endif %}">
+            <a href="#">
+            <i class="fa {% if item.get_children() and item._children[0]._view %}{{ item._children[0]._view.icon }}{%endif%}"></i>
+            <span>{{ item.name }}</span><i class="fa fa-angle-left pull-right"></i><small class="label pull-right bg-yellow"></small>
+            </a>
+            <ul class="treeview-menu">
+                {% for child in item.get_children() %}
+                <li {% if child.is_active(admin_view) %}class="active"{% endif %}><a href="{{ child.get_url() }}">
+                    <i class="fa fa-circle-o text-info"></i>
+                    <span>{{ child.name }}</span></a>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% else %}
+            <li><a href="{% if item.get_children() %}{{ item._children[0]._view.tagid }}{%endif%}">
+                <i class="fa {% if item.get_children() %}{{ item._children[0]._view.icon }}{%endif%}"></i>
+                <span>{{ item.name }}</span></a>
+            </li>
+        {%endif%}
+    {% endfor %}
+{% endmacro %}
+
+
+{% macro menu_links() %}
+  {% for item in admin_view.admin.menu_links() %}
+    {% if item.is_accessible() and item.is_visible() %}
+      <li>
+        <a href="{{ item.get_url() }}">{{ item.name }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
+
+{% macro messages() %}
+  {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+      {% for category, m in messages %}
+        {% if category %}
+        <div class="alert alert-{{ category }}">
+        {% else %}
+        <div class="alert">
+        {% endif %}
+          <a href="javascript:void(0)" class="close" data-dismiss="alert">x</a>
+          {{ m }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+{% endmacro %}

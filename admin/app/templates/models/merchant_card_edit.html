@@ -1,0 +1,152 @@
+{% extends 'admin/master.html' %}
+{% import 'admin/_lib.html' as lib with context %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_large = '会员卡信息' %}
+{% set body_main_header_small = '修改' %}
+
+{% block body_content %}
+  <div class="well">
+    <form action="" method="POST" role="form" class="admin-form form-horizontal" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="merchant" class="col-md-2 control-label">商户<strong style="color: red">*</strong></label>
+        <div class="col-md-8">
+          <select class="form-control" data-role="select2" id="merchant" name="merchant" tabindex="-1" title="商户*">
+              <option selected="" value="1">噼啪支付</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="card_id" class="col-md-2 control-label">微信卡号<strong style="color: red">*</strong></label>
+        <div class="col-md-8">
+          <input disabled="true" class="form-control" id="card_id" name="card_id" type="text" value="{{card.card_id}}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="card_info" class="col-md-2 control-label">Json参数<strong style="color: red">*</strong></label>
+        <div class="col-md-8">
+          <textarea rows="18" class="form-control" id="card_info" name="card_info"></textarea>
+        </div>
+      </div>
+      <div class="form-buttons">
+        <div class="form-group">
+          <div class="col-md-offset-2 col-md-8 submit-row">
+            <input type="submit" class="btn btn-primary" value="同步微信服务器">
+            <a href="/admin/card/" class="btn btn-danger" role="button">取消</a>
+          </div>
+        </div>
+      </div>
+      <label for="merchant" class="col-md-2 control-label">示例：</label>
+      <pre style="width:66.66666667%;height:400px">{
+  "card": {
+    "card_type": "MEMBER_CARD",
+    "member_card": {
+      "base_info": {
+        "id": "p0bNHt86rEpRzfWKAvdgk6ND_jhg",
+        "logo_url": "http://mmbiz.qpic.cn/mmbiz/OKg4BCa3zSrBeiaHLoMUEt3phSe7SFh7qicAXibCa0Oe5lH9PkGlFtJWlicsKV4G0G0IvP8KiatCw5NV55bvIeX9bag/0",
+        "code_type": "CODE_TYPE_TEXT",
+        "brand_name": "{{APPNAME}}",
+        "title": "{{APPNAME}}会员卡",
+        "sub_title": "至尊卡",
+        "date_info": {
+          "type": "DATE_TYPE_PERMANENT"
+        },
+        "color": "#C22B32",
+        "notice": "使用时向服务员出示此券",
+        "service_phone": "18651816350",
+        "description": "不可与其他优惠同享",
+        "location_id_list": [
+          272495002,
+          272494896
+        ],
+        "get_limit": 1,
+        "can_share": false,
+        "can_give_friend": true,
+        "use_custom_code": false,
+        "status": "CARD_STATUS_VERIFY_OK",
+        "sku": {
+          "quantity": 49999997,
+          "total_quantity": 50000000
+        },
+        "create_time": 1477214312,
+        "update_time": 1477229420,
+        "promotion_url": "http://pay.chexianghui.com/#!/cards",
+        "promotion_url_name": "会员卡消费",
+        "promotion_url_sub_title": "",
+        "need_push_on_view": true,
+        "use_all_locations": true,
+        "area_code_list": []
+      },
+      "supply_bonus": true,
+      "supply_balance": true,
+      "prerogative": "用卡可享受9折优惠\n每消费1元，赠送10积分",
+      "activate_url": "pay.chexianghui.com/#!/card/active",
+      "discount": 10,
+      "custom_cell1": {
+        "name": "我的会员卡",
+        "tips": "",
+        "url": "http://pay.chexianghui.com/#!/memcards"
+      },
+      "custom_cell2": {
+        "name": "会员卡入口",
+        "tips": "",
+        "url": "http://pay.chexianghui.com"
+      },
+      "auto_activate": false,
+      "custom_field1": {
+        "name_type": "FIELD_NAME_TYPE_LEVEL",
+        "url": "http: //pay.chexianghui.com"
+      },
+      "bonus_rule": {
+        "cost_money_unit": 100,
+        "increase_bonus": 1,
+        "max_increase_bonus": 10,
+        "init_increase_bonus": 10,
+        "cost_bonus_unit": 100,
+        "reduce_money": 100,
+        "least_money_to_use_bonus": 1000,
+        "max_reduce_bonus": 100
+      },
+      "background_pic_url": "http://mmbiz.qpic.cn/mmbiz_jpg/OKg4BCa3zSr1Wz5KoMHqiad0tV1LOqxD6zA0tDF0sLVUcFGJWG8Ka7AAh9jGO39H6CW49ScTo9pYJwsMynVQ6TA/0?wx_fmt=jpeg",
+      "advanced_info": {
+        "time_limit": [
+          {
+            "type": "MONDAY"
+          },
+          {
+            "type": "TUESDAY"
+          },
+          {
+            "type": "WEDNESDAY"
+          },
+          {
+            "type": "THURSDAY"
+          },
+          {
+            "type": "FRIDAY"
+          },
+          {
+            "type": "SATURDAY"
+          },
+          {
+            "type": "SUNDAY"
+          }
+        ],
+        "text_image_list": [],
+        "business_service": [
+          "BIZ_SERVICE_FREE_WIFI"
+        ],
+        "consume_share_card_list": [],
+        "use_condition": {
+          "can_use_with_other_discount": false,
+          "can_use_with_membercard": false
+        },
+        "share_friends": false
+      }
+    }
+  }
+}</pre>
+  </form>
+  </div>
+{% endblock %}

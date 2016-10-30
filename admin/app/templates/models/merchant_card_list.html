@@ -1,0 +1,10 @@
+{% extends 'admin/list.html' %}
+
+{%block list_row_action_more %}
+    <a class="icon" style="margin-left:5px;color:#0088cc;" href="/merchant/weixin/card/{{get_pk_value(row)}}/edit" title="提交微信">
+        <span class="glyphicon glyphicon-cloud-upload"></span>
+    </a>
+    <a class="icon" style="margin-left:5px;color:#0088cc;" href="/merchant/weixin/card/{{get_pk_value(row)}}/info" title="微信查询">
+        <span class="glyphicon glyphicon-info-sign"></span>
+    </a>
+{%endblock%}

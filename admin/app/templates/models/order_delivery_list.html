@@ -1,0 +1,43 @@
+{% extends "base/_layout.html" %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_large = '待取衣订单列表' %}
+
+{% block head_more %}
+    <!-- iCheck -->
+    <link href="{{ url_for('static', filename='css/skins/skin-purple.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="/admin/static/admin/css/bootstrap3/admin.css" rel="stylesheet">
+    <link href="/static/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet">
+    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+{% endblock %}
+
+{% block body_content %}
+    <div class="box">
+        <div class="box-body">
+            <table id="example" class="table table-bordered table-hover">
+            <thead><tr>
+                <th class="column-header">操作</th><th class="column-header">单号</th><th class="column-header">联系人姓名</th>
+                <th class="column-header">订单电话</th><th class="column-header">地址</th><th class="column-header">件数/㎡</th>
+                <th class="column-header">预约取衣日期</th><th class="column-header">状态</th>
+            </tr></thead>
+            </table>
+        </div><!-- /.box-body -->
+    </div>
+    <script>
+    $(document).ready(function() {
+        $('#example').dataTable( {
+            "language": {"url": "/static/plugins/datatables/chinese.json"},
+            "ajax": "/api/delivery_order/list",
+            "columns": [
+                {"data": function(obj){return "<a class=\"icon\" style=\"color:#0088cc;margin:4px;\" href=\"/admin/order/edit/?url=%2Fadmin%2Fneworderlistview%2F&amp;id="+ obj.order_id+"\" title=\"订单配置\"><span class=\"fa fa-gears\"></span></a><a class=\"icon\" style=\"color:#0088cc;margin:4px;\" href=\"/order/info/"+ obj.order_id+"\" title=\"订单信息\"><span class=\"fa fa-info-circle\"></span></a>";}},
+                {"data": function(obj){return "<a href='/order/info/"+ obj.order_id+"'>"+obj.order_serial+"</a>";}},
+                {"data": function(obj){return "<a href='/customer/info/"+ obj.customer_id+"'>"+obj.name+"</a>";}},
+                {"data":"phone" },{"data":"address" },{"data":"sum" },
+                {"data":"delivery_time" },{"data":"status"}
+            ]
+        } );
+    });
+    </script>
+{% endblock%}

@@ -1,0 +1,66 @@
+{% extends 'admin/master.html' %}
+{% import 'admin/_lib.html' as lib with context %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_small = '创建' %}
+{% block form_action %}'aaaaa'{% endblock %}
+
+{% macro extra() %}
+  <button name="_add_another" type="submit" class="btn btn-large">{{ _gettext('Save and Add') }}</button>
+{% endmacro %}
+
+{% block head_more %}
+    {{ super() }}
+    {{ lib.form_css() }}
+    <link rel="stylesheet" href="/static/plugins/kindeditor/themes/default/default.css" />
+    <script charset="utf-8" src="/static/plugins/kindeditor/kindeditor-min.js"></script>
+    <script charset="utf-8" src="/static/plugins/kindeditor/lang/zh_CN.js"></script>
+{% endblock %}
+
+{% block tail_base %}
+    {{ super() }}
+    {{ lib.form_js() }}
+    <script>
+        var editor;
+        KindEditor.ready(function(K) {
+            editor = K.create('textarea', {
+                pluginsPath : '/static/plugins/kindeditor/plugins/',
+                themesPath : '/static/plugins/kindeditor/themes/',
+                uploadJson : '/api/image/upload',
+                fileManagerJson : '/api/images',
+                allowFileManager : true,
+                filterMode : false,
+                autoHeightMode : true,
+                afterCreate : function() { this.loadPlugin('autoheight'); }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body_content %}
+  <div class="row"><div class="col-md-10">
+    {% block _buttons%}{% endblock %}
+
+  {% block navlinks %}
+  <ul class="nav nav-tabs">
+      <li>
+          <a href="{{ return_url }}">{{ _gettext('List') }}</a>
+      </li>
+      <li class="active">
+          <a href="javascript:void(0)">{{ _gettext('Create') }}</a>
+      </li>
+	</ul>
+  {% endblock %}
+
+    <div class="box box-primary">
+      {% call lib.form_tag(form) %}
+       <!-- form start -->
+          <div class="box-body">
+            {{ lib.render_form_fields(form, form_opts=form_opts) }}
+          </div><!-- /.box-body -->
+        {{ lib.render_form_buttons(return_url, extra()) }}
+      {% endcall %}
+    </div><!-- /.box -->
+  </div></div>
+{% endblock %}

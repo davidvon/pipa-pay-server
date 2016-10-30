@@ -1,0 +1,63 @@
+{% extends "base/_layout.html" %}
+{% set APPNAME = '琵琶金融' %}
+{% set BODY_CLASS = 'skin-purple' %}
+{% set LAYOUT_STYLE = 'fixed' %}
+{% set body_main_header_large = '微信会员卡详情' %}
+{% block head_more %}
+    <!-- iCheck -->
+    <link href="{{ url_for('static', filename='css/skins/skin-purple.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="/admin/static/admin/css/bootstrap3/admin.css" rel="stylesheet">
+    <link href="/static/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet">
+    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+{% endblock %}
+
+{% block bread_crumb_title %}
+<li><a href="/admin/card">基本设置</a></li>
+{% endblock %}
+
+{% block body_content %}
+    <div class="tab-content">
+        <div class="active" id="customer_info">
+            <div >
+            <span><a href="{{url}}" class="btn btn-success">返回</a></span>
+            <span><a href="{{url}}" class="btn btn-danger">微信会员卡参数查询</a></span>
+            </div>
+            <h4>基本信息</h4>
+            <div class="widget-container-span ui-sortable">
+                <table class="table table-striped table-bordered table-hover model-list order_info">
+                    <colgroup>
+                      <col class="span2">
+                      <col class="span7">
+                    </colgroup>
+                    <tbody><tr><td>卡ID</td><td style="color:#aaa">{{card.card_id}}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <h4>微信会员卡信息</h4>
+            <div class="widget-container-span ui-sortable">
+                <table class="table table-striped table-bordered table-hover model-list order_info">
+                    <colgroup><col class="span7"></colgroup>
+                    <tbody><tr><td style="color:#d73925" id="wxcard_info">查询中...</td></tr></tbody>
+                </table>
+            </div><!-- /.box-body -->
+        </div>
+    </div>
+    <script>
+    $(document).ready(function() {
+        $.ajax({
+            type: 'GET',
+            url: '/api/weixin/card/{{card.card_id}}',
+            contentType: 'application/json',
+            success: function(resp){
+                if(resp.result != 0){
+                    $('#wxcard_info').css("color","#d73925").text("查询微信数据失败")
+                } else {
+                    $('#wxcard_info').css("color","#aaa").text(resp.data)
+                }
+            }
+        });
+
+    });
+    </script>
+{% endblock%}

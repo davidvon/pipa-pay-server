@@ -1,0 +1,30 @@
+{% extends 'admin/list.html' %}
+{% import 'base/_alert.html' as alert with context -%}
+
+{% block _buttons %}
+    <div class="alert fade in alert-info" style="display:none">
+        <strong>提示：提交中...</strong>
+    </div>
+    <script>
+        function post_weixin_menu_operate(op) {
+            $.post('/weixin/api/menu/register',{text: op}).done(function(result) {
+                var msg = '';
+                if( result['errcode'] == '0'){
+                    msg = '提示：操作成功';
+                } else {
+                    msg = '提示：操作失败:'+ result['errcode']+" 错误详细信息:"+ result['errmsg'];
+                }
+                $(".alert strong").text(msg);
+            });
+            $(".alert").show();
+        }
+    </script>
+    <div class='push_left'>
+        {% if search_supported %}
+        <div class="search-form btn-menu">
+            {{ model_layout.search_form(input_class='span2 btn-title') }}
+        </div>
+        {% endif %}
+        <a href="javascript:post_weixin_menu_operate('enable')" class="btn btn-large btn-danger" style="margin-bottom:10px">提交微信服务器</a>
+    </div>
+{% endblock %}

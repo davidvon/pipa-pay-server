@@ -1,0 +1,261 @@
+{% extends 'admin/list.html' %}
+
+{% block _content_header %}
+    <div class="header">
+        <h1 class="page-title">{{ admin_view.name|capitalize }}列表</h1>
+    </div>
+{% endblock%}
+
+{% block _content_breadcrumb %}
+    <ul class="breadcrumb">
+        <li>首页<span class="divider">/</span></li>
+        <li class="active">{{ admin_view.name|capitalize }}</li>
+    </ul>
+{% endblock%}
+
+{% block _buttons %}
+    <div class="alert alert-warning alert-dismissible" role="alert">
+      <strong>提醒:</strong>
+      用户列表是与微信服务器保持同步，用户如果48小时内没有与公众平台响应就不能正常推送。推送的内容会立即发往用户微信终端，请谨慎使用。
+    </div>
+    <div class="push_left" style="margin-left:0px; margin-top: 10px;">
+        <div class="btn-group open" style="float:left;left: 20px;">
+            <a href="javascript:void(0)" onclick="open_push_dialog()" data-toggle="modal" class="btn btn-large partusers btn-danger disabled">用户推送</a>
+            <a href="javascript:void(0)" onclick="open_allpush_dialog()" data-toggle="modal" class="btn btn-large allusers btn-danger">全部用户推送</a>
+        </div>
+        <div class="clearfix"></div>
+        <hr>
+    </div>
+{% endblock %}
+
+{% block list_row_actions scoped %}
+    {%- if admin_view.can_edit -%}
+    <a class="icon" href="{{ url_for('.edit_view', id=get_pk_value(row), url=return_url) }}">
+        <i class="icon-pencil"></i>
+    </a>
+    {%- endif -%}
+{% endblock %}
+
+{% block tail_js %}
+    <script src="{{ url_for('admin.static', filename='datetimepicker/bootstrap-datetimepicker.js') }}"></script>
+    <script src="{{ url_for('admin.static', filename='admin/js/form.js') }}"></script>
+    <script src="{{ url_for('admin.static', filename='admin/js/filters.js') }}"></script>
+
+    <div class="modal hide fade" id="pushModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3>推送类型选项</h3>
+        </div>
+        <div class="push_result modal-body" style="display:none">
+            <div class='alert alert-info'><strong>推送中...</strong><div class="push-info"></div></div>
+        </div>
+        <div class="push_dialog modal-body">
+            <div class="tabbable tabs-left">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#newslist" data-toggle="tab">图文素材</a></li>
+                    <li><a href="#txtlist" data-toggle="tab">文字素材</a></li>
+                </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="newslist">
+                    <div class="controls controls-row">
+                        <table class="table table-hover" style="width:350px">
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane" id="txtlist">
+                    <div class="controls controls-row">
+                        <table class="table table-hover" style="width:350px">
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+    <span>选中用户数:</span><span class="user_count" style="margin-right:40px;">3</span>
+    <button class="btn" id="msg_dialog_cancel" data-dismiss="modal" aria-hidden="true">取消</button>
+    <button class="btn btn-danger" id="msg_pushing">开始推送</button>
+    <button class="btn" id="msg_dialog_return">返回</button>
+    </div>
+   <script>
+        var input_action_checkbox = $('input.action-checkbox');
+        var btn_danger = $('.btn-danger');
+        var push_dialog = $('.push_dialog');
+        var push_result = $('.push_result');
+        var msg_pushing = $('#msg_pushing');
+        var msg_dialog_cancel = $('#msg_dialog_cancel');
+        var msg_dialog_return =$('#msg_dialog_return');
+        var pushModal = $('#pushModal');
+
+        function open_push_dialog(){
+            push_dialog.show();
+            push_result.hide();
+            msg_pushing.show();
+            msg_dialog_cancel.show();
+            msg_dialog_return.hide();
+            if( btn_danger.hasClass("disabled") ) return;
+            pushModal.modal('show');
+        }
+
+        function open_allpush_dialog(){
+            push_dialog.show();
+            push_result.hide();
+            msg_pushing.show();
+            msg_dialog_cancel.show();
+            msg_dialog_return.hide();
+            $('.user_count').text( '所有' );
+            pushModal.modal('show');
+        }
+
+        function news_select(page, e){
+            $(page + ' table .select').css('background-color', '')
+            $(page + ' table .select').removeClass('select')
+            $(e.target.parentNode).css('background-color','lavender');
+            $(e.target.parentNode).addClass('select')
+        }
+
+        $('#newslist table').bind('click', function(e){
+            news_select('#newslist', e);
+        })
+        $('#txtlist table').bind('click', function(e){
+            news_select('#txtlist', e);
+        })
+        msg_dialog_return.bind('click', function(e){
+            pushModal.modal('hide');
+        })
+
+        msg_pushing.bind('click', function () {
+            var count = $('.user_count').text();
+            if( count == '所有'){
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/customers',
+                    contentType: 'application/json',
+                    success: function(data){
+                        weixin_push_operate(data)
+                    }
+                });
+
+            } else {
+                var user_doms = $('input.action-checkbox:checked');
+                var userids = [];
+                for( var i=0; i<user_doms.length; i++ ){
+                    var id = user_doms[i].value;
+                    userids.push(id)
+                }
+                weixin_push_operate(userids)
+            }
+        })
+
+        function weixin_push_operate( users ) {
+            var pageid = $('.modal-body .active > a')[0].hash;
+            if( $(pageid + ' table .select').size() == 0 ){
+                alert("请选择图文或文本模型");
+                return;
+            }
+            msg_dialog_cancel.hide();
+            msg_pushing.hide();
+            msg_dialog_return.show();
+            var news_id = $(pageid + ' table .select').attr('rowid')
+            var success_count = 0;
+            var failure_count = 0;
+            var i=0;
+            push_dialog.hide();
+            push_result.show();
+            for(;i<users.length; i++){
+                $.ajax({
+                    type: 'POST',
+                    url: '/weixin/weixin_push',
+                    data: JSON.stringify({
+                            user: users[i],
+                            tag: pageid,
+                            newsid: news_id
+                        }),
+                    contentType: 'application/json',
+                    success: function(data){
+                        json = eval("(" + data + ")");
+                        if(json.success == 1) {success_count+= 1} else {failure_count+=1}
+                        $('.push-info').html("推送:"+(success_count+failure_count)+'/'+users.length+', 成功:'+success_count+',失败:'+failure_count);
+                    }
+                });
+            }
+        }
+
+        function toggle_enable(tag){
+           if( tag == true ){
+               $('.partusers').removeClass("disabled");
+           } else {
+               $('.partusers').addClass("disabled");
+           }
+        }
+
+        $('.action-rowtoggle').bind('change',function(e){
+            toggle_enable(e.target.checked)
+            var count = input_action_checkbox.size()
+            $('.user_count').text( count );
+        })
+        input_action_checkbox.bind('change',function(){
+            var selected = $('input.action-checkbox:checked').size();
+            toggle_enable(selected > 0)
+            var count = $('input.action-checkbox:checked').size()
+            $('.user_count').text( count );
+        })
+
+        function load_data(tag, data){
+            domid = tag + ' .table';
+            for( var i=0; i<data.length; i++ ){
+                $(domid).append('<tr rowid="'+ data[i].id +'"><td>' + data[i].title + '</td></tr>');
+            }
+        }
+        function init(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/news_list',
+                contentType: 'application/json',
+                success: function(data){
+                    load_data('#newslist',data);
+                },
+                error: function(xhr, type){}
+            });
+            $.ajax({
+                type: 'GET',
+                url: '/api/text_list',
+                contentType: 'application/json',
+                success: function(data){
+                    load_data('#txtlist',data);
+                },
+                error: function(xhr, type){}
+            });
+            $('body').css('min-height', $(window).height());
+            $(".nav-header[href='#']").remove()
+            $(".sidebar-nav").show()
+        }
+        $('.action-rowtoggle').change(function() {
+            $('input.action-checkbox').attr('checked', this.checked);
+        });
+       $(document).ready(function(){
+            init();
+        });
+   </script>
+
+    {{ actionlib.script(_gettext('Please select at least one model.'),
+                      actions,
+                      actions_confirmation) }}
+
+    <script language="javascript">
+        (function($) {
+            $('[data-role=tooltip]').tooltip({
+                html: true,
+                placement: 'bottom'
+            });
+            {% if filter_groups is not none and filter_data is not none %}
+                var filter = new AdminFilters(
+                    '#filter_form', '.field-filters',{{ admin_view._get_filter_dict()|tojson|safe }},
+                    {{ filter_data|tojson|safe }},
+                    {{ filter_types|tojson|safe }}
+                );
+            {% endif %}
+        })(jQuery);
+    </script>
+{% endblock%}
+

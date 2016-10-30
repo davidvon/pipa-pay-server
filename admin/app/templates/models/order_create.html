@@ -1,0 +1,160 @@
+{% extends 'admin/create.html' %}
+
+{% block head_more %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/css/ion.rangeSlider.css" />
+    <link rel="stylesheet" href="/static/css/ion.rangeSlider.skinFlat.css" />
+{% endblock %}
+
+{% block body_content %}
+<div class="row"><div class="col-md-10">
+    <ul class="nav nav-tabs">
+      <li>
+          <a href="/admin/order">订单列表</a>
+      </li>
+      <li class="active">
+          <a href="javascript:void(0)">订单修改</a>
+      </li>
+	</ul>
+
+    <div class="box box-primary">
+    <form action="/order/info/{{model.id}}" method="POST" role="form" class="admin-form form-horizontal" enctype="multipart/form-data">
+       <!-- form start -->
+    <div class="box-body">
+      <div class="form-group">
+        <label for="order_serial" class="col-md-2 control-label">订单序列号<strong style="color: red">*</strong></label>
+        <div class="col-md-8">
+          <input class="form-control" id="order_serial" name="order_serial" readonly="" type="text" value="{{model.order_serial}}">
+        </div>
+      </div>
+      <div class="form-group"><label class="col-md-2 control-label">联系人姓名&nbsp;</label>
+        <div class="col-md-8">
+        <input class="form-control" id="customer_name" name="customer_name" readonly="" type="text" value="{{model.address.name}}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-md-2 control-label">上门取衣日期&nbsp;</label>
+        <div class="col-md-4"><input class="form-control" id="booking_delivery_date" name="booking_delivery_date" type="date" value="{{model.booking_delivery_date}}"></div>
+        <div class="col-md-4">
+        <select class="form-control" id="booking_delivery_time" name="booking_delivery_time" title="上门取衣时间段">
+            {% for i in range(7,20)%}<option {% if model and model.booking_delivery_time == i %}selected="selected"{%endif%} value="{{i}}">{{i}}:00-{{i+1}}:00</option>{% endfor%}
+        </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-md-2 control-label">上门送衣日期&nbsp;</label>
+        <div class="col-md-4"><input class="form-control" id="booking_received_date" name="booking_received_date" type="date" value="{{model.booking_received_date}}"></div>
+        <div class="col-md-4">
+        <select class="form-control" id="booking_received_time" name="booking_received_time" title="上门送衣时间段">
+            {% for i in range(7,20)%}<option {% if model and model.booking_received_time == i %}selected="selected"{%endif%} value="{{i}}">{{i}}:00-{{i+1}}:00</option>{% endfor%}
+        </select>
+        </div>
+      </div>
+      <div class="form-group"><label for="address" class="col-md-2 control-label">上门地址&nbsp;</label>
+        <div class="col-md-8">
+          <div class="select2-container form-control" id="s2id_address">
+              <select class="form-control" id="address" name="address" title="收货地址&nbsp;">
+                  <option value=""></option>
+                  {% for address in model.customer.addresses %}
+                  <option {%if model.address_id==address.id%}selected="selected"{%endif%} value="{{address.id}}">{{address}}</option>
+                  {%endfor%}
+              </select>
+          </div>
+        </div>
+        <div class="col-md-1">
+        <a href="/admin/customer/edit?url=%2Fadmin%2Forder%2Fedit%3Fid%3D{{model.id}}&id={{model.customer.id}}" class="btn btn-danger" role="button">新增</a>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="pay_price" class="col-md-2 control-label">应付金额&nbsp;</label>
+        <div class="col-md-8">
+          <input class="form-control" id="pay_price" name="pay_price" type="text" value="{{model.pay_price or ''}}">
+        </div>
+      </div>
+      <div class="form-group"><label for="status" class="col-md-2 control-label">订单状态&nbsp;</label>
+        <div class="col-md-8">
+          <input type="text" id="status_range" value="" name="range" />
+          <input type="hidden" class="form-control" id="status" name="status" value="{{model.status}}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="pay_type" class="col-md-2 control-label">支付方式&nbsp;</label>
+        <div class="col-md-8">
+          <select disabled="disabled" style="background-color:#F9F8C4;" class="form-control" id="pay_type" name="pay_type">
+              {%if model.pay_type==2%}
+              <option value="2">微信</option>
+              {%else%}
+              <option value="1">现金</option>
+              {%endif%}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="paid" class="col-md-2 control-label">是否支付&nbsp;</label>
+        <div class="col-md-8">
+          <select {%if model.paid == 1 %}disabled="disabled" style="background-color:#F9F8C4;"{%endif%} class="form-control" id="paid" name="paid">
+              {%if model.paid == 1 %}
+              <option value="1">已支付</option>
+              {%else%}
+              <option value="0">未支付</option>
+              <option value="1">已支付</option>
+              {%endif%}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="booking_clothes" class="col-md-2 control-label">件数/㎡&nbsp;</label>
+        <div class="col-md-8" >
+          <input class="form-control" id="booking_clothes" name="booking_clothes" type="text" value="{{model.booking_clothes}}">
+        </div>
+        <div class="col-md-2"><label style="background-color:green;font-size:15px;color:white;padding:5px 10px 5px 10px;">实际: {{model.order_items_len()}}件</label></div>
+      </div>
+      <div class="form-group">
+        <label for="paid" class="col-md-2 control-label">衣服列表&nbsp;</label>
+        <div class="col-md-8">
+            {%if model.order_items.all()%}
+            <div style="width:100%">
+                <ul style="padding-left:0px;">
+                    {% for item in model.order_items%}
+                    <li style="padding:4px 0 4px 8px;background-color:#A1F2EF;list-style-type:none;" class="select2-search-choice">{{item.service}}&nbsp;&nbsp;{{item.brand or ''}}&nbsp;{{item.color or ''}}&nbsp;&nbsp;¥{{item.service.price}} x {{item.count}}</li>
+                    {%endfor%}
+                </ul>
+            </div>
+            {%else%}<label style="padding:6px;background-color:#eee;display:block;text-align:center" class="control-label">无</label>
+            {%endif%}
+        </div>
+        <div class="col-md-2"><label style="background-color:green;font-size:15px;color: white;padding:5px 10px 5px 10px;">估价: ¥{{model.original_total_price()}}&nbsp;</label></div>
+      </div>
+      <div class="col-md-offset-2">
+        <a href="/order/item/create/{{model.order_serial}}?url=%2Fadmin%2Forder%2Fedit?id={{model.id}}" class="btn btn-info">新增洗衣清单</a>
+      </div>
+      </div><!-- /.box-body -->
+      <hr>
+        <div class="form-group">
+          <div class="col-md-offset-2 col-md-8 submit-row">
+            <input type="submit" class="btn btn-primary" value="修改">
+            <a href="/order/info/{{model.id}}" class="btn btn-danger" role="button">取消</a>
+          </div>
+        </div>
+        <br>
+        </form>
+        </div><!-- /.box -->
+      </div>
+    </div>
+{% endblock %}
+
+{% block tail_base %}
+    <script src="/static/js/ion.rangeSlider.min.js"></script>
+    <script>
+        $(function () {
+            $("#status_range").ionRangeSlider({
+                grid: true, from:{{model.status}}, values:["已下单", "已上门收衣", "洗涤中", "已派送","订单关闭"],
+                grid_snap: true,
+                onChange: function (data) {
+                    $('#status').val(data.from);
+                }
+            });
+        });
+    </script>
+    {{ super() }}
+{% endblock %}
