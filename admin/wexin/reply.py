@@ -229,7 +229,7 @@ class ReplyKeyWords(object):
             else:
                 errors += 1
             logger.info("[WEIXIN] push message to user[%d/%d]: %s" % (currentid, total, ret.get('message')))
-        return {'success': success, 'error': errors, 'total': total}
+        return self.__response(str({'success': success, 'error': errors, 'total': total}))
 
     def push_text_reply(self, helper, text_id, receivers):
         text_reply = WechatTextReply.query.get(text_id)
@@ -254,13 +254,13 @@ class ReplyKeyWords(object):
             else:
                 errors += 1
             logger.info("push message to user[%d/%d]: %s" % (currentid, total, ret.get('message')))
-        return {'success': success, 'error': errors, 'total': total}
+        return self.__response(str({'success': success, 'error': errors, 'total': total}))
 
     def batch_push_text_notify(self, notify_list):
         for notify in notify_list:
             self.push_text_notify(notify['text'], notify['openid'])
             time.sleep(0.1)
-        return ''
+        return self.__response('')
 
     def push_text_notify(self, text, openid):
         message = {
@@ -273,7 +273,7 @@ class ReplyKeyWords(object):
         ret = self._weixin.weixin_helper.send_custom_message(message)
         content = ret.get('message')
         logger.info("push message to user[%s]: %s" % (openid, content))
-        return content
+        return self.__response(content)
 
     def card_give(self, args):
         logger.info('[card_give] customer[%s] card give event[%s] received' % (self.sender, args))
@@ -304,7 +304,7 @@ class ReplyKeyWords(object):
                 card_gid = pop_cache_card_id(cardid, self.sender)
                 if not card_gid:
                     logger.error('[card_give] customer[%s] card[%s] pop is empty' % (self.sender, cardid))
-                    return {'result': 'error'}
+                    return self.__response(str({'result': 'error'}))
                 logger.debug('[card_give] customer[%s] card[%s] popped' % (self.sender, card_gid))
                 card = CustomerCard.query.get(card_gid)
                 balance = card.balance
@@ -317,13 +317,13 @@ class ReplyKeyWords(object):
             helper = WeixinHelper()
             logger.info('[card_give] recharge: card[%s] code[%s], balance[%s] bonus=[%s]' %
                             (cardid, card_code, balance, bonus))
-            ret = helper.card_recharge(cardid, card_code, balance, bonus)
+            ret = helper.card_recharge(cardid, card_code, 1000, 2000)  # TODO
             logger.info('[card_give] recharge: card[%s] code[%s], ret[%s]' % (cardid, card_code, ret))
-            return {'result': 'ok'}
+            return self.__response(str({'result': 'ok'}))
         except Exception as e:
             logger.error(traceback.print_exc())
             logger.error('[card_give] customer[%s] card banding event[%s] error:%s' % (self.sender, args, e.message))
-            return {'result': 'error'}
+            return self.__response(str({'result': 'error'}))
 
 
     def card_pay_event_notify(self, args):
@@ -334,4 +334,4 @@ class ReplyKeyWords(object):
         trans_id = args.get('transid')
         trans_id = args.get('fee')
         # TODO
-        return {'result': 'ok'}
+        return self.__response(str({'result': 'ok'}))
