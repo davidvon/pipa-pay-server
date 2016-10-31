@@ -5,7 +5,7 @@ from flask.ext.restful import abort
 from wtforms import SelectField
 from app import db, app
 from app.view import BaseModelView, admin
-from models import City, Card, User
+from models import City, Card, User, Merchant
 
 
 class ShopView(BaseModelView):
@@ -58,4 +58,14 @@ def merchant_card_info(card_id, action):
     back_url = request.args.get('url') or '/admin/card'
     template_html = 'models/merchant_card_%s.html' % action
     return render_template(template_html, card=card, url=back_url, admin_base_template='base/_layout.html',
+                           admin_view=admin.index_view), 200
+
+
+@app.route('/merchant/<string:merchant_id>/card/create', methods=['GET'])
+@login_required
+def merchant_card_create(merchant_id):
+    merchant = Merchant.query.filter_by(id=merchant_id).first()
+    back_url = request.args.get('url')
+    template_html = 'models/merchant_card_create.html'
+    return render_template(template_html, merchant=merchant, url=back_url, admin_base_template='base/_layout.html',
                            admin_view=admin.index_view), 200

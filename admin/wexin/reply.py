@@ -304,7 +304,7 @@ class ReplyKeyWords(object):
                 card_gid = pop_cache_card_id(cardid, self.sender)
                 if not card_gid:
                     logger.error('[card_give] customer[%s] card[%s] pop is empty' % (self.sender, cardid))
-                    return
+                    return {'result': 'error'}
                 logger.debug('[card_give] customer[%s] card[%s] popped' % (self.sender, card_gid))
                 card = CustomerCard.query.get(card_gid)
                 balance = card.balance

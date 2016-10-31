@@ -514,4 +514,9 @@ class WeixinHelper(object):
         response = self.request.request(url, params, json_data, 'POST')
         return response
 
+    def create_card(self, json_str):
+      url = "/card/create"
+      params = {"access_token": self.request.get_access_token()}
+      response = self.request.request(url, params, json_str, 'POST')
+      return response
 logger.info("======= Weixin Helper End =======")

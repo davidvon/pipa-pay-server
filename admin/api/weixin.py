@@ -80,6 +80,16 @@ class ApiWxCardChooseSign(Resource):
     return ret
 
 
+class ApiWxCardCreate(Resource):
+  def post(self):
+    logger.info('[ApiWxCardCreate] in: args[%s]' % request.data)
+    data = json.JSONDecoder().decode(request.data)
+    helper = WeixinHelper()
+    ret = helper.create_card(data)
+    logger.info('[ApiWxCardCreate] out: result[%s]' % ret)
+    return ret
+
+
 # buy cards
 class ApiWxCardsAdd(Resource):
   def post(self):
@@ -208,6 +218,7 @@ class ApiWxCardConsumeCheck(Resource):
     return True if ret['errcode'] == 0 else False
 
 
+restful_api.add_resource(ApiWxCardCreate, API_WX_PREFIX + 'card/create')
 restful_api.add_resource(OAuthDecode, API_WX_PREFIX + 'oauth/decode')
 restful_api.add_resource(ApiQRcode, API_WX_PREFIX + 'qrcode')
 restful_api.add_resource(ApiWxJsSign, API_WX_PREFIX + 'sign/jsapi')
