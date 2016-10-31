@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 from logging.handlers import RotatingFileHandler
-import datetime
-import time
 from flask import g
 from flask import Flask, request, session
 from flask.ext.login import current_user
@@ -25,10 +23,14 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 redis_client = redis.StrictRedis(host='127.0.0.1', port=6379)
 logger.info("[RUNNING] running mode:[%r], database:[%r]" % (config.RUN_MODE, config.SQLALCHEMY_DATABASE_URI))
+logger.info("[RUNNING] db: [%r], redis: [%r,%r,%d]" % (config.SQLALCHEMY_DATABASE_URI, config.REDIS_SERVER_IP,
+                                                       config.REDIS_SERVER_PWD, config.REDIS_SERVER_DB))
+logger.info("[RUNNING] app id:%s, secret:%s" % (config.WEIXIN_APPID, config.WEIXIN_SECRET))
+
 
 db = SQLAlchemy(app)
 babel = Babel(app, default_locale=config.BABEL_DEFAULT_LOCALE, default_domain=Domain(domain='admin'))
@@ -76,7 +78,16 @@ def before_first_request():
         db.session.add(Role(name=config.ROLE_SHOP_STAFF, desc='店员'))
         db.session.commit()
 
+@app.after_request
+def after_request(response):
+    origin = 'http://wx.pipapay.com' if config.RUN_MODE == 'production' else '*'
+    response.headers.add('Access-Control-Allow-Origin', origin)
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
 
+
+import models
 import view
 import views
 import api
