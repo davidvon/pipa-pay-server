@@ -65,11 +65,11 @@ class ApiCardDispatch(Resource):
             if count < order.card_count:
                 for i in range(count, order.card_count):
                     card = CustomerCard(customer_id=order.customer.openid, order_id=order_id, card_id=order.card_id,
-                                        balance=order.face_balance, expire_date=expire_date, status=0)
+                                        balance=order.face_amount, expire_date=expire_date, status=0)
                     db.session.add(card)
                 db.session.commit()
 
-            output = {"result": 0, "data": {"count": order.card_count, "balance": order.face_balance}}
+            output = {"result": 0, "data": {"count": order.card_count, "balance": order.face_amount}}
             logger.debug('[ApiCardDispatch] out: return [%s]' % output)
             return output
         except Exception as e:
