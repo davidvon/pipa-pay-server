@@ -444,7 +444,7 @@ class WeixinHelper(object):
             return response['code']
         return None
 
-    def active_card(self, init_balance, card_code, card_id, init_bonus=0):
+    def active_card(self, card_id, card_code, init_balance, init_bonus=0):
         url = "/card/membercard/activate"
         params = {"access_token": self.request.get_access_token()}
         json = {
@@ -490,6 +490,27 @@ class WeixinHelper(object):
         url = "/card/membercard/userinfo/get"
         params = {"access_token": self.request.get_access_token()}
         json_data = {"card_id": card_id, "code": card_code}
+        response = self.request.request(url, params, json_data, 'POST')
+        return response
+
+    def card_code_list(self, openid, card_id):
+        url = "/card/user/getcardlist"
+        params = {"access_token": self.request.get_access_token()}
+        json_data = {"openid": openid, "card_id": card_id}
+        response = self.request.request(url, params, json_data, 'POST')
+        return response
+
+    def card_status(self, code, card_id):
+        url = "/card/code/get"
+        params = {"access_token": self.request.get_access_token()}
+        json_data = {"code": code, "card_id": card_id, "check_consume": True}
+        response = self.request.request(url, params, json_data, 'POST')
+        return response
+
+    def card_delete(self, code, card_id):
+        url = "/card/delete"
+        params = {"access_token": self.request.get_access_token()}
+        json_data = {"code": code, "card_id": card_id, "check_consume": True}
         response = self.request.request(url, params, json_data, 'POST')
         return response
 

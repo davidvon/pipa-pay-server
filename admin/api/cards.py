@@ -11,7 +11,7 @@ from api.order import create_order
 from app import restful_api, db, logger
 from cache.order import cache_qrcode_code, get_cache_order
 from cache.weixin import get_cache_customer_cards, cache_customer_cards
-from models import Customer, CustomerCard, CustomerTradeRecords, CustomerCardShare, Order
+from models import Customer, CustomerCard, CustomerTradeRecords, CustomerCardShare, Order, Card
 from utils.util import nonce_str
 from wexin.helper import WeixinHelper
 from wexin_pay.views import payable
@@ -84,10 +84,16 @@ class ApiWxCardStatusUpdate(Resource):
         try:
             args = request.values
             logger.debug('[ApiWxCardStatusUpdate] in: args[%s]' % args)
-
             openid = args['openid']
             card_global_id = args['cardGlobalId']
             card = CustomerCard.query.get(card_global_id)
+            helper = WeixinHelper()
+            resp = helper.card_recharge(card.card_id, card.card_code, card.balance)
+            if resp['errcode'] != 0:
+                logger.error('[ApiWxCardStatusUpdate] customer[%s] arg[%s] card recharge error:[%s]' %
+                (openid, args, resp['errmsg']))
+                return {'result': 255, 'data': resp['errmsg']}
+            logger.info('[ApiWxCardStatusUpdate] customer[%s] arg[%s] card recharge success' % (openid, args))
             card.status = 1
             db.session.add(card)
             db.session.commit()
@@ -343,12 +349,10 @@ class ApiCardBuy(Resource):
                 return {'result': 250}
             res, outputs = payable(request, openid, order)
             logger.info('[ApiCardBuy] data:%s' % str(outputs))
-
             if res == 0:
                 outputs['orderId'] = order.order_id
                 logger.info('[ApiCardBuy] create temp order success:%s' % order.order_id)
                 return {'result': 0, 'content': outputs}
-
             logger.warn('[ApiCardBuy] order:%s pre-pay failed:%d' % (order.order_id, res))
             return {'result': res, 'msg': outputs}
         except Exception as e:
@@ -366,7 +370,6 @@ class ApiCardBuyCommit(Resource):
         if not order:
             logger.warn('[ApiCardBuyCommit] order:%s not exist' % order_id)
             return {'result': 254}
-
         try:
             order.paid = True
             db.session.add(order)
@@ -397,11 +400,15 @@ class ApiCardActive(Resource):
                 return {'result': 255}
 
             card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=code).first()
-            active = helper.active_card(card.balance * 100, code, card_id, 0)
+            # init balance
+            init_balance = card.balance * 100
+            init_bonus = init_balance
+            active = helper.active_card(card_id, code, init_balance, init_bonus)
             if not active:
                 logger.error('[ApiCardActive] active card[%s,%s,%s] error' % (open_id, card_id, code))
                 return {'result': 255}
-
+            logger.info('[ApiCardActive] active card[%s,%s,%s] init balance:%s, bonus:%s success' %
+                        (open_id, card_id, code, init_balance, init_bonus))
             card.status = 2
             db.session.add(card)
             db.session.commit()
@@ -410,6 +417,20 @@ class ApiCardActive(Resource):
         except Exception as e:
             logger.error('[ApiCardActive] active card[%s,%s,%s] exception:%s' % (open_id, card_id, code, e.message))
             return {'result': 255}
+
+
+class ApiCardKeyGet(Resource):
+    def post(self):
+        args = request.values
+        logger.debug('[ApiCardKeyGet] in: args[%s]' % args)
+        key = args.get('key')
+        card = Card.query.filter(card_key=key).first()
+        if not card:
+            ret = {'result': 255}
+        else:
+            ret = {'result': 0, 'card_id': card.card_id}
+        logger.debug('[ApiCardKeyGet] out: [%s]' % ret)
+        return ret
 
 
 restful_api.add_resource(ApiCardBuy, API_PREFIX + 'card/buy')
@@ -427,4 +448,4 @@ restful_api.add_resource(ApiCardShare, API_PREFIX + 'card/share')
 restful_api.add_resource(ApiCardShareInfo, API_PREFIX + 'card/share/info')
 restful_api.add_resource(ApiCardReceiveCheck, API_PREFIX + 'card/receive/check')
 restful_api.add_resource(ApiCardReceive, API_PREFIX + 'card/receive')
-
+restful_api.add_resource(ApiCardKeyGet, API_PREFIX + 'card/key')

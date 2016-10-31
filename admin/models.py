@@ -95,6 +95,7 @@ class Card(db.Model):
     title = db.Column(db.String(32), nullable=False)
     sub_title = db.Column(db.String(128))
     type = db.Column(db.Integer())  # 卡类型
+    card_key = db.Column(db.String(32), unique=True, nullable=False)  # 前后台关联使用
 
 
 class Customer(db.Model):
