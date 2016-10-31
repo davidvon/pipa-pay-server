@@ -474,13 +474,13 @@ class WeixinHelper(object):
         response = self.request.request(url, params, json_data, 'POST')
         return response
 
-    def card_recharge(self, card_id, card_code, balance):
+    def card_recharge(self, card_id, card_code, balance, bonus=0):
         url = "/card/membercard/updateuser"
         params = {"access_token": self.request.get_access_token()}
         json_data = {"card_id": card_id,
                      "code": card_code,
-                     "bonus": balance,
-                     "record_bonus":"赠送%s积分" % balance,
+                     "bonus": bonus or balance,
+                     "record_bonus":"赠送%s积分" % bonus or balance,
                      "balance": balance,
                      "record_balance": "充入金额%s元" % balance}
         response = self.request.request(url, params, json_data, 'POST')

@@ -8,6 +8,7 @@ from cache.weixin import pop_cache_card_id
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
     WechatSystemReply,  WechatImageNews, CustomerCardShare, CustomerCard
 from config import LIKE_MATCH
+from wexin.helper import WeixinHelper
 from wexin.util import *
 from app import logger
 
@@ -293,6 +294,8 @@ class ReplyKeyWords(object):
                     new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0,
                                             img=old_card.img, balance=old_card.balance, expire_date=old_card.expire_date)
                 old_card.status = 4
+                balance = old_card.balance
+                bonus = old_card.bonus
                 card_share.acquire_customer_id = self.sender
                 db.session.add(card_share)
                 db.session.add(old_card)
@@ -302,12 +305,20 @@ class ReplyKeyWords(object):
                 if not card_gid:
                     logger.error('[card_give] customer[%s] card[%s] pop is empty' % (self.sender, cardid))
                     return
+                logger.debug('[card_give] customer[%s] card[%s] popped' % (self.sender, card_gid))
                 card = CustomerCard.query.get(card_gid)
+                balance = card.balance
+                bonus = card.bonus
                 card.wx_binding_time = datetime.now()
                 card.card_code = card_code
                 db.session.add(card)
             db.session.commit()
             logger.info('[card_give] customer[%s] card banding success' % self.sender)
+            helper = WeixinHelper()
+            logger.info('[card_give] recharge: card[%s] code[%s], balance[%s] bonus=[%s]' %
+                            (cardid, card_code, balance, bonus))
+            ret = helper.card_recharge(cardid, card_code, balance, bonus)
+            logger.info('[card_give] recharge: card[%s] code[%s], ret[%s]' % (cardid, card_code, ret))
             return {'result': 'ok'}
         except Exception as e:
             logger.error(traceback.print_exc())

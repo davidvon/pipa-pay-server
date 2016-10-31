@@ -25,7 +25,7 @@ def push_cache_card_id(card_id, openid, card_unique_id):
     tmp = JSONDecoder().decode(val) if val else []
     tmp.append(card_unique_id)
     val = JSONEncoder().encode(tmp)
-    redis_client.set('%s_%s_card' % (card_id, openid), val, 120)
+    redis_client.set('%s_%s_card' % (card_id, openid), val, 1200)
 
 
 def pop_cache_card_id(card_id, openid):
@@ -37,7 +37,7 @@ def pop_cache_card_id(card_id, openid):
         return None
     gid = tmp.pop()
     val = JSONEncoder().encode(tmp)
-    redis_client.set('%s_%s_card' % (card_id, openid), val, 120)
+    redis_client.set('%s_%s_card' % (card_id, openid), val, 1200)
     return gid
 
 
