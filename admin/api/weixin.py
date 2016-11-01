@@ -132,7 +132,7 @@ class ApiWxCardInfo(Resource):
     logger.info('[ApiWxCardInfo] in: card_id[%s]' % card_id)
     helper = WeixinHelper()
     ret = helper.card_info(card_id)
-    logger.info('[ApiWxCardAdd] out: result[0] data[%s]' % ret)
+    logger.info('[ApiWxCardInfo] out: result[0] data[%s]' % ret)
     if not ret:
       return {'result': 255}
     return {'result': 0, "data": ret}

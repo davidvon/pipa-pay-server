@@ -21,15 +21,15 @@ def get_cache_ticket(type):
 
 
 def push_cache_card_id(card_id, openid, card_unique_id):
-    val = redis_client.get('%s_%s_card' % (card_id, openid))
+    val = redis_client.get('%s_%s_cardid' % (card_id, openid))
     tmp = JSONDecoder().decode(val) if val else []
     tmp.append(card_unique_id)
     val = JSONEncoder().encode(tmp)
-    redis_client.set('%s_%s_card' % (card_id, openid), val, 1200)
+    redis_client.set('%s_%s_cardid' % (card_id, openid), val, 120)
 
 
 def pop_cache_card_id(card_id, openid):
-    val = redis_client.get('%s_%s_card' % (card_id, openid))
+    val = redis_client.get('%s_%s_cardid' % (card_id, openid))
     if not val:
         return None
     tmp = JSONDecoder().decode(val)
@@ -37,7 +37,7 @@ def pop_cache_card_id(card_id, openid):
         return None
     gid = tmp.pop()
     val = JSONEncoder().encode(tmp)
-    redis_client.set('%s_%s_card' % (card_id, openid), val, 1200)
+    redis_client.set('%s_%s_cardid' % (card_id, openid), val, 120)
     return gid
 
 
@@ -61,3 +61,6 @@ def get_cache_customer_cards(open_id):
     cards = JSONDecoder().decode(val)
     return cards
 
+
+def clear_cache_customer_cards(open_id):
+    redis_client.delete(open_id+'_cards')

@@ -10,7 +10,7 @@ from api import API_PREFIX
 from api.order import create_order
 from app import restful_api, db, logger
 from cache.order import cache_qrcode_code, get_cache_order
-from cache.weixin import get_cache_customer_cards, cache_customer_cards
+from cache.weixin import get_cache_customer_cards, cache_customer_cards, clear_cache_customer_cards
 from models import Customer, CustomerCard, CustomerTradeRecords, CustomerCardShare, Order, Card
 from utils.util import nonce_str
 from wexin.helper import WeixinHelper
@@ -374,6 +374,8 @@ class ApiCardBuyCommit(Resource):
             order.paid = True
             db.session.add(order)
             db.session.commit()
+            # clear cache
+            clear_cache_customer_cards(order.customer_id)
             logger.info('[ApiCardBuyCommit] order:%s create success' % order_id)
             return {'result': 0}
         except Exception as e:
@@ -401,6 +403,9 @@ class ApiCardActive(Resource):
 
             # init balance
             card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=code).first()
+            if not card:
+                logger.error('[ApiCardActive] card[%s,%s,%s] not exist' % (open_id, card_id, code))
+                return {'result': 255}
             init_balance = card.balance * 100
             init_bonus = init_balance
             active = helper.active_card(card_id, code, init_balance, init_bonus)
@@ -412,6 +417,8 @@ class ApiCardActive(Resource):
             card.status = 2
             db.session.add(card)
             db.session.commit()
+            # clear cache
+            clear_cache_customer_cards(open_id)
             logger.debug('[ApiCardActive] out: result[0]')
             return {'result': 0}
         except Exception as e:

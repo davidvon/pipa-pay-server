@@ -11,4 +11,4 @@ if __name__ == '__main__':
             'usercardcode': '8888888',
             'oldusercardcode': '123456789'
             }
-    reply.card_give(args)
+    reply.user_get_card(args)

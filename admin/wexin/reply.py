@@ -53,9 +53,9 @@ class ReplyKeyWords(object):
                 self.content = args.get('eventkey')
                 return self.qrcode(self.content)
             elif self.event == 'user_get_card':  # 领取卡券
-                return self.card_give(args)
+                return self.user_get_card(args)
             elif self.event == 'user_pay_from_pay_cell':  # 买单卡券
-                return self.card_pay_event_notify(args)
+                return self.user_pay_from_pay_cell(args)
             elif self.event == 'user_del_card':  # 删除卡券
                 return ''
             elif self.event == 'user_consume_card':  # 核销卡券
@@ -276,8 +276,8 @@ class ReplyKeyWords(object):
         logger.info("push message to user[%s]: %s" % (openid, content))
         return self.__response(content)
 
-    def card_give(self, args):
-        logger.info('[card_give] customer[%s] card give event[%s] received' % (self.sender, args))
+    def user_get_card(self, args):
+        logger.info('[user_get_card] customer[%s] card give event[%s] received' % (self.sender, args))
         is_gived = args.get('isgivebyfriend')
         share_openid = args.get('friendusername')
         cardid = args.get('cardid')
@@ -292,8 +292,8 @@ class ReplyKeyWords(object):
                 new_card = CustomerCard.query.filter_by(customer_id=self.sender, card_id=cardid,
                                                         card_code=card_code).first()
                 if not new_card:
-                    new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0,
-                                            img=old_card.img, balance=old_card.balance, expire_date=old_card.expire_date)
+                    new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code,
+                                            status=0, balance=old_card.balance, expire_date=old_card.expire_date)
                 old_card.status = 4
                 card_share.acquire_customer_id = self.sender
                 db.session.add(card_share)
@@ -302,23 +302,23 @@ class ReplyKeyWords(object):
             else:
                 card_gid = pop_cache_card_id(cardid, self.sender)
                 if not card_gid:
-                    logger.error('[card_give] customer[%s] card[%s] pop is empty' % (self.sender, cardid))
+                    logger.error('[user_get_card] customer[%s] card[%s] pop is empty' % (self.sender, cardid))
                     return self.__response(str({'result': 'error'}))
-                logger.debug('[card_give] customer[%s] card[%s] popped' % (self.sender, card_gid))
+                logger.debug('[user_get_card] customer[%s] card[%s] popped' % (self.sender, card_gid))
                 card = CustomerCard.query.get(card_gid)
                 card.wx_binding_time = datetime.now()
                 card.card_code = card_code
                 db.session.add(card)
             db.session.commit()
-            logger.info('[card_give] customer[%s] card banding success' % self.sender)
+            logger.info('[user_get_card] customer[%s] banding success' % self.sender)
             return self.__response(str({'result': 'ok'}))
         except Exception as e:
             logger.error(traceback.print_exc())
-            logger.error('[card_give] customer[%s] card banding event[%s] error:%s' % (self.sender, args, e.message))
+            logger.error('[user_get_card] customer[%s] banding event[%s] error:%s' % (self.sender, args, e.message))
             return self.__response(str({'result': 'error'}))
 
 
-    def card_pay_event_notify(self, args):
+    def user_pay_from_pay_cell(self, args):
         logger.info('customer[%s] card pay event[%s] received' % (self.sender, args))
         share_openid = args.get('friendusername')
         cardid = args.get('cardid')
