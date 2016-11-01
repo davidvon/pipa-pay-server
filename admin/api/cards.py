@@ -344,7 +344,7 @@ class ApiCardBuy(Resource):
             price = args.get('price')
             count = args.get('count')
             openid = args.get('openId')
-            order = create_order(card_id, float(price), openid, count)
+            order = create_order(card_id, float(price), openid, int(count))
             if not order:
                 return {'result': 250}
             res, outputs = payable(request, openid, order)
