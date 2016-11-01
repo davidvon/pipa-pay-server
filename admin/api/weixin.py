@@ -166,7 +166,7 @@ class ApiWxCardInfoSync(Resource):
     ret = helper.card_balance(card.card_id, card.card_code)
     if ret['errcode'] == 0:
       try:
-        card.wx_balance = ret['balance']
+        card.wx_balance = ret['balance']/100
         card.credit = ret['bonus']
         db.session.add(card)
         db.session.commit()
