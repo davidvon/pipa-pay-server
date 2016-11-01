@@ -1,20 +1,17 @@
 # coding: utf-8
 import time
 import traceback
-
+from datetime import datetime
 from flask import Response
-
 from cache.weixin import pop_cache_card_id
 from models import WechatSubscribeReply, WechatUselessWordReply, WechatTextReply, WechatNewsReply, \
-    WechatSystemReply,  WechatImageNews, CustomerCardShare, CustomerCard
+    WechatSystemReply,  WechatImageNews, CustomerCardShare, CustomerCard, Customer
 from config import LIKE_MATCH
-from wexin.helper import WeixinHelper
-from wexin.util import *
-from app import logger
+from wexin import util
+from app import logger, db
 
 # from cache.public import cache_url
 # from signals import signal_customer_message_cached_notify
-
 CACHE_OPENID_STR = "WEIXIN_OPENID"
 REPLY_NONE = '0'
 REPLY_TEXT = '1'
@@ -39,11 +36,11 @@ class ReplyKeyWords(object):
         if msg_type == 'event':
             self.event = args.get('event')
             if self.event == 'subscribe':
-                create_customer_try(self.sender)
-                update_customer_info(self.sender)
+                util.create_customer_try(self.sender)
+                util.update_customer_info(self.sender)
                 return self.event_reply()
             elif self.event == 'unsubscribe':
-                unsubscribe_customer(self.sender)
+                util.unsubscribe_customer(self.sender)
                 return self.__response('')
             elif self.event == 'CLICK':
                 return self.auto_news_reply()
@@ -103,7 +100,8 @@ class ReplyKeyWords(object):
         else:
             return self.useless_reply()
 
-    def system_reply(self):
+    @staticmethod
+    def system_reply():
         return ''
 
     def get_reply_news(self):
@@ -141,11 +139,13 @@ class ReplyKeyWords(object):
                 jsons.append(json)
         return jsons
 
-    def location_report(self, location_x, location_y, scale):
+    @staticmethod
+    def location_report(location_x, location_y, scale):
         logger.info('[WEIXIN] location: %s-%s-%s' % (location_x, location_y, scale))
         return ''
 
-    def qrcode(self, content):
+    @staticmethod
+    def qrcode(content):
         return ''
 
     def __custom_text_reply(self, username, sender, **kwargs):
@@ -187,7 +187,8 @@ class ReplyKeyWords(object):
         text = template % dct
         return text
 
-    def __shared_reply(self, username, sender, type):
+    @staticmethod
+    def __shared_reply(username, sender, type):
         dct = {
             'username': username,
             'sender': sender,
@@ -294,8 +295,6 @@ class ReplyKeyWords(object):
                     new_card = CustomerCard(customer_id=self.sender, card_id=cardid, card_code=card_code, status=0,
                                             img=old_card.img, balance=old_card.balance, expire_date=old_card.expire_date)
                 old_card.status = 4
-                balance = old_card.balance
-                bonus = old_card.bonus
                 card_share.acquire_customer_id = self.sender
                 db.session.add(card_share)
                 db.session.add(old_card)
@@ -307,18 +306,11 @@ class ReplyKeyWords(object):
                     return self.__response(str({'result': 'error'}))
                 logger.debug('[card_give] customer[%s] card[%s] popped' % (self.sender, card_gid))
                 card = CustomerCard.query.get(card_gid)
-                balance = card.balance
-                bonus = card.bonus
                 card.wx_binding_time = datetime.now()
                 card.card_code = card_code
                 db.session.add(card)
             db.session.commit()
             logger.info('[card_give] customer[%s] card banding success' % self.sender)
-            helper = WeixinHelper()
-            logger.info('[card_give] recharge: card[%s] code[%s], balance[%s] bonus=[%s]' %
-                            (cardid, card_code, balance, bonus))
-            ret = helper.card_recharge(cardid, card_code, 1000, 2000)  # TODO
-            logger.info('[card_give] recharge: card[%s] code[%s], ret[%s]' % (cardid, card_code, ret))
             return self.__response(str({'result': 'ok'}))
         except Exception as e:
             logger.error(traceback.print_exc())

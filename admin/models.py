@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import uuid
 from stringold import strip
 from datetime import datetime
 from flask.ext.security import UserMixin, RoleMixin
@@ -8,8 +9,8 @@ import config
 from app import db
 
 roles_users = db.Table('roles_users',
-                       db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-                       db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
+                       db.Column('user_id', db.String(32), db.ForeignKey('user.id')),
+                       db.Column('role_id', db.String(32), db.ForeignKey('role.id')))
 
 
 class Role(db.Model, RoleMixin):
@@ -17,7 +18,7 @@ class Role(db.Model, RoleMixin):
         self.name = name
         self.desc = desc
 
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     name = db.Column(db.String(80), unique=True)
     desc = db.Column(db.String(255))
 
@@ -26,13 +27,13 @@ class Role(db.Model, RoleMixin):
 
 
 class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     nickname = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), default="123456789")
     email = db.Column(db.String(255))
-    city_id = db.Column(db.Integer(), db.ForeignKey('city.id'))
+    city_id = db.Column(db.String(32), db.ForeignKey('city.id'))
     city = db.relationship('City')
-    customer_id = db.Column(db.Integer(), db.ForeignKey('customer.id'))
+    customer_id = db.Column(db.String(32), db.ForeignKey('customer.id'))
     customer = db.relationship('Customer')
     register_time = db.Column(db.DateTime(), default=datetime.now)
     active = db.Column(db.Integer, default=0, nullable=False)
@@ -66,7 +67,7 @@ class User(db.Model, UserMixin):
 
 
 class City(db.Model):
-    id = db.Column(db.Integer(), Sequence('city_id_seq', start=1001, increment=1), primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     city_name = db.Column(db.String(32), unique=True, nullable=False)
 
     def __repr__(self):
@@ -74,13 +75,13 @@ class City(db.Model):
 
 
 class Merchant(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     name = db.Column(db.String(80), unique=True, nullable=False)
     address = db.Column(db.String(64), nullable=False)
     phone = db.Column(db.String(12), nullable=False)
     logo = db.Column(db.String(64))
     lon_lat = db.Column(db.String(32), nullable=False)
-    city_id = db.Column(db.Integer(), db.ForeignKey('city.id'))
+    city_id = db.Column(db.String(32), db.ForeignKey('city.id'))
     city = db.relationship(City)
 
     def __repr__(self):
@@ -88,9 +89,9 @@ class Merchant(db.Model):
 
 
 class Card(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     card_id = db.Column(db.String(32), unique=True, nullable=False)  # 服务器内部卡券号
-    merchant_id = db.Column(db.Integer(), db.ForeignKey('merchant.id'), nullable=False)
+    merchant_id = db.Column(db.String(32), db.ForeignKey('merchant.id'), nullable=False)
     merchant = db.relationship(Merchant)
     title = db.Column(db.String(32), nullable=False)
     sub_title = db.Column(db.String(128))
@@ -99,7 +100,7 @@ class Card(db.Model):
 
 
 class Customer(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     openid = db.Column(db.String(64), unique=True)
     name = db.Column(db.String(32))
     nickname = db.Column(db.String(64))
@@ -131,7 +132,7 @@ class Customer(db.Model):
 
 
 class CustomerCard(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'), nullable=False)
     customer = db.relationship(Customer)
     order_id = db.Column(db.String(32), db.ForeignKey('order.order_id'))
@@ -162,10 +163,10 @@ class CustomerCard(db.Model):
 
 
 class CustomerCardShare(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     share_customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'))
     share_customer = db.relationship(Customer)
-    customer_card_id = db.Column(db.Integer(), db.ForeignKey('customer_card.id'))
+    customer_card_id = db.Column(db.String(32), db.ForeignKey('customer_card.id'))
     customer_card = db.relationship(CustomerCard)
     acquire_customer_id = db.Column(db.String(64))
     timestamp = db.Column(db.Integer())
@@ -173,14 +174,14 @@ class CustomerCardShare(db.Model):
     content = db.Column(db.String(32))
     sign = db.Column(db.String(64), nullable=False)
     status = db.Column(db.Integer(), default=0)  # 0:转赠中未接收 1: 已被对方接收
-    new_card_id = db.Column(db.Integer())  # TODO 需与老卡ID关联
+    new_card_id = db.Column(db.String(32))  # TODO 需与老卡ID关联
 
     def status_str(self):
         return self.customer_card.status_str()
 
 
 class CustomerTradeRecords(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'))
     customer = db.relationship(Customer)
     card_id = db.Column(db.String(32), db.ForeignKey('card.card_id'))
@@ -192,7 +193,7 @@ class CustomerTradeRecords(db.Model):
 
 
 class Order(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     order_id = db.Column(db.String(32), unique=True, nullable=False)
     customer_id = db.Column(db.String(64), db.ForeignKey('customer.openid'), nullable=False)
     customer = db.relationship(Customer)

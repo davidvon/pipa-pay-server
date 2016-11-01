@@ -399,8 +399,8 @@ class ApiCardActive(Resource):
                 logger.error('[ApiCardActive] decrypt card code[%s,%s] error' % (open_id, card_id))
                 return {'result': 255}
 
-            card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=code).first()
             # init balance
+            card = CustomerCard.query.filter_by(customer_id=open_id, card_id=card_id, card_code=code).first()
             init_balance = card.balance * 100
             init_bonus = init_balance
             active = helper.active_card(card_id, code, init_balance, init_bonus)

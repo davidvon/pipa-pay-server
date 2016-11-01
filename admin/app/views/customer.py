@@ -43,9 +43,13 @@ class CustomerView(BaseModelView):
                       (model.head_image, model.show_name()))
 
     def card_fmt(self, context, model, name):
-        card = model.cards.first()
-        return Markup('<a href="/admin/customercard/?search=%s">%s</a>' %
-                      (card.card_code, card.card_code))
+        cards = model.cards.all()
+        if not cards:
+            return ''
+        ret = ''
+        for card in cards:
+            ret += '<a href="/admin/customercard/?search=%s">%s</a>&nbsp&nbsp' % (card.card_code, card.card_code)
+        return Markup(ret)
 
     column_formatters = dict({'name': image_fmt, 'cards': card_fmt})
 
